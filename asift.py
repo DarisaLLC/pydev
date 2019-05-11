@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import numpy as np
 import cv2 as cv
-import imutils
+
 
 # built-in modules
 import itertools as it
@@ -205,15 +205,8 @@ if __name__ == '__main__':
     motion = cv.absdiff(img2_aligned, img1)
     diff = motion.copy()
     cv.threshold(motion, 80, 255, cv.THRESH_BINARY)
-    cnts = cv.findContours(motion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    cnts = imutils.grab_contours(cnts)
-    for c in cnts:
-        # compute the bounding box of the contour and then draw the
-        # bounding box on both input images to represent where the two
-        # images differ
-        (x, y, w, h) = cv.boundingRect(c)
-        cv.rectangle(img1, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        cv.rectangle(img2_aligned, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    #cnts = cv.findContours(motion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
 
     # show the output images
 
