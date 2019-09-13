@@ -8,10 +8,10 @@ from utils import get_four_points
 if __name__ == '__main__' :
 
     # Read in the image.
-    im_src = cv2.imread("book1.jpg")
+    im_src = cv2.imread("/Volumes/medvedev/_SP/car_reference_position/car_2m0/image00001.png")
 
     # Destination image
-    size = (300,400,3)
+    size = (720, 576,3)
 
     im_dst = np.zeros(size, np.uint8)
 
@@ -26,10 +26,8 @@ if __name__ == '__main__' :
                        )
     
     
-    print '''
-        Click on the four corners of the book -- top left first and
-        bottom left last -- and then hit ENTER
-        '''
+    print ("Click on the four corners of the book -- top left first and bottom left last -- and then hit ENTER")
+
     
     # Show image and wait for 4 clicks.
     cv2.imshow("Image", im_src)

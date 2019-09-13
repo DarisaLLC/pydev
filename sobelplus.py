@@ -120,7 +120,7 @@ if __name__ == '__main__':
         if not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists():
             print(sys.argv[1] + '  Does not exist ')
 
-        lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 3)
+        lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
         corners = squares.find_squares(lab_tuple[0])
         display = opencv_utils.convert_lab2rgb(lab_tuple)
         result = process(lab_tuple[0], 1)
