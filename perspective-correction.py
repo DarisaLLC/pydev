@@ -39,6 +39,8 @@ if __name__ == '__main__' :
     # Warp source image to destination
     im_dst = cv2.warpPerspective(im_src, h, size[0:2])
 
+    result_image_name = '/Volumes/medvedev/_SP/results/perespevtive.png'
+    cv2.imwrite(result_image_name, im_dst)
     # Show output
     cv2.imshow("Image", im_dst)
     cv2.waitKey(0)

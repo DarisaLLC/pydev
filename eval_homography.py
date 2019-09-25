@@ -169,6 +169,8 @@ def main():
     # Show input images
     input_images = np.hstack( (img1, img2) )
     cv2.imshow ('Input Images', input_images)
+    input_image_name = '/Volumes/medvedev/_SP/results/inputs.png'
+    cv2.imwrite(input_image_name, input_images)
 
     # Use SIFT to find keypoints and return homography matrix
     M = get_sift_homography ( img1, img2 )
@@ -177,8 +179,8 @@ def main():
     result_image = get_stitched_image ( img2, img1, M )
 
     # Write the result to the same directory
-    result_image_name = '/Volumes/medvedev/_SP/results/' + sys.argv[1]
-    cv2.imwrite ( result_image_name, result_image )
+    result_image_name = '/Volumes/medvedev/_SP/results/homography.png'
+    cv2.imwrite(result_image_name, result_image)
 
     # Show the resulting image
     cv2.imshow ( 'Result', result_image )
