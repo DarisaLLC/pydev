@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import numpy as np
 import cv2 as cv
-import imutils
+
 
 # built-in modules
 import itertools as it
@@ -14,7 +14,7 @@ from multiprocessing.pool import ThreadPool
 
 # local modules
 from common import Timer
-from find_obj import init_feature, filter_matches, explore_match
+from alignment_utils import init_feature, filter_matches, explore_match
 import squares
 from skimage.measure import compare_ssim
 
@@ -203,17 +203,7 @@ if __name__ == '__main__':
 
     motion = None
     motion = cv.absdiff(img2_aligned, img1)
-    diff = motion.copy()
-    cv.threshold(motion, 80, 255, cv.THRESH_BINARY)
-    cnts = cv.findContours(motion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    cnts = imutils.grab_contours(cnts)
-    for c in cnts:
-        # compute the bounding box of the contour and then draw the
-        # bounding box on both input images to represent where the two
-        # images differ
-        (x, y, w, h) = cv.boundingRect(c)
-        cv.rectangle(img1, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        cv.rectangle(img2_aligned, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
 
     # show the output images
 
@@ -221,8 +211,7 @@ if __name__ == '__main__':
     cv.imshow("TOI01", img2)
     cv.imshow("Aligned Image 1", img1_aligned)
     cv.imshow("Aligned Image 2", img2_aligned)
-    cv.imshow("Difference", motion)
-    cv.imshow("raw diff", diff)
+    cv.imshow("raw diff", motion)
 
 
 
