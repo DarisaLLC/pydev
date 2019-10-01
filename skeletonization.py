@@ -2,29 +2,30 @@ import cv2
 import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN, KMeans,  SpectralClustering, AgglomerativeClustering
+from sklearn.cluster import DBSCAN, KMeans, SpectralClustering, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.mixture import GaussianMixture
 
-img = cv2.imread('/Volumes/medvedev/_SP/2019_09_06_BMWi3_natika_camera_images/empty_pad/empty_pad3/image00181.png',0)
+# img = cv2.imread('/Volumes/medvedev/_SP/2019_09_06_BMWi3_natika_camera_images/empty_pad/empty_pad3/image00181.png',0)
+img = cv2.imread("/Volumes/medvedev/Users/arman/dev/Arman Garakani/image_roi.png", 0)
 
 
 def make_skeletonization(img, show_image=False):
-    kernel_size=5
+    kernel_size = 5
     img = cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
     size = np.size(img)
-    skel = np.zeros(img.shape,np.uint8)
+    skel = np.zeros(img.shape, np.uint8)
 
-    ret,img = cv2.threshold(img,127,255,0)
-    element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+    ret, img = cv2.threshold(img, 127, 255, 0)
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
     done = False
 
     while (not done):
-        eroded = cv2.erode(img,element)
-        temp = cv2.dilate(eroded,element)
-        temp = cv2.subtract(img,temp)
-        skel = cv2.bitwise_or(skel,temp)
+        eroded = cv2.erode(img, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(img, temp)
+        skel = cv2.bitwise_or(skel, temp)
         img = eroded.copy()
 
         zeros = size - cv2.countNonZero(img)
@@ -33,7 +34,7 @@ def make_skeletonization(img, show_image=False):
 
     skel += img
     if show_image:
-        cv2.imshow("skel",skel)
+        cv2.imshow("skel", skel)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     return skel
@@ -64,8 +65,7 @@ def make_Canny_filtration(img, show_image=False):
 
 
 def convert_mask_to_regression(skel, show_image=False):
-
-    indexes = list(zip(*np.where(skel > 0)))   # вывести все индексы, где яркость выше 0
+    indexes = list(zip(*np.where(skel > 0)))  # вывести все индексы, где яркость выше 0
     xs = [ind_pair[0] for ind_pair in indexes]
     ys = [ind_pair[1] for ind_pair in indexes]
     if show_image:
@@ -75,7 +75,6 @@ def convert_mask_to_regression(skel, show_image=False):
 
 
 def cluster_mask_dbscan(skel, eps=0.38, show_image=False):
-
     xs, ys = convert_mask_to_regression(skel)
     X = np.array(list(zip(xs, ys)))
 
@@ -85,8 +84,8 @@ def cluster_mask_dbscan(skel, eps=0.38, show_image=False):
     dbscan = DBSCAN(eps=eps)
     clusters = dbscan.fit_predict(X_scaled)
 
-    n_clusters = len(set(clusters))   # количество кластеров
-    clusters_points = [X[clusters==i] for i in range(n_clusters)]
+    n_clusters = len(set(clusters))  #
+    clusters_points = [X[clusters == i] for i in range(n_clusters)]
 
     if show_image:
         plt.scatter(X[:, 0], X[:, 1], c=clusters, cmap="plasma")
@@ -99,15 +98,14 @@ def cluster_mask_dbscan(skel, eps=0.38, show_image=False):
 
 
 def cluster_mask_kmeans(skel, show_image=False):
-
     xs, ys = convert_mask_to_regression(skel)
     X = np.array(list(zip(xs, ys)))
 
     kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
     clusters = kmeans.predict(X)
 
-    n_clusters = len(set(clusters))   # количество кластеров
-    clusters_points = [X[clusters==i] for i in range(n_clusters)]
+    n_clusters = len(set(clusters))  #
+    clusters_points = [X[clusters == i] for i in range(n_clusters)]
 
     if show_image:
         plt.scatter(X[:, 0], X[:, 1], c=clusters, cmap='viridis')
@@ -119,29 +117,7 @@ def cluster_mask_kmeans(skel, show_image=False):
     return clusters_points
 
 
-def cluster_mask_OPTICS(skel, show_image=False):
-
-    xs, ys = convert_mask_to_regression(skel)
-    X = np.array(list(zip(xs, ys)))
-
-    clust = OPTICS(min_samples=50, xi=.05, min_cluster_size=.05)
-    clust.fit(X)
-
-
-    print(clust.reachability_)
-    print(clust.core_distances_)
-    print(clust.ordering_)
-
-    labels_050 = cluster_optics_dbscan(reachability=clust.reachability_,
-                                       core_distances=clust.core_distances_,
-                                       ordering=clust.ordering_, eps=2)
-
-    # Пока не разобрался
-    return None
-
-
 def cluster_mask_GaussianMixture(skel, show_image=False, find_optimal_clusters_num=False):
-
     xs, ys = convert_mask_to_regression(skel)
     X = np.array(list(zip(xs, ys)))
 
@@ -155,7 +131,7 @@ def cluster_mask_GaussianMixture(skel, show_image=False, find_optimal_clusters_n
         plt.xlabel('n_components')
         plt.show()
 
-    gmm = GaussianMixture(n_components=4)
+    gmm = GaussianMixture(n_components=20)
     gmm.fit(X)
     clusters_points = gmm.predict(X)
     if show_image:
@@ -197,7 +173,6 @@ def cluster_mask_AgglomerativeClustering(skel, show_image=False):
 
 
 def make_skeleton_regression(clusters_points, show_image=False):
-
     regr = LinearRegression()
     quadratic = PolynomialFeatures(degree=2)
     cubic = PolynomialFeatures(degree=3)
@@ -206,7 +181,7 @@ def make_skeleton_regression(clusters_points, show_image=False):
     for cluster_points in clusters_points:
         X = np.array(cluster_points[:, 0])
         y = np.array(cluster_points[:, 1])
-        
+
         X = X.reshape(-1, 1)
         X_quad = quadratic.fit_transform(X)
         X_cubic = cubic.fit_transform(X)
@@ -214,15 +189,6 @@ def make_skeleton_regression(clusters_points, show_image=False):
         # fit features
         X_fit = np.arange(X.min(), X.max())[:, np.newaxis]
 
-        # Полином 1 степени
-        #regr = regr.fit(X, y)
-        #y_lin_fit = regr.predict(X_fit)
-
-        # Полином второй степени
-        #regr = regr.fit(X_quad, y)
-        #y_quad_fit = regr.predict(quadratic.fit_transform(X_fit))
-
-        # Полином третьей степени
         regr = regr.fit(X_cubic, y)
         y_cubic_fit = regr.predict(cubic.fit_transform(X_fit))
 
@@ -235,31 +201,23 @@ def make_skeleton_regression(clusters_points, show_image=False):
         return railsmid
 
 
-
-
-
 if __name__ == '__main__':
     skeleton = make_skeletonization(img)
     Sobel = make_Sobel_filtration(img)
     Canny = make_Canny_filtration(img)
     skeleton_Sobel = skeleton + Sobel
-    skeleton_Canny = skeleton + Canny 
+    skeleton_Canny = skeleton + Canny
 
     cv2.imshow('Skeleton ', skeleton)
     cv2.waitKey(0)
     cv2.imshow('Skeleton + Sobel', skeleton_Sobel)
     cv2.waitKey(0)
 
+clusters_points = cluster_mask_dbscan(img, show_image=True)
+clusters_points = cluster_mask_kmeans(img, show_image=True)
+cluster_points = cluster_mask_GaussianMixture(skeleton, show_image=True, find_optimal_clusters_num=True)
+#cluster_points = cluster_mask_SpectralClustering(skeleton, show_image=True)
+cluster_points = cluster_mask_AgglomerativeClustering(skeleton, show_image=True)
 
-
-    clusters_points = cluster_mask_dbscan(img, show_image=True)
-    clusters_points = cluster_mask_kmeans(img, show_image=True)
-    cluster_points = cluster_mask_GaussianMixture(skeleton, show_image=True)
-    cluster_points = cluster_mask_SpectralClustering(skeleton, show_image=True)
-    cluster_points = cluster_mask_AgglomerativeClustering(skeleton, show_image=True)
-
-    #print(clusters_points)
-    #regr_cluster_points = make_skeleton_regression(clusters_points, show_image=False)
-
-
-
+# print(clusters_points)
+# regr_cluster_points = make_skeleton_regression(clusters_points, show_image=False)
