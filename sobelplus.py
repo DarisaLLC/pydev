@@ -48,7 +48,7 @@ def truePeaks(magnitudes, phases, isUnique=None):
         for j in range(2, width - 2, 1):
             angle = phases[i, j]
             mag = magnitudes[i, j]
-            if mag < 30: continue
+            if mag < 100: continue
             ax = axis(angle)
             axh[angle] += 1
             m1 = m2 = mag
@@ -136,6 +136,8 @@ if __name__ == '__main__':
     ax2 = plt.subplot2grid((3, 3), (0, 0))
     ax2.imshow(result[0], cmap='gray')
     ax2.set_title('Gradient Magnitude')
+    ax2.plot(corners[:, 0], corners[:, 1], '+g', markersize=3)
+    ax2.set_title('Image + CORNERS ')
 
     ax2 = plt.subplot2grid((3, 3), (0, 1))
     ax2.imshow(result[1], cmap='gray')
