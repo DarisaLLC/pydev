@@ -37,9 +37,9 @@ bins = [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
 def axis(x): return int((x + 16) // 32) % 8
 
 
-def truePeaks(magnitudes, phases, isUnique=None):
+def truePeaks(magnitudes, phases):
     tps = []
-    axh = np.zeros(256, np.int32)
+    axish = np.zeros(256, np.int32)
     ltps = [[], [], [], [], [], [], [], []]
     offsets = [[[0, -1], [0, 1]], [[-1, -1], [1, 1]], [[-1, 0], [1, 0]], [[-1, 1], [1, -1]]]
 
@@ -50,7 +50,7 @@ def truePeaks(magnitudes, phases, isUnique=None):
             mag = magnitudes[i, j]
             if mag < 100: continue
             ax = axis(angle)
-            axh[angle] += 1
+            axish[angle] += 1
             m1 = m2 = mag
             if ax == 0 or ax == 4:  # left & right column
                 m1 = magnitudes[i, j - 1]
@@ -68,12 +68,11 @@ def truePeaks(magnitudes, phases, isUnique=None):
                 assert (False)
 
             if ((mag > m1 and mag >= m2) or (mag >= m1 and mag > m2)):
-                #                if not (isUnique is None) and isTpUnique ( i, j, ax ):
                 ltps[ax].append([j, i, ax, angle, mag])
 
     tps = np.concatenate(ltps)
 
-    return (tps,axh)
+    return (tps, axish)
 
 
 

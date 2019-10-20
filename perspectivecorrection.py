@@ -2,7 +2,7 @@
 
 import cv2
 import numpy as np
-from utils import get_four_points
+from opencv_utils import get_four_points
 
 
 if __name__ == '__main__' :

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-from sklearn.cluster import KMeans
 from sklearn.cluster import MiniBatchKMeans
 import cv2
 import time
@@ -32,9 +31,9 @@ COLORS = [[255, 0, 0],
 
 
 if __name__ == '__main__':
-img_path = '/Volumes/medvedev/_SP/2019_09_06_BMWi3_natika_camera_images/empty_pad/empty_pad3/image00081.png'
+    img_path = '/Volumes/medvedev/_SP/2019_09_06_BMWi3_natika_camera_images/empty_pad/empty_pad3/image00081.png'
 image = cv2.imread(img_path)
-#image = cv2.bilateralFilter(image, 15, 75, 75)
+# image = cv2.bilateralFilter(image, 15, 75, 75)
 h, w, c = image.shape
 image = cv2.resize(image, (256, 256))
 
