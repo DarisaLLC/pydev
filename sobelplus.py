@@ -9,6 +9,7 @@ from skimage import draw
 from skimage import img_as_float
 from skimage import img_as_ubyte
 from skimage import measure
+import math
 import squares
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
@@ -37,18 +38,26 @@ bins = [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
 def axis(x): return int((x + 16) // 32) % 8
 
 
-def truePeaks(magnitudes, phases):
+def truePeaks(magnitudes, phases_ubyte, phases):
+    height, width = magnitudes.shape[:2]
     tps = []
+    u = np.zeros((height, width))
+    v = np.zeros((height, width))
     axish = np.zeros(256, np.int32)
     ltps = [[], [], [], [], [], [], [], []]
     offsets = [[[0, -1], [0, 1]], [[-1, -1], [1, 1]], [[-1, 0], [1, 0]], [[-1, 1], [1, -1]]]
+    sUU = 0.0
+    sVV = 0.0
+    sUV = 0.0
+    sUR = 0.0
+    sVR = 0.0
 
-    height, width = magnitudes.shape[:2]
     for i in range(2, height - 2, 1):
         for j in range(2, width - 2, 1):
-            angle = phases[i, j]
+            angle = phases_ubyte[i, j]
+            theta = phases[i, j]
             mag = magnitudes[i, j]
-            if mag < 100: continue
+            if mag < 10: continue
             ax = axis(angle)
             axish[angle] += 1
             m1 = m2 = mag
@@ -67,28 +76,50 @@ def truePeaks(magnitudes, phases):
             else:
                 assert (False)
 
-            if ((mag > m1 and mag >= m2) or (mag >= m1 and mag > m2)):
-                ltps[ax].append([j, i, ax, angle, mag])
+            if (((mag >= m1 and mag > m2)) and (m1 != m2)):
+                ltps[ax].append([j, i, angle, mag, m1, m2])
+                uij = math.sin(theta + math.pi / 2)
+                vij = math.cos(theta + math.pi / 2)
+                u[i, j] = uij
+                v[i, j] = vij
+                r = j * uij + i * vij
+                sUU += uij * uij
+                sVV += vij * vij
+                sUV += uij + vij
+                sUR += uij * r
+                sVR += vij * r
+
+    # determinant
+    detA = sUU * sVV - sUV * sUV
+    moc = None
+    if detA > 0:
+        moc = np.zeros(2)
+        moc[0] = (sUR * sVV - sUV * sVR) / detA
+        moc[1] = (sVR * sUU - sUV * sUR) / detA
 
     tps = np.concatenate(ltps)
 
-    return (tps, axish)
+    return (tps, u, v, axish, moc)
 
 
-
-def process(img, half_size=1):
+def sobel_detect(img, half_size=1):
     hs = half_size - int(half_size) % 1
     block_size = 2 * hs + 1
 
     sobelx = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=block_size)
     sobely = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=block_size)
-    phases = cv2.phase(sobelx, sobely, False)
-    #    phases = np.unwrap(phases, np.pi + np.pi) / (2 * np.pi)
-    phases = np.divide(phases, np.pi + np.pi)
-    phases = img_as_ubyte(phases)
+    phases = cv2.phase(sobelx, sobely)  # angleInDegrees=False)
+    phases_ubyte = np.divide(phases, np.pi + np.pi)
+    phases_ubyte = img_as_ubyte(phases_ubyte)
     magnitudes = np.sqrt(sobelx ** 2 + sobely ** 2)
 
-    return (magnitudes, phases)
+    return (magnitudes, phases_ubyte, phases)
+
+
+# tps, u, v, axh
+def motionCenter(tpTuple):
+    tps, u, v, axh = tpTuple
+    truepeaks = np.array(tps, dtype='f')
 
 
 if __name__ == '__main__':
@@ -96,63 +127,63 @@ if __name__ == '__main__':
     display = None
     tcontours = None
     contours = None
-
-
+    synth_center_col = 7
+    synth_center_row = 8
+    synth_case = False
     def data_circle():
-        arr = np.zeros((200, 200))
-        rr, cc = draw.circle(100, 100, 67)
-        arr[rr, cc] = 200
+        arr = np.zeros((16, 16), dtype=np.uint8)
+        arr = arr + 200
+        rr, cc = draw.circle(synth_center_row, synth_center_col, 5)
+        arr[rr, cc] = 0
         img = cv2.GaussianBlur(arr, (7, 7), sigmaX=1.2)
         return img
 
-
-    contours = None
-    corners = None
-
     if len(sys.argv) < 2:
         # Construct some test data
-        r = img_as_float(data_circle())
-        result = process(np.uint8(r), 1)
-        contours = measure.find_contours(r, 0.5)
-        display = r
+        r = data_circle()
+        result = sobel_detect(r, 1)
+        display = img_as_float(r)
+        synth_case = True
     else:
         if not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists():
             print(sys.argv[1] + '  Does not exist ')
-
         lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
-        corners = squares.find_squares(lab_tuple[0])
         display = opencv_utils.convert_lab2rgb(lab_tuple)
-        result = process(lab_tuple[0], 1)
+        result = sobel_detect(lab_tuple[0], 1)
 
-    tps, axh = truePeaks(result[0], result[1])
+    dims = display.shape
+    height = dims[0]
+    width = dims[1]
+    tps, u, v, axh, moc = truePeaks(result[0], result[1], result[2])
+    if synth_case:
+        dx = moc[0] - synth_center_col
+        dy = moc[1] - synth_center_row
+        print("%1.3f,%1.3f", (dx, dy))
+
     truepeaks = np.array(tps, dtype='f')
-
+    x = np.linspace(0, width - 1, width)
+    y = np.linspace(0, height - 1, height)
 
     fig = plt.figure(figsize=(22, 15))
 
-
-
     ax2 = plt.subplot2grid((3, 3), (0, 0))
-    ax2.imshow(result[0], cmap='gray')
-    ax2.set_title('Gradient Magnitude')
-    ax2.plot(corners[:, 0], corners[:, 1], '+g', markersize=3)
-    ax2.set_title('Image + CORNERS ')
+    ax2.imshow(display, cmap='gray')
+    ax2.set_title('Input Image')
 
     ax2 = plt.subplot2grid((3, 3), (0, 1))
-    ax2.imshow(result[1], cmap='gray')
+    ax2.imshow(result[2], cmap='gray')
     ax2.set_title('Gradient Angle')
 
-    ax1 = plt.subplot2grid((3, 3), (1, 0))
-    ax1.imshow(display, cmap='gray')
-    ax1.plot(truepeaks[:, 0], truepeaks[:, 1], '+r', markersize=3)
-    ax1.set_title('Image + TP ')
+    ax2 = plt.subplot2grid((3, 3), (1, 0))
+    ax2.imshow(display, cmap='gray')
+    ax2.quiver(x, y, u, v, units='xy', scale=1, pivot='tail', color='r')
+    ax2.set_title('Image + TP ')
+    ax2.xaxis.set_ticks([])
+    ax2.yaxis.set_ticks([])
+    ax2.set_aspect('equal')
 
     # Display histogram
     ax_hist = plt.subplot2grid((3, 3), (1, 1))
-    ax_hist.hist(result[1].ravel(), bins=256,density=True)
-    ax_hist.ticklabel_format(axis='y', style='scientific', scilimits=(0, 0))
-    ax_hist.set_xlabel(' Direction / 2 PI')
-  #  ax_hist.set_xlim(0, 1.0)
-   # ax_hist.set_yticks([])
-
+    ax_hist.hist(axh, bins=256, range=(0, 255))
+    ax_hist.set_xlabel(' Direction Histogram')
     plt.show()
