@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+from sobelplus import sobel_detect
 from skimage.util import img_as_ubyte
 from skimage.util import img_as_float
 
@@ -69,9 +70,8 @@ def pupil(img, sp, sr, dpath=None):
     dest = create_new(src)
     i = 0
     while (i <= sr):
-        src = cv2.cvtColor(src, cv2.COLOR_BGR2LAB, src)
-        dest = create_new(src)
-        cv2.pyrMeanShiftFiltering(src, sp, i, dest, 3)
+        src = cv2.cvtColor(src, cv2.COLOR_BGR2LAB, tmp)
+        cv2.pyrMeanShiftFiltering(tmp, sp, i, dest, 2)
         dest = cv2.cvtColor(dest, cv2.COLOR_Lab2BGR, dest)
         src = dest
         i = i + 2
@@ -85,7 +85,10 @@ def pupil(img, sp, sr, dpath=None):
     # threshold the image
     # otsu
     ret, otsu = cv2.threshold(rc, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    mask = createConvexMask(otsu)
+    otsu_eroded = cv2.erode(otsu, None, iterations=2)
+    otsu_cleansed = cv2.dilate(otsu_eroded, None, iterations=2)
+
+    mask = createConvexMask(otsu_cleansed)
     cx, cy = CenterOfIntensity(mask)
     print('(%d,%d)', (cx, cy))
 
@@ -103,13 +106,14 @@ def pupil(img, sp, sr, dpath=None):
     f1.tight_layout()
     plt.show()
 
-    # # Watershed Segmentation
-    # f2, a2 = plt.subplots(2, 2, figsize=(18, 10))
-    # a2[0, 0].imshow(dtwImage), a2[0, 0].set_title("Distance Transform Weighted Image")
-    # a2[0, 1].imshow(markers), a2[0, 1].set_title("Markers for Wateshed")
-    # a2[1, 0].imshow(labels), a2[1, 0].set_title("Watershed Operation")
-    # a2[1, 1].imshow(segmented_image), a2[1, 1].set_title("Final Segmentation")
-    # f2.tight_layout()
+
+# # Watershed Segmentation
+# f2, a2 = plt.subplots(2, 2, figsize=(18, 10))
+# a2[0, 0].imshow(dtwImage), a2[0, 0].set_title("Distance Transform Weighted Image")
+# a2[0, 1].imshow(markers), a2[0, 1].set_title("Markers for Wateshed")
+# a2[1, 0].imshow(labels), a2[1, 0].set_title("Watershed Operation")
+# a2[1, 1].imshow(segmented_image), a2[1, 1].set_title("Final Segmentation")
+# f2.tight_layout()
 
 
 if __name__ == '__main__':
