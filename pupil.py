@@ -2,21 +2,16 @@ import cv2
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
-from sobelplus import sobel_detect
+from skimage import color, img_as_ubyte, img_as_float
+from skimage.color import rgb2gray
+
+from sobelplus import sobel_detect, gradient_all
 from skimage.util import img_as_ubyte
 from skimage.util import img_as_float
-
-MASK_BORDER_SIZE = 7
-
-SE_K_SIZE = 3
-
-
-def choose(x):
-    return {
-        's': 1,
-        'r': 2,
-        'b': 3,
-    }[x]
+from circles import find_circle
+from skimage.draw import circle_perimeter
+from matplotlib.patches import Circle
+import matplotlib.patches as patches
 
 
 def wait():
@@ -55,6 +50,12 @@ def createConvexMask(image):
     return (hull_image)
 
 
+def check_specular_reflection(otsu):
+    # look for black
+    inv = cv2.bitwise_not(otsu)
+    return inv, None
+
+
 def CenterOfIntensity(gray):
     moments = cv2.moments(gray)  # Calculate moments
     (cx, cy) = (-1.0, -1.0)
@@ -63,61 +64,64 @@ def CenterOfIntensity(gray):
         cy = int(moments['m01'] / moments['m00'])  # cy = M01/M00
     return (cx, cy)
 
-
-def pupil(img, sp, sr, dpath=None):
-    src = img.copy()
-    tmp = create_new(src)
-    dest = create_new(src)
-    i = 0
-    while (i <= sr):
-        src = cv2.cvtColor(src, cv2.COLOR_BGR2LAB, tmp)
-        cv2.pyrMeanShiftFiltering(tmp, sp, i, dest, 2)
-        dest = cv2.cvtColor(dest, cv2.COLOR_Lab2BGR, dest)
-        src = dest
-        i = i + 2
-
-    if not (dpath is None):
-        cv2.imwrite(dpath + 'mshift' + '.png', dest)
-    bc, gc, rc = cv2.split(dest)
-    cv2.medianBlur(rc, 7, rc)
-    if not (dpath is None):
-        cv2.imwrite(dpath + 'red' + '.png', rc)
     # threshold the image
     # otsu
+
+
+def getMask(rc):
     ret, otsu = cv2.threshold(rc, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     otsu_eroded = cv2.erode(otsu, None, iterations=2)
     otsu_cleansed = cv2.dilate(otsu_eroded, None, iterations=2)
-
     mask = createConvexMask(otsu_cleansed)
-    cx, cy = CenterOfIntensity(mask)
-    print('(%d,%d)', (cx, cy))
+    return mask, otsu
+
+
+def pupil(img, dpath=None):
+    src = img.copy()
+    tmp = create_new(src)
+    dest = create_new(src)
+    height, width, channels = img.shape
+    image_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
+    image_gray = color.rgb2gray(img_as_float(image_rgb))
+    high_radi = height * 0.25
+    low_radi = high_radi - 5
+    hough_radii = np.arange(low_radi, high_radi, 2)
+    circle_zip, edges = find_circle(image_gray, hough_radii, 1)
+    # iris_candidates = list(circle_zip)
+
+    #
+    # rinc, reflects = check_specular_reflection(rc)
+    # cx, cy = CenterOfIntensity(mask)
+    # print((cx, cy))
+    # inv_mask = cv2.bitwise_not(mask)
+    # cx, cy = CenterOfIntensity(inv_mask)
+    # print((cx, cy))
+    #
+    # mask3 = cv2.resize(mask, img.shape[1::-1])
+    # mask3 = cv2.merge([mask3,mask3,mask3])
+    # iris = cv2.bitwise_and(img, mask3)
+    #
+    # hist_item = cv2.calcHist([img], [0], mask, [256], [0, 255])
+    #
+    #
 
     # remove any blobs that are on the edge
 
     # Preprocessing images
     src_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    dest_rgb = cv2.cvtColor(dest, cv2.COLOR_BGR2RGB)
-    f1, a1 = plt.subplots(3, 2, figsize=(18, 10))
-    a1[0, 0].imshow(src_rgb), a1[0, 0].set_title("Original Image")
-    a1[1, 0].imshow(dest_rgb), a1[1, 0].set_title("MeanShift")
-    a1[0, 1].imshow(rc, cmap=plt.cm.gray), a1[0, 1].set_title("Red Channel")
-    a1[1, 1].imshow(otsu, cmap=plt.cm.gray), a1[1, 1].set_title("Mask")
-    a1[2, 1].imshow(mask, cmap=plt.cm.gray), a1[1, 1].set_title("Mask")
+    circle_color = 'red'
+    f1, a1 = plt.subplots(1)
+    a1.set_aspect('equal')
+    a1.imshow(src_rgb)
+    a1.set_title("Pupil Results")
+
+    for center_y, center_x, radius in circle_zip:
+        c = patches.Circle((center_x, center_y), radius, color=circle_color, linewidth=2, fill=False)
+        a1.add_patch(c)
+
     f1.tight_layout()
     plt.show()
 
-
-# # Watershed Segmentation
-# f2, a2 = plt.subplots(2, 2, figsize=(18, 10))
-# a2[0, 0].imshow(dtwImage), a2[0, 0].set_title("Distance Transform Weighted Image")
-# a2[0, 1].imshow(markers), a2[0, 1].set_title("Markers for Wateshed")
-# a2[1, 0].imshow(labels), a2[1, 0].set_title("Watershed Operation")
-# a2[1, 1].imshow(segmented_image), a2[1, 1].set_title("Final Segmentation")
-# f2.tight_layout()
-
-
 if __name__ == '__main__':
     img = cv2.imread(sys.argv[1])
-    sp = int(sys.argv[2])
-    sr = int(sys.argv[3])
-    pupil(img, sp, sr)
+    pupil(img)

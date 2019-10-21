@@ -10,7 +10,7 @@ from skimage import img_as_float
 from skimage import img_as_ubyte
 from skimage import measure
 import math
-import squares
+
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
@@ -38,7 +38,7 @@ bins = [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
 def axis(x): return int((x + 16) // 32) % 8
 
 
-def truePeaks(magnitudes, phases_ubyte, phases):
+def truePeaks(magnitudes, phases_ubyte, phases, threshold):
     height, width = magnitudes.shape[:2]
     tps = []
     u = np.zeros((height, width))
@@ -57,7 +57,7 @@ def truePeaks(magnitudes, phases_ubyte, phases):
             angle = phases_ubyte[i, j]
             theta = phases[i, j]
             mag = magnitudes[i, j]
-            if mag < 10: continue
+            if mag < threshold: continue
             ax = axis(angle)
             axish[angle] += 1
             m1 = m2 = mag
@@ -99,7 +99,7 @@ def truePeaks(magnitudes, phases_ubyte, phases):
 
     tps = np.concatenate(ltps)
 
-    return (tps, u, v, axish, moc)
+    return (tps, u, v, axish, moc, threshold)
 
 
 def sobel_detect(img, half_size=1):
@@ -112,14 +112,13 @@ def sobel_detect(img, half_size=1):
     phases_ubyte = np.divide(phases, np.pi + np.pi)
     phases_ubyte = img_as_ubyte(phases_ubyte)
     magnitudes = np.sqrt(sobelx ** 2 + sobely ** 2)
-
     return (magnitudes, phases_ubyte, phases)
 
 
-# tps, u, v, axh
-def motionCenter(tpTuple):
-    tps, u, v, axh = tpTuple
-    truepeaks = np.array(tps, dtype='f')
+def gradient_all(img, threshold=10, half_size=1):
+    result = sobel_detect(img, half_size)
+    output_tuple = truePeaks(result[0], result[1], result[2], half_size)
+    return output_tuple
 
 
 if __name__ == '__main__':
@@ -154,7 +153,7 @@ if __name__ == '__main__':
     dims = display.shape
     height = dims[0]
     width = dims[1]
-    tps, u, v, axh, moc = truePeaks(result[0], result[1], result[2])
+    tps, u, v, axh, moc, threshold = truePeaks(result[0], result[1], result[2], 10)
     if synth_case:
         dx = moc[0] - synth_center_col
         dy = moc[1] - synth_center_row
