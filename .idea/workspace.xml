@@ -4,11 +4,10 @@
     <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/cone.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/content.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pydev.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pydev.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pupil.py" beforeDir="false" afterPath="$PROJECT_DIR$/pupil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sobelplus.py" beforeDir="false" afterPath="$PROJECT_DIR$/sobelplus.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/squares.py" beforeDir="false" afterPath="$PROJECT_DIR$/squares.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +93,29 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.sobelplus">
+  <component name="RunManager" selected="Python.pupil">
+    <configuration name="circles" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/circles.py" />
+      <option name="PARAMETERS" value="./projects/pupil/images/single_1.jpg 94 99 1 3" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="cone" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -131,29 +152,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pupil.py" />
-      <option name="PARAMETERS" value="./projects/pupil/images/single_1.jpg 40 40" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="skeletonization" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="AGM" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/skeletonization.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="PARAMETERS" value="./projects/pupil/images/single_1.jpg" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -175,7 +174,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sobelplus.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="PARAMETERS" value="./projects/pupil/images/images-11.jpeg" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -183,8 +182,8 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="AGM" />
+    <configuration name="squares" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -196,8 +195,8 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils.py" />
-      <option name="PARAMETERS" value="$USER_HOME$/Downloads/single_1.jpg 40 40 r" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/squares.py" />
+      <option name="PARAMETERS" value="./projects/pupil/images/single_1.jpg 85 95 3" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -206,19 +205,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.skeletonization" />
-      <item itemvalue="Python.utils" />
       <item itemvalue="Python.pupil" />
       <item itemvalue="Python.sobelplus" />
       <item itemvalue="Python.cone" />
+      <item itemvalue="Python.squares" />
+      <item itemvalue="Python.circles" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.pupil" />
+        <item itemvalue="Python.circles" />
+        <item itemvalue="Python.squares" />
         <item itemvalue="Python.sobelplus" />
         <item itemvalue="Python.cone" />
-        <item itemvalue="Python.pupil" />
-        <item itemvalue="Python.utils" />
-        <item itemvalue="Python.skeletonization" />
       </list>
     </recent_temporary>
   </component>
@@ -245,7 +244,7 @@
       <workItem from="1569694990626" duration="10384000" />
       <workItem from="1571081426444" duration="3238000" />
       <workItem from="1571554813588" duration="12740000" />
-      <workItem from="1571596059940" duration="20754000" />
+      <workItem from="1571596059940" duration="44407000" />
     </task>
     <task id="LOCAL-00001" summary="WiTricity Project adds">
       <created>1568412949264</created>
@@ -296,7 +295,14 @@
       <option name="project" value="LOCAL" />
       <updated>1571596193097</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="fixed display of sub-pixel edgepoints&#10;added motion center calculation to truepeak&#10;started adaptive segmentation in pupil">
+      <created>1571619142693</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1571619142693</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -319,17 +325,13 @@
     <MESSAGE value="Added Pupil script to run all through pupil stages" />
     <MESSAGE value="Adding test images and project directory" />
     <MESSAGE value="added name of my LLC to README" />
-    <option name="LAST_COMMIT_MESSAGE" value="added name of my LLC to README" />
+    <MESSAGE value="fixed display of sub-pixel edgepoints&#10;added motion center calculation to truepeak&#10;started adaptive segmentation in pupil" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed display of sub-pixel edgepoints&#10;added motion center calculation to truepeak&#10;started adaptive segmentation in pupil" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/squares.py</url>
-          <line>105</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sobelplus.py</url>
           <line>160</line>
@@ -339,9 +341,11 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1571619052908" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$pupil.coverage" NAME="pupil Coverage Results" MODIFIED="1571602709505" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1571634605275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$circles.coverage" NAME="circles Coverage Results" MODIFIED="1571691431870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$cone.coverage" NAME="cone Coverage Results" MODIFIED="1571609655939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$pupil.coverage" NAME="pupil Coverage Results" MODIFIED="1571692606715" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$squares.coverage" NAME="squares Coverage Results" MODIFIED="1571686601642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="masterDetails">
     <states>
