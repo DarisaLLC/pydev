@@ -91,37 +91,7 @@ def smooth(x, window_len):
     return y
 
 
-def pupil(img, dpath=None):
-    src = img.copy()
-    low_pass = 17
-    src = cv2.GaussianBlur(src, (5, 5), 0)
-    tmp = create_new(src)
-    dest = create_new(src)
-    height, width, channels = img.shape
-    image_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
-    image_lab = cv2.cvtColor(src, cv2.COLOR_BGR2LAB)
-    Lc, Ac, Bc = cv2.split(image_lab)
-    cm = CenterOfIntensity(Lc)
-    print(cm)
-
-    image_gray = color.rgb2gray(img_as_float(image_rgb))
-    high_radi = height * 0.25
-    low_radi = high_radi - 5
-    print((low_radi, high_radi))
-
-    hough_radii = np.arange(low_radi, high_radi, 2)
-    circle_zip, edges = find_circle(image_gray, hough_radii, 1)
-    # note row column to x y to width height
-    circles = []
-    for center_y, center_x, radius in circle_zip:
-        circles.append((center_x, center_y, radius))
-
-    iris_circle = circles[0]
-    center_y = iris_circle[1]
-    center_x = iris_circle[0]
-
-    roi = Lc[int(center_y - radius + 16):int(center_y + radius - 16),
-          int(center_x - radius + 16):int(center_x + radius - 16)]
+def pupil_range_by_reduce(roi, low_pass):
     colsums = cv2.reduce(roi, 0, cv2.REDUCE_MAX, dtype=cv2.CV_8U).flatten()
     roi_width = len(colsums)
     diffc = np.diff(colsums)
@@ -159,12 +129,63 @@ def pupil(img, dpath=None):
 
     sruns = Sort(runs)
     est_pupil = sruns[0]
-    ## choose closest to the center
-    estimated_pupil_diameter = est_pupil[2]
+    return est_pupil
+
+def pupil(img, dpath=None):
+    src = img.copy()
+    low_pass = 5
+    src = cv2.GaussianBlur(src, (low_pass, low_pass), 0)
+    tmp = create_new(src)
+    dest = create_new(src)
+    height, width, channels = img.shape
+    image_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
+    image_lab = cv2.cvtColor(src, cv2.COLOR_BGR2LAB)
+    Lc, Ac, Bc = cv2.split(image_lab)
+    cm = CenterOfIntensity(Lc)
+    print('Entire Cm ', cm)
+
+    image_gray = color.rgb2gray(img_as_float(image_rgb))
+    high_radi = height * 0.25
+    low_radi = high_radi - 5
+    print('radii range', (low_radi, high_radi))
+
+    hough_radii = np.arange(low_radi, high_radi, 2)
+    circle_zip, edges = find_circle(image_gray, hough_radii, 1)
+    # note row column to x y to width height
+    circles = []
+    for center_y, center_x, radius in circle_zip:
+        circles.append((center_x, center_y, radius))
+
+    iris_circle = circles[0]
+    crad = (center_x, center_y)
+    center_y = iris_circle[1]
+    center_x = iris_circle[0]
+    print('Center ', (center_x, center_y))
+
+    roi = Lc[int(center_y - radius + 16):int(center_y + radius - 16),
+          int(center_x - radius + 16):int(center_x + radius - 16)]
+    cmroi = CenterOfIntensity(roi)
+    print('cmroi', cmroi)
+
+    est_pupil = pupil_range_by_reduce(roi, low_pass)
     estimated_pupil_radius = est_pupil[2] / 2
-    pupil_center_delta = (est_pupil[1] + est_pupil[0]) / 2
-    estimated_pupil_x_center = center_x + radius - pupil_center_delta
-    print((estimated_pupil_x_center, center_x, estimated_pupil_radius))
+    estimated_pupil_x_center = center_x + radius - (est_pupil[1] + est_pupil[0]) / 2
+
+    # @note refactor to using rectangles
+    tl_x = center_x - radius
+    tl_y = center_y - radius
+    proi_tl_x = tl_x + radius / 2
+    proi_tl_y = tl_y + radius / 2
+    pwidth = radius * 2 - radius
+    pheight = radius * 2 - radius
+    print('cmroi_tl', (proi_tl_x, proi_tl_y))
+
+    # reduce the roi by the difference of roi and roi cm.
+    proi = Lc[int(proi_tl_y):int(proi_tl_y + pheight),
+           int(proi_tl_y):int(proi_tl_y + pheight)]
+
+    cmproi = CenterOfIntensity(proi)
+    print('cmproi', cmproi)
 
     # Preprocessing images
     src_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
@@ -178,6 +199,7 @@ def pupil(img, dpath=None):
     ax1.imshow(src_rgb)
     ax1.set_title("Pupil Results")
 
+
     print((center_x, center_y, radius))
     c = patches.Circle((center_x, center_y), radius, color=circle_color, linewidth=2, fill=False)
     ax1.add_patch(c)
@@ -187,8 +209,16 @@ def pupil(img, dpath=None):
     p = patches.Circle((estimated_pupil_x_center, center_y), estimated_pupil_radius, color=pupil_color, linewidth=2,
                        fill=False)
     ax1.add_patch(p)
-    l = patches.Rectangle((cm), 7, 7, color='green', linewidth=3, fill=False)
+    lc = patches.Rectangle((proi_tl_x, proi_tl_y), pwidth, pheight, color='yellow', linewidth=3, fill=False)
+    ax1.add_patch(lc)
+
+    l = patches.Rectangle((cmroi[0] + tl_x, cmroi[1] + tl_y), 7, 7, color='green', linewidth=3, fill=False)
     ax1.add_patch(l)
+
+    pp = patches.Circle((proi_tl_x + cmproi[0], proi_tl_y + cmproi[1]), estimated_pupil_radius, color='red',
+                        linewidth=2,
+                        fill=False)
+    ax1.add_patch(pp)
     plt.show()
 
 if __name__ == '__main__':
