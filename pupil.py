@@ -12,12 +12,7 @@ from circles import find_circle
 from skimage.draw import circle_perimeter
 from matplotlib.patches import Circle
 import matplotlib.patches as patches
-
-
-def wait():
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
+import math
 
 def create_new(img):
     height, width, channels = img.shape
@@ -56,13 +51,17 @@ def check_specular_reflection(otsu):
     return inv, None
 
 
-def CenterOfIntensity(gray):
-    moments = cv2.moments(gray)  # Calculate moments
+def CenterOfIntensity(gray, invert=False):
+    src = gray.copy()
+    if invert:
+        src = cv2.bitwise_not(gray)
+
+    moments = cv2.moments(src)  # Calculate moments
     (cx, cy) = (-1.0, -1.0)
     if moments['m00'] != 0:
         cx = int(moments['m10'] / moments['m00'])  # cx = M10/M00
         cy = int(moments['m01'] / moments['m00'])  # cy = M01/M00
-    return (cx, cy)
+    return (cx, cy), moments['m00']
 
     # threshold the image
     # otsu
@@ -141,7 +140,7 @@ def pupil(img, dpath=None):
     image_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
     image_lab = cv2.cvtColor(src, cv2.COLOR_BGR2LAB)
     Lc, Ac, Bc = cv2.split(image_lab)
-    cm = CenterOfIntensity(Lc)
+    cm, wmass = CenterOfIntensity(Lc)
     print('Entire Cm ', cm)
 
     image_gray = color.rgb2gray(img_as_float(image_rgb))
@@ -164,7 +163,7 @@ def pupil(img, dpath=None):
 
     roi = Lc[int(center_y - radius + 16):int(center_y + radius - 16),
           int(center_x - radius + 16):int(center_x + radius - 16)]
-    cmroi = CenterOfIntensity(roi)
+    cmroi, roimass = CenterOfIntensity(roi, True)
     print('cmroi', cmroi)
 
     est_pupil = pupil_range_by_reduce(roi, low_pass)
@@ -172,20 +171,22 @@ def pupil(img, dpath=None):
     estimated_pupil_x_center = center_x + radius - (est_pupil[1] + est_pupil[0]) / 2
 
     # @note refactor to using rectangles
+    ring = 0.25
     tl_x = center_x - radius
     tl_y = center_y - radius
-    proi_tl_x = tl_x + radius / 2
-    proi_tl_y = tl_y + radius / 2
-    pwidth = radius * 2 - radius
-    pheight = radius * 2 - radius
+    pwidth = radius * (1.0 + ring)
+    pheight = radius * (1.0 + ring)
+    proi_tl_x = tl_x + (1.0 - ring) * radius / 2
+    proi_tl_y = tl_y + (1.0 - ring) * radius / 2
     print('cmroi_tl', (proi_tl_x, proi_tl_y))
 
     # reduce the roi by the difference of roi and roi cm.
     proi = Lc[int(proi_tl_y):int(proi_tl_y + pheight),
            int(proi_tl_y):int(proi_tl_y + pheight)]
 
-    cmproi = CenterOfIntensity(proi)
-    print('cmproi', cmproi)
+    cmproi, pmass = CenterOfIntensity(proi, True)
+    prad = np.sqrt((pmass / 256.0) / math.pi)
+    print('cmproi', (cmproi, prad))
 
     # Preprocessing images
     src_rgb = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
@@ -206,16 +207,16 @@ def pupil(img, dpath=None):
     r = patches.Rectangle((center_x - radius, center_y - radius), radius * 2, radius * 2, color=box_color,
                           linewidth=3, fill=False)
     ax1.add_patch(r)
-    p = patches.Circle((estimated_pupil_x_center, center_y), estimated_pupil_radius, color=pupil_color, linewidth=2,
+    p = patches.Circle((estimated_pupil_x_center, center_y), estimated_pupil_radius, color=pupil_color, linewidth=1,
                        fill=False)
     ax1.add_patch(p)
-    lc = patches.Rectangle((proi_tl_x, proi_tl_y), pwidth, pheight, color='yellow', linewidth=3, fill=False)
+    lc = patches.Rectangle((proi_tl_x, proi_tl_y), pwidth, pheight, color='yellow', linewidth=1, fill=False)
     ax1.add_patch(lc)
 
-    l = patches.Rectangle((cmroi[0] + tl_x, cmroi[1] + tl_y), 7, 7, color='green', linewidth=3, fill=False)
-    ax1.add_patch(l)
+    #    l = patches.Rectangle((cmroi[0] + tl_x, cmroi[1] + tl_y), 7, 7, color='green', linewidth=3, fill=False)
+    #    ax1.add_patch(l)
 
-    pp = patches.Circle((proi_tl_x + cmproi[0], proi_tl_y + cmproi[1]), estimated_pupil_radius, color='red',
+    pp = patches.Circle((proi_tl_x + cmproi[0], proi_tl_y + cmproi[1]), prad, color=pupil_color,
                         linewidth=2,
                         fill=False)
     ax1.add_patch(pp)
