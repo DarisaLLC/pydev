@@ -144,8 +144,8 @@ def pupil(img, dpath=None):
     print('Entire Cm ', cm)
 
     image_gray = color.rgb2gray(img_as_float(image_rgb))
-    high_radi = height * 0.25
-    low_radi = high_radi - 5
+    high_radi = height * 0.31
+    low_radi = high_radi - 30
     print('radii range', (low_radi, high_radi))
 
     hough_radii = np.arange(low_radi, high_radi, 2)
