@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/zscore_1d.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pydev.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pydev.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blur_polar.py" beforeDir="false" afterPath="$PROJECT_DIR$/blur_polar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/pupil/images/polar_rad.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pupil.py" beforeDir="false" afterPath="$PROJECT_DIR$/pupil.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -245,7 +239,7 @@
       <workItem from="1569694990626" duration="10384000" />
       <workItem from="1571081426444" duration="3238000" />
       <workItem from="1571554813588" duration="12740000" />
-      <workItem from="1571596059940" duration="124431000" />
+      <workItem from="1571596059940" duration="125324000" />
     </task>
     <task id="LOCAL-00001" summary="WiTricity Project adds">
       <created>1568412949264</created>
@@ -331,7 +325,14 @@
       <option name="project" value="LOCAL" />
       <updated>1571795208285</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Added moments for determination of axis of inertia &#10;Added adaptive pupil tracking ( initial approach )">
+      <created>1572301554592</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1572301554592</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -397,7 +398,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/blur_polar.py</url>
-          <line>158</line>
+          <line>164</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
       </breakpoints>
