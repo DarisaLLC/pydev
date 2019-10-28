@@ -13,6 +13,7 @@ from skimage.draw import circle_perimeter
 from matplotlib.patches import Circle
 import matplotlib.patches as patches
 import math
+from zscore_1d import find_inflections
 
 def create_new(img):
     height, width, channels = img.shape
@@ -199,7 +200,6 @@ def pupil(img, dpath=None):
     ax1.set_aspect('equal')
     ax1.imshow(src_rgb)
     ax1.set_title("Pupil Results")
-
 
     print((center_x, center_y, radius))
     c = patches.Circle((center_x, center_y), radius, color=circle_color, linewidth=2, fill=False)
