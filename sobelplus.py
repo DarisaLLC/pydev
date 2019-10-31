@@ -120,7 +120,6 @@ def gradient_all(img, threshold=10, half_size=1):
     output_tuple = truePeaks(result[0], result[1], result[2], half_size)
     return output_tuple
 
-
 if __name__ == '__main__':
     result = None
     display = None
