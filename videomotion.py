@@ -1,102 +1,61 @@
-import sys
-from pathlib import Path
-
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.misc
-import sys
-from pathlib import Path
-import skvideo.io
-import skvideo.motion
-import skvideo.datasets
+import cv2 as cv
+import argparse
+from videoio import getMetaData
+import json
 
-try:
-    xrange
-except NameError:
-    xrange = range
+parser = argparse.ArgumentParser(description='meanshift-tracking')
+parser.add_argument('image', type=str, help='path to image file')
+args = parser.parse_args()
 
+mdata = getMetaData(args.image)
+print(mdata.keys())
+print(json.dumps(mdata["video"], indent=4))
 
-def getPlots(motionData):
-    motionMagnitude = np.sqrt(np.sum(motionData ** 2, axis=2))
+cap = cv.VideoCapture(args.image)
 
-    fig = plt.figure()
-    plt.quiver(motionData[::-1, :, 0], motionData[::-1, :, 1])
-    fig.axes[0].get_xaxis().set_visible(False)
-    fig.axes[0].get_yaxis().set_visible(False)
-    plt.tight_layout()
-    fig.canvas.draw()
+# take first frame of the video
+ret,frame = cap.read()
 
-    # Get the RGBA buffer from the figure
-    w, h = fig.canvas.get_width_height()
-    buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
-    buf.shape = (h, w, 4)
-    quiver = buf[:, :, 1:]
-    plt.close()
+# setup initial location of window
+x, y, w, h = 250, 192, 300, 100 # simply hardcoded the values
+track_window = (x, y, w, h)
 
-    fig = plt.figure()
-    plt.imshow(motionMagnitude, cmap="Greys_r")
-    fig.axes[0].get_xaxis().set_visible(False)
-    fig.axes[0].get_yaxis().set_visible(False)
-    plt.tight_layout()
-    fig.canvas.draw()
+# set up the ROI for tracking
+roi = frame[y:y+h, x:x+w]
+hsv_roi =  cv.cvtColor(roi, cv.COLOR_BGR2HSV)
+#mask = cv.inRange(hsv_roi, np.array((0., 60.,32.)), np.array((180.,255.,255.)))
+roi_hist = cv.calcHist([hsv_roi],[0],None,[180],[0,180])
+cv.normalize(roi_hist,roi_hist,0,255,cv.NORM_MINMAX)
 
-    w, h = fig.canvas.get_width_height()
-    buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
-    buf.shape = (h, w, 4)
-    magnitude = buf[:, :, 1:]
-    plt.close()
+# Setup the termination criteria, either 10 iteration or move by atleast 1 pt
+term_crit = ( cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1 )
 
-    # histogram it
-    fig = plt.figure()
-    hist, bins = np.histogram(motionMagnitude, bins=10, range=(-0.5, 9.5))
-    center = (bins[1:] + bins[:-1]) / 2.0
-    plt.scatter(center, hist)
-    plt.xlabel("Motion magnitude")
-    plt.ylabel("Count")
-    plt.ylim([0, 14000])
-    plt.grid()
-    plt.tight_layout()
-    fig.canvas.draw()
+i = 0
+while(1):
+    ret, frame = cap.read()
 
-    w, h = fig.canvas.get_width_height()
-    buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
-    buf.shape = (h, w, 4)
-    histogram = buf[:, :, 1:]
-    plt.close()
+    if ret == True:
+        cv.imwrite('/Users/arman/tmp/wiic/' + str(i) + '.png', frame)
+        hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+        dst = cv.calcBackProject([hsv],[0],roi_hist,[0,180],1)
 
-    return quiver, magnitude, histogram
+        # apply meanshift to get the new location
+        ret, track_window = cv.meanShift(dst, track_window, term_crit)
 
+        # Draw it on image
+        x,y,w,h = track_window
+        img2 = cv.rectangle(frame, (x,y), (x+w,y+h), 255,2)
+        cv.imshow('img2',img2)
+        i = i + 1
 
-if __name__ == '__main__':
-    filename = sys.argv[1]
-    if not Path(filename).exists() or not Path(filename).is_file():
-        print(filename + '  Does not exist -- using skvideo dataset instead ')
-        filename = skvideo.datasets.bigbuckbunny()
+        k = cv.waitKey(30) & 0xff
+        if k == 27:
+            break
+    else:
+        break
 
-    videodata = skvideo.io.vread(filename)
-
-    videometadata = skvideo.io.ffprobe(filename)
-    frame_rate = videometadata['video']['@avg_frame_rate']
-
-    T, M, N, C = videodata.shape
-
-    motionData = skvideo.motion.blockMotion(videodata)
-
-    writer = skvideo.io.FFmpegWriter("motion.mp4", inputdict={
-        "-r": frame_rate
-    })
-
-    for i in xrange(T - 1):
-        a, b, c = getPlots(motionData[i])
-    frame = scipy.misc.imresize(videodata[i + 1], (a.shape[0], a.shape[1], 3))
-
-    outputframe = np.zeros((frame.shape[0] * 2, frame.shape[1] * 2, 3), dtype=np.uint8)
-
-    outputframe[:frame.shape[0], :frame.shape[1]] = frame
-    outputframe[frame.shape[0]:, :frame.shape[1]] = a
-    outputframe[:frame.shape[0], frame.shape[1]:] = b
-    outputframe[frame.shape[0]:, frame.shape[1]:] = c
-
-    writer.writeFrame(outputframe)
-
-    writer.close()
+while(1):
+    k = cv.waitKey(30) & 0xff
+    if k == 27:
+        break
