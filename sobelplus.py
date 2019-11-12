@@ -147,12 +147,13 @@ if __name__ == '__main__':
             print(sys.argv[1] + '  Does not exist ')
         lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
         display = opencv_utils.convert_lab2rgb(lab_tuple)
-        result = sobel_detect(lab_tuple[0], 1)
+        img = cv2.GaussianBlur(lab_tuple[0], (11, 11), sigmaX=1.2)
+        result = sobel_detect(img, 1)
 
     dims = display.shape
     height = dims[0]
     width = dims[1]
-    tps, u, v, axh, moc, threshold = truePeaks(result[0], result[1], result[2], 10)
+    tps, u, v, axh, moc, threshold = truePeaks(result[0], result[1], result[2], 250)
     if synth_case:
         dx = moc[0] - synth_center_col
         dy = moc[1] - synth_center_row

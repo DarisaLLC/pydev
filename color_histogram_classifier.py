@@ -60,7 +60,39 @@ class HistogramColorClassifier:
         self.model_list = list()
         self.name_list = list()
 
-    def addModelHistogram(self, model_frame, name=''):
+    def generateModelHistogram(self, model_frame):
+        """Generate the histogram to using the hist type indicated in the initialization
+
+        @param model_frame the frame to add to the model, its histogram
+            is obtained and saved in internal list.
+        """
+        if(self.hist_type=='HSV'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2HSV)
+        elif(self.hist_type=='GRAY'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2GRAY)
+        elif(self.hist_type=='RGB'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2RGB)
+        hist = cv2.calcHist([model_frame], self.channels, None, self.hist_size, self.hist_range)
+        hist = cv2.normalize(hist, hist).flatten()
+        return hist
+
+    def addModelByHistogram(self, hist, name=''):
+        """Add the histogram to internal container. If the name of the object
+           is already present then replace that histogram with a new one.
+
+        @param hist to add to the model, its histogram
+            is obtained and saved in internal list.
+        @param name a string representing the name of the model.
+            If nothing is specified then the name will be the index of the element.
+        """
+        if name == '': name = str(len(self.model_list))
+        if name not in self.name_list:
+            self.model_list.append(hist)
+            self.name_list.append(name)
+        else:
+            for i in range(len(self.name_list)):
+                if self.name_list[i] == name:
+                    self.model_list[i] = hist
+                    break
+
+    def addModelByFrame(self, model_frame, name=''):
         """Add the histogram to internal container. If the name of the object
            is already present then replace that histogram with a new one.
 
@@ -69,11 +101,7 @@ class HistogramColorClassifier:
         @param name a string representing the name of the model.
             If nothing is specified then the name will be the index of the element.
         """
-        if(self.hist_type=='HSV'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2HSV)
-        elif(self.hist_type=='GRAY'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2GRAY)
-        elif(self.hist_type=='RGB'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2RGB)
-        hist = cv2.calcHist([model_frame], self.channels, None, self.hist_size, self.hist_range)
-        hist = cv2.normalize(hist, hist).flatten()
+        hist = self.generateModelHistogram(model_frame)
         if name == '': name = str(len(self.model_list))
         if name not in self.name_list:
             self.model_list.append(hist)
@@ -107,28 +135,18 @@ class HistogramColorClassifier:
         @param method the comparison method.
             intersection: (default) the histogram intersection (Swain, Ballard)
         """
-        if cv2.__version__.split(".")[0] == '3':
-            if(method=="intersection"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_INTERSECT)
-            elif(method=="correlation"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CORREL)
-            elif(method=="chisqr"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CHISQR)
-            elif(method=="bhattacharyya"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_BHATTACHARYYA)
-            else:
-                raise ValueError('[DEEPGAZE] color_classification.py: the method specified ' + str(method) + ' is not supported.')
+        assert(cv2.__version__.split(".")[0] == '3')
+        if(method=="intersection"):
+            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_INTERSECT)
+        elif(method=="correlation"):
+            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CORREL)
+        elif(method=="chisqr"):
+            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CHISQR)
+        elif(method=="bhattacharyya"):
+            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_BHATTACHARYYA)
         else:
-            if(method=="intersection"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.cv.CV_COMP_INTERSECT)
-            elif(method=="correlation"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.cv.CV_COMP_CORREL)
-            elif(method=="chisqr"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.cv.CV_COMP_CHISQR)
-            elif(method=="bhattacharyya"):
-                comparison = cv2.compareHist(hist_1, hist_2, cv2.cv.CV_COMP_BHATTACHARYYA)
-            else:
-                raise ValueError('[DEEPGAZE] color_classification.py: the method specified ' + str(method) + ' is not supported.')
+            raise ValueError('[DarisaLLC] color_classification.py: the method specified ' + str(method) + ' is not supported.')
+
         return comparison
 
     def returnHistogramComparisonArray(self, image, method='intersection'):

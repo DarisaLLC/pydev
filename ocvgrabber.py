@@ -1,12 +1,10 @@
+import os
 import numpy as np
 import cv2
 import sys
 from pathlib import Path
-from pylab import *
-from moviepy.video.io.bindings import mplfig_to_npimage
+import pickle
 
-import cv2
-import numpy as np
 from matplotlib import pyplot as plt
 from color_histogram_classifier import HistogramColorClassifier
 
@@ -48,10 +46,32 @@ class Scope(object):
 
 
 #Defining the classifier
-my_classifier = HistogramColorClassifier(channels=[0, 1, 2], hist_size=[128, 128, 128], hist_range=[0, 256, 0, 256, 0, 256], hist_type='BGR')
+my_classifier = HistogramColorClassifier(channels=[0, 1, 2], hist_size=[128, 128, 128],
+                                         hist_range=[0, 256, 0, 256, 0, 256], hist_type='BGR')
 
-model_1 = cv2.imread('./projects/wiic/images/pad.png') # Pad
-my_classifier.addModelHistogram(model_1)
+
+color_histogram_feature_file = "./projects/pad.pickle"
+hist_1 = None
+if (not os.path.exists(color_histogram_feature_file)):
+    model_1 = cv2.imread('./projects/wiic/images/pad.png')  # Pad
+    hist_1 = my_classifier.generateModelHistogram(model_1)
+    # serialize the VP-Tree to disk
+    print("[INFO] serializing ...")
+    f = open(color_histogram_feature_file, "wb")
+    f.write(pickle.dumps(hist_1))
+    f.close()
+else:
+    print("[INFO] loading model histogram...")
+    hist_1 = pickle.loads(open(color_histogram_feature_file, "rb").read())
+
+if hist_1 is None:
+    print("[ERROR] failed to create or rule loading model histogram...")
+else:
+    my_classifier.addModelByHistogram(hist_1)
+    print("[INFO] Model added ...")
+
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
