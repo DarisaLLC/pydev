@@ -10,6 +10,7 @@ import sys
 import numpy
 
 
+<<<<<<< HEAD
 
 class Scope(object):
     def __init__(self, ax, maxt, dt):
@@ -43,6 +44,7 @@ class Scope(object):
 
     def y_data(self):
         self.y_data
+
 
 def choose(x):
     return {

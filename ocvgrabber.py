@@ -11,11 +11,12 @@ from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         exit(1)
     print(sys.argv[1])
+    print(sys.argv[2])
     if Path(sys.argv[1]).is_file():
-        checker = padChecker(cachePath='/Users/arman/PycharmProjects/pydev/projects/wiic')
+        checker = padChecker(cachePath=sys.argv[2])
         file_name = sys.argv[1]
         cap = cv2.VideoCapture(file_name) # Capture video from camera
 
