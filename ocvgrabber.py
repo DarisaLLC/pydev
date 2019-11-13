@@ -25,21 +25,27 @@ if __name__ == "__main__":
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) + 0.5)
         fc = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-
         # Define the codec and create VideoWriter object
         #fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use the lower case
         #out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (width, height))
-        intersection = []
-        fn = 0
+
         while(cap.isOpened()):
             ret, frame = cap.read()
             if ret == True:
                 y = checker.check(frame)
+                maxi = np.max(checker.history())
+                x = np.arange(len(checker.history()))
+                vals = checker.history()
+                vals = np.multiply(height,vals)
+                vals = np.subtract(height,vals)
+                pts = np.vstack((x,vals)).astype(np.int32).T
+                cv2.polylines(frame, [pts],isClosed=False, color=(255,0,0))
+
                 cv2.imshow('frame',frame)
                 if (cv2.waitKey(1) & 0xFF) == ord('q'): # Hit `q` to exit
                     break
             else:
-                break
+                exit(0)
 
         x = np.arange(len(checker.history()))
         fig = plt.figure()
@@ -53,3 +59,5 @@ if __name__ == "__main__":
         # if we were writing out.release()
         cap.release()
         cv2.destroyAllWindows()
+        exit(0)
+
