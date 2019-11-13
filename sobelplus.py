@@ -150,7 +150,6 @@ if __name__ == '__main__':
 #        img = cv2.GaussianBlur(lab_tuple[0], (11, 11), sigmaX=1.2)
         result = sobel_detect(lab_tuple[0], 1)
 
-
     dims = display.shape
     height = dims[0]
     width = dims[1]
