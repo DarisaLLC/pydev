@@ -11,31 +11,46 @@ class padChecker:
 
     def __init__(self, cachePath='.'):
 
-        self.intersection = list()
-        # Defining the classifier
-        self.classifier = ColorClassifier(channels=[0, 1], hist_size=[180,256],
-                                                 hist_range=[0,180,0,256], hist_type='HSV')
-
+        self.channels = [0, 1]
+        self.hist_size = [180,256]
+        self.hist_range = [0, 180, 0, 256]
         self.color_histogram_feature_file = cachePath + "/pickels/pad.pickle"
-        self.histogram_source_file = cachePath + '/images/pad.png'
+        self.histogram_source_file = cachePath + '/images/pad2.png'
+        self.bphist = None
         self.hist = None
         if (not os.path.exists(self.color_histogram_feature_file)):
             self.model = cv2.imread(self.histogram_source_file)  # Pad
-            self.hist = self.classifier.generateModelHistogram(self.model)
+            hists = self.generateModelHistogram(self.model)
             print("[INFO] serializing ...")
             f = open(self.color_histogram_feature_file, "wb")
-            f.write(pickle.dumps(self.hist))
+            f.write(pickle.dumps(hists))
             f.close()
+            self.hist = hists[0]
+            self.bphist = hists[1]
         else:
             print("[INFO] loading model histogram...")
-            self.hist = pickle.loads(open(self.color_histogram_feature_file, "rb").read())
+            hists = pickle.loads(open(self.color_histogram_feature_file, "rb").read())
+            self.hist = hists[0]
+            self.bphist = hists[1]
 
-        if self.hist is None:
+        if (self.hist is None) or (self.bphist is None):
             print("[ERROR] failed to create or rule loading model histogram...")
-        else:
-            self.classifier.addModelByHistogram(self.hist)
-            print("[INFO] Model Successfully added ...")
+
+        print("[INFO] Model Successfully added ...")
         self.clear()
+
+    def generateModelHistogram(self, model):
+        """Generate the histogram to using the hist type indicated in the initialization
+
+        @param model_frame the frame to add to the model, its histogram
+            is obtained and saved in internal list.
+        """
+        model_frame = cv2.cvtColor(model, cv2.COLOR_BGR2HSV)
+        hist = cv2.calcHist([model_frame], self.channels, None, self.hist_size, self.hist_range)
+        bphist = hist.copy()
+        hist = cv2.normalize(hist, hist).flatten()
+        cv2.normalize(bphist, bphist, 255, cv2.NORM_MINMAX)
+        return (hist, bphist)
 
     def clear(self):
         self.intersection = []
@@ -44,31 +59,28 @@ class padChecker:
     def history(self):
         return self.intersection
 
-    def check(self, frame):
-        comparison_array, masks = self.classifier.returnHistogramComparisonArray(frame, method="intersection")
-        y = np.log(comparison_array[0])
+    def check(self, image_in):
+        image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
+        image_hist = cv2.calcHist([image], self.channels, None, self.hist_size, self.hist_range)
+        image_hist = cv2.normalize(image_hist, image_hist).flatten()
+        y = cv2.compareHist(self.hist, image_hist, cv2.HISTCMP_INTERSECT)
+        y = np.log(y)
         y = 1.0 / np.fabs(y)
         self.intersection.append(y)
         print("[INFO] (%d,%f)" % (len(self.intersection), y))
-        dst = masks[0]
+
+        # use normalized histogram and apply backprojection
+        dst = cv2.calcBackProject([image], self.channels, self.bphist, self.hist_range, 1)
+
         # Now convolute with circular disc
         disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         cv2.filter2D(dst, -1, disc, dst)
-        median = np.median(dst)
-        print(median)
-        ret, mask = cv2.threshold(dst, 50, 255, cv2.THRESH_BINARY)
-        mask = cv2.erode(mask, None, iterations=2)
-        mask = cv2.dilate(mask, None, iterations=2)
 
-        # find largest contour
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        if len(cnts) > 0:
-            c = max(cnts, key=cv2.contourArea)
-            mask = np.zeros(frame.shape, np.uint8)
-            cv2.drawContours(mask, [c], 0, (255, 255, 255), -1)
-        else:
-            mask = cv2.merge((mask, mask, mask))
-        return y,mask
+        # threshold and binary AND
+        ret, thresh = cv2.threshold(dst, 50, 255, 0)
+        thresh = cv2.merge((thresh, thresh, thresh))
+        res = cv2.bitwise_and(image_in, thresh)
+        return y,res
 
 class ColorClassifier:
     """Classifier for comparing an image I with a model M. The comparison is based on color
@@ -108,18 +120,7 @@ class ColorClassifier:
         self.model_list = list()
         self.name_list = list()
 
-    def generateModelHistogram(self, model_frame):
-        """Generate the histogram to using the hist type indicated in the initialization
 
-        @param model_frame the frame to add to the model, its histogram
-            is obtained and saved in internal list.
-        """
-        if(self.hist_type=='HSV'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2HSV)
-        elif(self.hist_type=='GRAY'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2GRAY)
-        elif(self.hist_type=='RGB'): model_frame = cv2.cvtColor(model_frame, cv2.COLOR_BGR2RGB)
-        hist = cv2.calcHist([model_frame], self.channels, None, self.hist_size, self.hist_range)
-        hist = cv2.normalize(hist, hist).flatten()
-        return hist
 
     def addModelByHistogram(self, hist, name=''):
         """Add the histogram to internal container. If the name of the object

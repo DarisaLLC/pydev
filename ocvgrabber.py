@@ -52,7 +52,7 @@ if __name__ == "__main__":
     if Path(sys.argv[1]).is_file():
         checker = padChecker(cachePath=sys.argv[2])
         file_name = sys.argv[1]
-        cap = cv2.VideoCapture(0) # Capture video from camera
+        cap = cv2.VideoCapture(file_name) # Capture video from camera
 
         pad = (10,60)
         # Get the width and height of frame
@@ -63,9 +63,6 @@ if __name__ == "__main__":
 
         ret, frame = cap.read()
         if ret == False: exit(1)
-        # Define the codec and create VideoWriter object
-        #fourcc = cv2.VideoWriter_fourcc(*'mp4v') # Be sure to use the lower case
-        #out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (width, height))
         lastgray = None
         fcount = 1
         while(cap.isOpened()):
@@ -73,35 +70,35 @@ if __name__ == "__main__":
             fcount = fcount + 1
             _maxLoc = (0,0)
             if ret == True:
-                tmp = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                gray = tmp[pad[1]:pad[1]+height, pad[0]:pad[0]+width]
-                com = CenterOfIntensity(gray)
-                print((com))
-
-                y, mask = checker.check(frame[pad[1]:pad[1]+height, pad[0]:pad[0]+width])
-
-                gray = cv2.pyrUp(gray)
-                gray = cv2.pyrUp(gray)
-                gray = cv2.pyrDown(gray)
-                gray = cv2.pyrDown(gray)
-
-                if not (lastgray is None):
-                    method = cv2.TM_CCORR_NORMED
-                    roi = lastgray[10:height-20, 10:width-20]
-                    res = cv2.matchTemplate(gray, roi, cv2.TM_CCOEFF_NORMED)
-                    _minVal, _maxVal, _minLoc, _maxLoc = cv2.minMaxLoc(res, None)
-                    rr = _maxVal*_maxVal
-                    print((_maxVal*_maxVal,_maxLoc))
-#                    if rr > 0.99:
-                    lastgray:gray
-                else:
-                    lastgray = gray
-
-                lines = lsd_lines(gray)
-
                 display = frame[pad[1]: pad[1] + height, pad[0]: pad[0] + width]
-                cv2.line(display, (0,0), _maxLoc, (0, 0, 255), 2)
+                lab_image  = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+                # Split LAB channels
+                gray, a, b = cv2.split(lab_image)
+                gray = gray[pad[1]:pad[1]+height, pad[0]:pad[0]+width]
 
+                # gray = cv2.pyrUp(gray)
+                # gray = cv2.pyrUp(gray)
+                # gray = cv2.pyrDown(gray)
+                # gray = cv2.pyrDown(gray)
+
+#                 if not (lastgray is None):
+#                     method = cv2.TM_CCORR_NORMED
+#                     roi = lastgray[10:height-20, 10:width-20]
+#                     res = cv2.matchTemplate(gray, roi, cv2.TM_CCOEFF_NORMED)
+#                     _minVal, _maxVal, _minLoc, _maxLoc = cv2.minMaxLoc(res, None)
+#                     rr = _maxVal*_maxVal
+#                     print((_maxVal*_maxVal,_maxLoc))
+# #                    if rr > 0.99:
+#                     lastgray:gray
+#                 else:
+#                     lastgray = gray
+#
+#                 cv2.line(display, (0,0), _maxLoc, (0, 0, 255), 2)
+
+                    # com = CenterOfIntensity(gray)
+                    # print((com))
+                y, mask = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
+                lines = lsd_lines(gray)
                 for line in lines:
                     angle = geom_tools.get_line_angle(line)
                     vert = angle%90
@@ -123,7 +120,8 @@ if __name__ == "__main__":
 
                 drawString(frame, str(fcount))
 
-                cv2.imshow('frame',display)
+                res = np.vstack((display,mask))
+                cv2.imshow('frame',res)
                 kk = cv2.waitKey(1) & 0xff
                 Pause = kk == ord('c')
                 if kk == ord('n') or Pause == False: continue
