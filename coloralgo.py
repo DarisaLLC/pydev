@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
+import sys
+from pathlib import Path
 import cv2
 import numpy as np
 from skimage import color
 from skimage.morphology import square, erosion
 from skimage.util import img_as_float
 from skimage.util import img_as_ubyte
-
+from skimage import io
 from sklearn.cluster import KMeans
 from collections import Counter
 import cv2  # for resizing image
-
+from skimage import io
+from matplotlib import pyplot as plt
 from collections import namedtuple
 
+
+# @memorize.Memorize
+def fetch_image_for_image_file(filename):
+    return io.imread(filename)
 
 def get_dominant_color(image, k=4, image_processing_size=None):
     """
@@ -123,6 +130,23 @@ def omf(image):
     omf_all = (omf_r,omf_g, omf_b)
     print(omf_all)
     return omf_all
+
+
+def geom_gray(nimg):
+    image = img_as_float(nimg)
+    Red = image[:, :, 0]
+    Green = image[:, :, 1]
+    Blue = image[:, :, 2]
+    gg = Red * Green * Blue
+    return img_as_ubyte(gg)
+
+def mean_gray(nimg):
+    image = img_as_float(nimg)
+    Red = image[:, :, 0]
+    Green = image[:, :, 1]
+    Blue = image[:, :, 2]
+    gg = (Red + Green + Blue)/ 3
+    return img_as_ubyte(gg)
 
 
 def grey_world_median(nimg):
@@ -295,3 +319,38 @@ def shadow(ccc_image, islab=False):
     d = np.sqrt(np.square(a) + np.square(b) + np.square(delta_L))
     med = np.median(d) / np.std(d)
     return {'image': d, 'score': med}
+
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        exit(1)
+    print(sys.argv[1])
+    if Path(sys.argv[1]).is_file():
+        img = fetch_image_for_image_file(sys.argv[1])
+        if img.ndim > 3:
+            rgb = color.rgba2rgb(img)
+        elif img.ndim == 3:
+            rgb = img
+        else:
+            print('Not a color image')
+            exit(1)
+
+        Red = rgb[:, :, 0]
+        Green = rgb[:, :, 1]
+        Blue = rgb[:, :, 2]
+
+        gg = geom_gray(rgb)
+        mm = mean_gray(rgb)
+
+        f, axs = plt.subplots(2, 4, figsize=(20, 10), frameon=False,
+                              subplot_kw={'xticks': [], 'yticks': []})
+        axs[0, 0].imshow(rgb)
+        axs[0, 1].imshow(Red, cmap='gray')
+        axs[0, 2].imshow(Green, cmap='gray')
+        axs[0, 3].imshow(Blue, cmap='gray')
+        axs[1, 0].imshow(gg, cmap='gray')
+        axs[0, 1].imshow(mm, cmap='gray')
+
+        plt.autoscale
+        plt.show()

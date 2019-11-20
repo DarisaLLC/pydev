@@ -207,7 +207,6 @@ if __name__ == "__main__":
             print('Not a color image')
             exit(1)
 
-        omfs = omf(img)
         dc = get_dominant_color(img)
         print(dc)
 

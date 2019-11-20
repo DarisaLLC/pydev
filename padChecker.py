@@ -12,10 +12,9 @@ class padChecker:
     def __init__(self, cachePath='.'):
 
         self.intersection = list()
-
         # Defining the classifier
-        self.classifier = ColorClassifier(channels=[0, 1, 2], hist_size=[128, 128, 128],
-                                                 hist_range=[0, 256, 0, 256, 0, 256], hist_type='BGR')
+        self.classifier = ColorClassifier(channels=[0, 1], hist_size=[180,256],
+                                                 hist_range=[0,180,0,256], hist_type='HSV')
 
         self.color_histogram_feature_file = cachePath + "/pickels/pad.pickle"
         self.histogram_source_file = cachePath + '/images/pad.png'
@@ -46,13 +45,30 @@ class padChecker:
         return self.intersection
 
     def check(self, frame):
-        comparison_array = self.classifier.returnHistogramComparisonArray(frame, method="intersection")
+        comparison_array, masks = self.classifier.returnHistogramComparisonArray(frame, method="intersection")
         y = np.log(comparison_array[0])
         y = 1.0 / np.fabs(y)
         self.intersection.append(y)
         print("[INFO] (%d,%f)" % (len(self.intersection), y))
-        return y
+        dst = masks[0]
+        # Now convolute with circular disc
+        disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        cv2.filter2D(dst, -1, disc, dst)
+        median = np.median(dst)
+        print(median)
+        ret, mask = cv2.threshold(dst, 50, 255, cv2.THRESH_BINARY)
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
 
+        # find largest contour
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        if len(cnts) > 0:
+            c = max(cnts, key=cv2.contourArea)
+            mask = np.zeros(frame.shape, np.uint8)
+            cv2.drawContours(mask, [c], 0, (255, 255, 255), -1)
+        else:
+            mask = cv2.merge((mask, mask, mask))
+        return y,mask
 
 class ColorClassifier:
     """Classifier for comparing an image I with a model M. The comparison is based on color
@@ -61,7 +77,7 @@ class ColorClassifier:
 
     """
 
-    def __init__(self, channels=[0, 1, 2], hist_size=[10, 10, 10], hist_range=[0, 256, 0, 256, 0, 256], hist_type='BGR'):
+    def __init__(self, channels=[0, 1], hist_size=[180, 256], hist_range=[0, 180, 0, 256], hist_type='HSV'):
         """Init the classifier.
 
         This class has an internal list containing all the models.
@@ -179,9 +195,10 @@ class ColorClassifier:
         else:
             raise ValueError('[DarisaLLC] color_classification.py: the method specified ' + str(method) + ' is not supported.')
 
+
         return comparison
 
-    def returnHistogramComparisonArray(self, image, method='intersection'):
+    def returnHistogramComparisonArray(self, image_in, method='intersection'):
         """Return the comparison array between all the model and the input image.
 
         The highest value represents the best match.
@@ -190,17 +207,22 @@ class ColorClassifier:
             intersection: (default) the histogram intersection (Swain, Ballard)
         @return a numpy array containg the comparison value between each pair image-model
         """
-        if(self.hist_type=='HSV'): image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        elif(self.hist_type=='GRAY'): image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        elif(self.hist_type=='RGB'): image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        if(self.hist_type=='HSV'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
+        elif(self.hist_type=='GRAY'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2GRAY)
+        elif(self.hist_type=='RGB'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2RGB)
         comparison_array = np.zeros(len(self.model_list))
+        masks = {}
         image_hist = cv2.calcHist([image], self.channels, None, self.hist_size, self.hist_range)
         image_hist = cv2.normalize(image_hist, image_hist).flatten()
         counter = 0
         for model_hist in self.model_list:
             comparison_array[counter] = self.returnHistogramComparison(image_hist, model_hist, method=method)
+            cv2.normalize(model_hist,model_hist, 0,255,cv2.NORM_MINMAX)
+            dst = cv2.calcBackProject([image], self.channels, model_hist, self.hist_range, 1)
+
+            masks[counter] = dst
             counter += 1
-        return comparison_array
+        return (comparison_array, masks)
 
     def returnHistogramComparisonProbability(self, image, method='intersection'):
         """Return the probability distribution of the comparison between
