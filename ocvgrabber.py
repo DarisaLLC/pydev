@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from vp import vp_ransac
 from vp import vp_finder
 import time
-
+import argparse  # provide interface for calling this script
 
 from coloralgo import CenterOfIntensity
 from opencv_utils import drawString
@@ -64,6 +64,9 @@ def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_pre
 
     lines, rect_widths, precisions, false_alarms = detector.detect(source_image)
     line_lengths = [geom_tools.get_line_length(l[0]) for l in lines]
+    line_angles = [geom_tools.get_line_angle(l[0]) for l in lines]
+
+
     return [l[0] for (i, l) in enumerate(lines)
             if max_line_length > line_lengths[i] > min_line_length and
             precisions[i] > min_precision]
@@ -71,104 +74,110 @@ def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_pre
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 3:
-        exit(1)
-    print(sys.argv[1])
-    print(sys.argv[2])
-
+    # Get input parameters
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-s","--source", required=False, default='camera',help="camera -- default is camera")
+    ap.add_argument("-v", "--video", required=False, help="path to input video file")
+    ap.add_argument("-c", "--cache", required=False, default='./projects/wiic', help="path to cache directory relative to source code directory")
+    args = vars(ap.parse_args())
+    file_folder = os.path.dirname(os.path.realpath(__file__))
+    is_file = args['source'] == 'file' and Path(args['video']).is_file()
+    is_camera = not is_file
+    cachePath=os.path.abspath(os.path.join(file_folder, args['cache']))
     ## Geometric constants ( to be fetched from some config file )
     pad_pixels_minimum_size = 5
-
-    if Path(sys.argv[1]).is_file():
-        checker = padChecker(cachePath=sys.argv[2])
-        file_name = sys.argv[1]
+    file_name = args['video']
+    checker = padChecker(cachePath)
+    if is_file:
         cap = cv2.VideoCapture(file_name) # Capture video from camera
+    if is_camera:
+        cap = cv2.VideoCapture(0) # Capture video from camera
 
-        pad = (10,60)
-        # Get the width and height of frame
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) + 0.5) - pad[0]*2
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) + 0.5) - pad[1]*2
-        fc = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    pad = (10,60)
+    # Get the width and height of frame
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) + 0.5) - pad[0]*2
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) + 0.5) - pad[1]*2
+    fc = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
 
+    ret, frame = cap.read()
+    if ret == False: exit(1)
+    lastgray = None
+    fcount = 1
+    while(cap.isOpened()):
         ret, frame = cap.read()
-        if ret == False: exit(1)
-        lastgray = None
-        fcount = 1
-        while(cap.isOpened()):
-            ret, frame = cap.read()
-            fcount = fcount + 1
-            _maxLoc = (0,0)
-            if ret == True:
-                display = frame[pad[1]: pad[1] + height, pad[0]: pad[0] + width]
-                lab_image  = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-                # Split LAB channels
-                gray, a, b = cv2.split(lab_image)
-                gray = gray[pad[1]:pad[1]+height, pad[0]:pad[0]+width]
+        fcount = fcount + 1
+        _maxLoc = (0,0)
+        if ret == True:
+            display = frame[pad[1]: pad[1] + height, pad[0]: pad[0] + width]
+            lab_image  = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            # Split LAB channels
+            gray, a, b = cv2.split(lab_image)
+            gray = gray[pad[1]:pad[1]+height, pad[0]:pad[0]+width]
 
-                start_time = time.time()
-                y, mask, seethrough = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
+            start_time = time.time()
+            y, mask, seethrough = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
 
-                cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-                if len(cnts) > 0:
-                    # find the largest contour in the mask, then use
-                    # it to compute the minimum enclosing circle
-                    c = max(cnts, key=cv2.contourArea)
-                    bounding_rect = cv2.boundingRect(c)
-                    area = bounding_rect[2] * bounding_rect[3]
-                    min_radius = math.sqrt(area/math.pi)
+            if len(cnts) > 0:
+                # find the largest contour in the mask, then use
+                # it to compute the minimum enclosing circle
+                c = max(cnts, key=cv2.contourArea)
+                bounding_rect = cv2.boundingRect(c)
+                area = bounding_rect[2] * bounding_rect[3]
+                min_radius = math.sqrt(area/math.pi)
+                cx = int(bounding_rect[0] + bounding_rect[2] / 2)
+                cy = int(bounding_rect[1] + bounding_rect[3] / 2)
+                draw_cross(display, (cx, cy), (0, 0, 255), 10)
+                cv2.circle(display, (cx, cy), int(min_radius + 0.5), (255, 0, 0), -1)
 
-                check_time = time.time()
-                lines = lsd_lines(gray)
-                lsd_time = time.time()
-                lsd_time = lsd_time - check_time
-                check_time = check_time - start_time
-                print((check_time,lsd_time))
+            check_time = time.time()
+            lines = lsd_lines(gray)
+            lsd_time = time.time()
+            lsd_time = lsd_time - check_time
+            check_time = check_time - start_time
+            print((check_time,lsd_time))
 
-                for line in lines:
-                    angle = geom_tools.get_line_angle(line)
-                    vert = angle%90
-                    horz = angle%180
-                    x1, y1, x2, y2 = line
-                    cv2.line(display, (x1, y1), (x2, y2), (0, vert*255/90., horz*255/180.), 2)
+            for line in lines:
+                angle = geom_tools.get_line_angle(line)
+                vert = angle%90
+                horz = angle%180
+                x1, y1, x2, y2 = line
+                cv2.line(display, (x1, y1), (x2, y2), (0, vert*255/90., horz*255/180.), 2)
 
-                vals = checker.history()
-                maxi = np.max(vals)
-                x = np.arange(len(vals))
-                vals = np.multiply(height, vals)
-                vals = np.subtract(height, vals)
-                pts = np.vstack((x, vals)).astype(np.int32).T
-                cv2.polylines(display, [pts], isClosed=False, color=(255, 0, 0))
+            vals = checker.history()
+            maxi = np.max(vals)
+            x = np.arange(len(vals))
+            vals = np.multiply(height, vals)
+            vals = np.subtract(height, vals)
+            pts = np.vstack((x, vals)).astype(np.int32).T
+            cv2.polylines(display, [pts], isClosed=False, color=(255, 0, 0))
 
-                drawString(frame, str(fcount))
-                cx = int(bounding_rect[0]+bounding_rect[2]/2)
-                cy = int(bounding_rect[1]+bounding_rect[3]/2)
-                draw_cross(display, (cx,cy),(0, 0, 255), 3)
-                cv2.circle(display, (cx, cy), int(min_radius+0.5), (255, 0, 0), -1)
+            drawString(frame, str(fcount))
 
-                res = np.vstack((display,seethrough))
-                cv2.imshow('frame', res)
-                kk = cv2.waitKey(1) & 0xff
-                Pause = kk == ord('c')
-                if kk == ord('n') or Pause == False: continue
-                else:
-                    if kk == ord('q'): # Hit `q` to exit
-                        break
+            res = np.vstack((display,seethrough))
+            cv2.imshow('frame', res)
+            kk = cv2.waitKey(1) & 0xff
+            Pause = kk == ord('c')
+            if kk == ord('n') or Pause == False: continue
             else:
-                exit(0)
+                if kk == ord('q'): # Hit `q` to exit
+                    break
+        else:
+            exit(0)
 
-        x = np.arange(len(checker.history()))
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        ax.plot(x, checker.history(), color='tab:blue')
-        ax.set_xlim([0, fc])
-        ax.set_ylim([0, 1])
+    x = np.arange(len(checker.history()))
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(x, checker.history(), color='tab:blue')
+    ax.set_xlim([0, fc])
+    ax.set_ylim([0, 1])
 
-        plt.show()
-        # Release everything if job is finished
-        # if we were writing out.release()
-        cap.release()
-        cv2.destroyAllWindows()
-        exit(0)
+    plt.show()
+    # Release everything if job is finished
+    # if we were writing out.release()
+    cap.release()
+    cv2.destroyAllWindows()
+    exit(0)
 
