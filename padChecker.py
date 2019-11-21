@@ -4,6 +4,7 @@ import cv2
 import sys
 from pathlib import Path
 import pickle
+from coloralgo import get_dominant_colors
 
 from matplotlib import pyplot as plt
 
@@ -12,10 +13,10 @@ class padChecker:
     def __init__(self, cachePath='.'):
 
         self.channels = [0, 1]
-        self.hist_size = [180,256]
-        self.hist_range = [0, 180, 0, 256]
+        self.hist_size = [180,128]
+        self.hist_range = [0, 180, 0, 128]
         self.color_histogram_feature_file = cachePath + "/pickels/pad.pickle"
-        self.histogram_source_file = cachePath + '/images/pad2.png'
+        self.histogram_source_file = cachePath + '/images/pad.png'
         self.bphist = None
         self.hist = None
         if (not os.path.exists(self.color_histogram_feature_file)):
@@ -39,16 +40,35 @@ class padChecker:
         print("[INFO] Model Successfully added ...")
         self.clear()
 
+    def preprocessHSV(self, hsv):
+        hue, sat, vol = cv2.split(hsv)
+        kernel = 5
+        hue = cv2.medianBlur(hue, kernel, hue)
+        sat = cv2.medianBlur(sat, kernel, sat)
+        return cv2.merge((hue,sat,vol))
+
+    def PrintImage(self, image, nRows, nCols):
+        for i in range(nRows):
+            print("[%d]" % i, end=" ")
+            for j in range(nCols):
+                print(" %d" % image[i][j], end=" ")
+            print('\n')
+
     def generateModelHistogram(self, model):
         """Generate the histogram to using the hist type indicated in the initialization
 
         @param model_frame the frame to add to the model, its histogram
             is obtained and saved in internal list.
         """
-        model_frame = cv2.cvtColor(model, cv2.COLOR_BGR2HSV)
-        hist = cv2.calcHist([model_frame], self.channels, None, self.hist_size, self.hist_range)
+        hsv_image = cv2.cvtColor(model, cv2.COLOR_BGR2HSV)
+        hist = cv2.calcHist([hsv_image], self.channels, None, self.hist_size, self.hist_range)
+        self.PrintImage(hist, 180, 128)
         bphist = hist.copy()
-        hist = cv2.normalize(hist, hist).flatten()
+        hist = cv2.normalize(hist, hist)
+
+#        cv2.imshow("model histogram", hist)
+#        cv2.waitKey(0)
+        hist = hist.flatten()
         cv2.normalize(bphist, bphist, 255, cv2.NORM_MINMAX)
         return (hist, bphist)
 
@@ -60,8 +80,14 @@ class padChecker:
         return self.intersection
 
     def check(self, image_in):
-        image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
-        image_hist = cv2.calcHist([image], self.channels, None, self.hist_size, self.hist_range)
+
+        hsv_image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
+        hsv_image = self.preprocessHSV(hsv_image)
+
+        image_hist = cv2.calcHist([hsv_image], self.channels, None, self.hist_size, self.hist_range)
+      #  cv2.imshow('image_hist', image_hist)
+      #  cv2.waitKey(0);
+
         image_hist = cv2.normalize(image_hist, image_hist).flatten()
         y = cv2.compareHist(self.hist, image_hist, cv2.HISTCMP_INTERSECT)
         y = np.log(y)
@@ -70,17 +96,26 @@ class padChecker:
         print("[INFO] (%d,%f)" % (len(self.intersection), y))
 
         # use normalized histogram and apply backprojection
-        dst = cv2.calcBackProject([image], self.channels, self.bphist, self.hist_range, 1)
+        dst = cv2.calcBackProject([hsv_image], self.channels, self.bphist, self.hist_range, 1)
 
         # Now convolute with circular disc
         disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         cv2.filter2D(dst, -1, disc, dst)
 
         # threshold and binary AND
-        ret, thresh = cv2.threshold(dst, 50, 255, 0)
-        thresh = cv2.merge((thresh, thresh, thresh))
-        res = cv2.bitwise_and(image_in, thresh)
-        return y,res
+        ret, thresh = cv2.threshold(dst, 10, 255, 0)
+        thresh_bgr = cv2.merge((thresh, thresh, thresh))
+        res = cv2.bitwise_and(image_in, thresh_bgr)
+        return y,thresh, res
+
+    def polyLinePoints(self, width, height):
+        vals = self.history()
+        maxi = np.max(vals)
+        x = np.arange(len(vals))
+        vals = np.multiply(height, vals)
+        vals = np.subtract(height, vals)
+        pts = np.vstack((x, vals)).astype(np.int32).T
+        return pts
 
 class ColorClassifier:
     """Classifier for comparing an image I with a model M. The comparison is based on color
