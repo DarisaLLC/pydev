@@ -143,20 +143,23 @@ if __name__ == "__main__":
             y, mask, seethrough, cnts = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
 
             bbs = []
+            contours = []
             for cnt in cnts:
                 # find the largest contour in the mask, then use
                 # it to compute the minimum enclosing circle
                 bounding_rect = cv2.boundingRect(cnt)
                 if circleContainsBoundingRect(capture_center, radius_2, bounding_rect):
                     bbs.append(bounding_rect)
+                    contours.append(cnt)
+                    cv2.drawContours(display, cnt, -1, (128, 128, 0), -1)
 
-            for bb in bbs:
-                area = bb[2] * bb[3]
-                min_radius = math.sqrt(area/math.pi)
-                cx = int(bb[0] + bb[2] / 2)
-                cy = int(bb[1] + bb[3] / 2)
-                draw_cross(display, (cx, cy), (0, 0, 255), 10)
-                cv2.circle(display, (cx, cy), int(min_radius + 0.5), (255, 0, 0), -1)
+            # for bb in bbs:
+            #     area = bb[2] * bb[3]
+            #     min_radius = math.sqrt(area/math.pi)
+            #     cx = int(bb[0] + bb[2] / 2)
+            #     cy = int(bb[1] + bb[3] / 2)
+            #     draw_cross(display, (cx, cy), (0, 0, 255), 10)
+            #     cv2.circle(display, (cx, cy), int(min_radius + 0.5), (255, 0, 0), -1)
 
             check_time = time.time()
             raw_lines = lsd_lines(gray)
