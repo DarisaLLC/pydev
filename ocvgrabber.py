@@ -19,6 +19,26 @@ from opencv_utils import drawString
 from vp import geom_tools
 
 
+def circleContainsPoint(center, radius_2, point):
+    dx = center[0] - point[0]
+    dy = center[1] - point[1]
+    dd = dy * dy + dx * dx
+    return dd < radius_2
+
+
+def circleContainsLine(center, radius_2, line):
+    x1, y1, x2, y2 = line
+    if not circleContainsPoint(center, radius_2,(x1,y1)): return False
+    if not circleContainsPoint(center, radius_2,(x2,y2)): return False
+    return True
+
+def circleContainsBoundingRect(center, radius_2, bb):
+    if not circleContainsPoint(center, radius_2,(bb[0], bb[1])): return False
+    if not circleContainsPoint(center, radius_2,(bb[0] + bb[2], bb[1])): return False
+    if not circleContainsPoint(center, radius_2,(bb[0] + bb[2], bb[1] + bb[3])): return False
+    if not circleContainsPoint(center, radius_2,(bb[0], bb[1] + bb[3])): return False
+    return True
+
 def draw_cross(img, center, color, d):
     cv2.line(img,
              (center[0] - d, center[1]), (center[0] + d, center[1]),
@@ -93,12 +113,16 @@ if __name__ == "__main__":
     if is_camera:
         cap = cv2.VideoCapture(0) # Capture video from camera
 
+
+
     pad = (10,60)
     # Get the width and height of frame
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) + 0.5) - pad[0]*2
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) + 0.5) - pad[1]*2
     fc = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    capture_center = (int(width / 2), int(height / 2))
+    capture_radius = int(height/2.5)
+    radius_2 = capture_radius * capture_radius
 
     ret, frame = cap.read()
     if ret == False: exit(1)
@@ -116,24 +140,31 @@ if __name__ == "__main__":
             gray = gray[pad[1]:pad[1]+height, pad[0]:pad[0]+width]
 
             start_time = time.time()
-            y, mask, seethrough = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
+            y, mask, seethrough, cnts = checker.check(frame[pad[1]:pad[1] + height, pad[0]:pad[0] + width])
 
-            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-
-            if len(cnts) > 0:
+            bbs = []
+            for cnt in cnts:
                 # find the largest contour in the mask, then use
                 # it to compute the minimum enclosing circle
-                c = max(cnts, key=cv2.contourArea)
-                bounding_rect = cv2.boundingRect(c)
-                area = bounding_rect[2] * bounding_rect[3]
+                bounding_rect = cv2.boundingRect(cnt)
+                if circleContainsBoundingRect(capture_center, radius_2, bounding_rect):
+                    bbs.append(bounding_rect)
+
+            for bb in bbs:
+                area = bb[2] * bb[3]
                 min_radius = math.sqrt(area/math.pi)
-                cx = int(bounding_rect[0] + bounding_rect[2] / 2)
-                cy = int(bounding_rect[1] + bounding_rect[3] / 2)
+                cx = int(bb[0] + bb[2] / 2)
+                cy = int(bb[1] + bb[3] / 2)
                 draw_cross(display, (cx, cy), (0, 0, 255), 10)
                 cv2.circle(display, (cx, cy), int(min_radius + 0.5), (255, 0, 0), -1)
 
             check_time = time.time()
-            lines = lsd_lines(gray)
+            raw_lines = lsd_lines(gray)
+            lines = []
+            for line in raw_lines:
+                if circleContainsLine(capture_center, radius_2, line):
+                    lines.append(line)
+
             lsd_time = time.time()
             lsd_time = lsd_time - check_time
             check_time = check_time - start_time
@@ -155,6 +186,7 @@ if __name__ == "__main__":
             cv2.polylines(display, [pts], isClosed=False, color=(255, 0, 0))
 
             drawString(frame, str(fcount))
+            cv2.circle(display, capture_center, capture_radius, (0,255, 0), 3)
 
             res = np.vstack((display,seethrough))
             cv2.imshow('frame', res)

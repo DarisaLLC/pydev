@@ -4,17 +4,15 @@ import cv2
 import sys
 from pathlib import Path
 import pickle
-from coloralgo import get_dominant_colors
-
+from imutils import contours
 from matplotlib import pyplot as plt
 
 class padChecker:
 
     def __init__(self, cachePath='.'):
-
-        self.channels = [0, 1]
-        self.hist_size = [180,128]
-        self.hist_range = [0, 180, 0, 128]
+        self.channels = [0]
+        self.hist_size = [180]
+        self.hist_range = [0, 180]
         self.color_histogram_feature_file = cachePath + "/pickels/pad.pickle"
         self.histogram_source_file = cachePath + '/images/pad.png'
         self.bphist = None
@@ -40,19 +38,26 @@ class padChecker:
         print("[INFO] Model Successfully added ...")
         self.clear()
 
-    def preprocessHSV(self, hsv):
-        hue, sat, vol = cv2.split(hsv)
-        kernel = 5
-        hue = cv2.medianBlur(hue, kernel, hue)
-        sat = cv2.medianBlur(sat, kernel, sat)
-        return cv2.merge((hue,sat,vol))
-
     def PrintImage(self, image, nRows, nCols):
         for i in range(nRows):
             print("[%d]" % i, end=" ")
             for j in range(nCols):
                 print(" %d" % image[i][j], end=" ")
             print('\n')
+
+    def preprocessHSV(self, hsv):
+        hue, sat, vol = cv2.split(hsv)
+        kernel = 5
+        hue = cv2.medianBlur(hue, kernel, hue)
+        sat = cv2.medianBlur(sat, kernel, sat)
+        return cv2.merge((hue, sat, vol))
+
+    def smoothHistogram(self, hist_in):
+        shape = hist_in.shape
+        hist_out = hist_in.copy()
+        for i in range(1,shape[0]-1,1):
+            hist_out[i] = int((hist_in[i-1]+2*hist_in[i]+hist_in[i+1]) / 4 + 0.5)
+        return hist_out
 
     def generateModelHistogram(self, model):
         """Generate the histogram to using the hist type indicated in the initialization
@@ -62,12 +67,12 @@ class padChecker:
         """
         hsv_image = cv2.cvtColor(model, cv2.COLOR_BGR2HSV)
         hist = cv2.calcHist([hsv_image], self.channels, None, self.hist_size, self.hist_range)
-        self.PrintImage(hist, 180, 128)
+        self.PrintImage(hist, self.hist_size[0], 1)  # , self.hist_size[1])
+        hist = self.smoothHistogram(hist)
+        self.PrintImage(hist, self.hist_size[0], 1)  # , self.hist_size[1])
         bphist = hist.copy()
         hist = cv2.normalize(hist, hist)
 
-#        cv2.imshow("model histogram", hist)
-#        cv2.waitKey(0)
         hist = hist.flatten()
         cv2.normalize(bphist, bphist, 255, cv2.NORM_MINMAX)
         return (hist, bphist)
@@ -103,10 +108,13 @@ class padChecker:
         cv2.filter2D(dst, -1, disc, dst)
 
         # threshold and binary AND
-        ret, thresh = cv2.threshold(dst, 10, 255, 0)
+        median = np.median(dst)
+        ret, thresh = cv2.threshold(dst, median, 255, 0)
         thresh_bgr = cv2.merge((thresh, thresh, thresh))
         res = cv2.bitwise_and(image_in, thresh_bgr)
-        return y,thresh, res
+
+        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        return y,thresh, res, cnts
 
     def polyLinePoints(self, width, height):
         vals = self.history()
