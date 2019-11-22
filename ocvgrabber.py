@@ -170,6 +170,7 @@ if __name__ == "__main__":
     fcount = 1
     while (cap.isOpened()):
         ret, frame = cap.read()
+        if not ret: continue
         res = process_frame(frame, checker, settings)
         cv2.imshow('frame', res)
         kk = cv2.waitKey(1) & 0xff
