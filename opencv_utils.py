@@ -9,6 +9,7 @@ import numpy as np
 #pp = Path(os.getcwd() + '/../pairopy')
 #sys.path.append(str(pp))
 
+
 def mouse_handler(event, x, y, flags, data):
     if event == cv2.EVENT_LBUTTONDOWN:
         cv2.circle(data['im'], (x, y), 3, (0, 0, 255), 5, 16);
@@ -55,7 +56,7 @@ def load_reduce_convert(image_file, reduce):
     if channels == 3:
         lab_image = cv2.cvtColor ( bgr_image, cv2.COLOR_BGR2LAB )
         # Split LAB channels
-        L, a, b = cv2.split ( lab_image )
+        L, a, b = cv2.split(lab_image)
         return (L, a, b)
     if channels == 4:
         bgr_image = cv2.cvtColor ( bgr_image, cv2.COLOR_BGRA2BGR )

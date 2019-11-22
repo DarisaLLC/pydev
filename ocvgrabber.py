@@ -9,40 +9,7 @@ from padChecker import padChecker
 from matplotlib import pyplot as plt
 import time
 import argparse  # provide interface for calling this script
-from coloralgo import CenterOfIntensity
-from opencv_utils import drawString
-from vp import geom_tools
-
-
-def circleContainsPoint(center, radius_2, point):
-    dx = center[0] - point[0]
-    dy = center[1] - point[1]
-    dd = dy * dy + dx * dx
-    return dd < radius_2
-
-
-def circleContainsLine(center, radius_2, line):
-    x1, y1, x2, y2 = line
-    if not circleContainsPoint(center, radius_2, (x1, y1)): return False
-    if not circleContainsPoint(center, radius_2, (x2, y2)): return False
-    return True
-
-
-def circleContainsBoundingRect(center, radius_2, bb):
-    if not circleContainsPoint(center, radius_2, (bb[0], bb[1])): return False
-    if not circleContainsPoint(center, radius_2, (bb[0] + bb[2], bb[1])): return False
-    if not circleContainsPoint(center, radius_2, (bb[0] + bb[2], bb[1] + bb[3])): return False
-    if not circleContainsPoint(center, radius_2, (bb[0], bb[1] + bb[3])): return False
-    return True
-
-
-def draw_cross(img, center, color, d):
-    cv2.line(img,
-             (center[0] - d, center[1]), (center[0] + d, center[1]),
-             color, 1, cv2.LINE_AA, 0)
-    cv2.line(img,
-             (center[0], center[1] - d), (center[0], center[1] + d),
-             color, 1, cv2.LINE_AA, 0)
+import utils
 
 
 def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_precision=0):
@@ -81,14 +48,14 @@ def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_pre
     detector = cv2.createLineSegmentDetector(cv2.LSD_REFINE_ADV)
 
     lines, rect_widths, precisions, false_alarms = detector.detect(source_image)
-    line_lengths = [geom_tools.get_line_length(l[0]) for l in lines]
-    line_angles = [geom_tools.get_line_angle(l[0]) for l in lines]
+    line_lengths = [utils.get_line_length(l[0]) for l in lines]
+    line_angles = [utils.get_line_angle(l[0]) for l in lines]
 
     return [l[0] for (i, l) in enumerate(lines)
             if max_line_length > line_lengths[i] > min_line_length and
             precisions[i] > min_precision]
 
-global global_settings
+
 
 def initialize_settings(frame_tl, capture_size):
     settings = {'frameTopLeft': frame_tl, 'active_center_norm': (0.5, 0.5), 'active_radius_norm': 0.4,
@@ -129,7 +96,7 @@ def process_frame(frame, checker, settings_dict):
         # find the largest contour in the mask, then use
         # it to compute the minimum enclosing circle
         bounding_rect = cv2.boundingRect(cnt)
-        if circleContainsBoundingRect(settings['active_center'], radius_2, bounding_rect):
+        if utils.circleContainsBoundingRect(settings['active_center'], radius_2, bounding_rect):
             bbs.append(bounding_rect)
             contours.append(cnt)
             cv2.drawContours(display, cnt, -1, (128, 128, 0), -1)
@@ -146,7 +113,7 @@ def process_frame(frame, checker, settings_dict):
     raw_lines = lsd_lines(gray)
     lines = []
     for line in raw_lines:
-        if circleContainsLine(settings['active_center'], radius_2, line):
+        if utils.circleContainsLine(settings['active_center'], radius_2, line):
             lines.append(line)
 
     lsd_time = time.time()
@@ -155,7 +122,7 @@ def process_frame(frame, checker, settings_dict):
     print((check_time, lsd_time))
 
     for line in lines:
-        angle = geom_tools.get_line_angle(line)
+        angle = utils.get_line_angle(line)
         vert = angle % 90
         horz = angle % 180
         x1, y1, x2, y2 = line
@@ -169,7 +136,7 @@ def process_frame(frame, checker, settings_dict):
     pts = np.vstack((x, vals)).astype(np.int32).T
     cv2.polylines(display, [pts], isClosed=False, color=(255, 0, 0))
 
-    drawString(frame, str(fcount))
+    utils.drawString(frame, str(fcount))
     cv2.circle(display, settings['active_center'], settings['active_radius'], (0, 255, 0), 3)
     res = np.vstack((display, seethrough))
     return res
