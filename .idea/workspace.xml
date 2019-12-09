@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/pydev.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pydev.iml" afterDir="false" />
+    <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="add live camera support">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fiducial.py" beforeDir="false" afterPath="$PROJECT_DIR$/fiducial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/pupil/images/blob_axes.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/pupil/images/linear.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/videoio.py" beforeDir="false" afterPath="$PROJECT_DIR$/videoio.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/videomotion.py" beforeDir="false" afterPath="$PROJECT_DIR$/videomotion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HDBSCAN_Image_Segmentation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coloralgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/coloralgo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/grab_frame.py" beforeDir="false" afterPath="$PROJECT_DIR$/grab_frame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ocvgrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/ocvgrabber.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/pickels/pad.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/projects/wiic/pickels/pad.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/skeletonization.py" beforeDir="false" afterPath="$PROJECT_DIR$/skeletonization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sobelplus.py" beforeDir="false" afterPath="$PROJECT_DIR$/sobelplus.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/track_color.py" beforeDir="false" afterPath="$PROJECT_DIR$/track_color.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/track_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/track_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -63,7 +67,7 @@
   <component name="ProjectId" id="1STmeUPlHLWdNE9pwgx8rKw3Hc0" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/videoio.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../naumannlab_tutorials19-master/naumannlab_python_intro1_MaxNikitchenko.ipynb" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -94,95 +98,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.ocvgrabber">
-    <configuration name="color_plots" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pydev" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/color_plots.py" />
-      <option name="PARAMETERS" value="$USER_HOME$/tmp/wiic/122.png" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="coloralgo" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pydev" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/coloralgo.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="fiducial" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pydev" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fiducial.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="fps_demo" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pydev" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fps_demo.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.test">
     <configuration name="ocvgrabber" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -197,7 +113,95 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ocvgrabber.py" />
-      <option name="PARAMETERS" value="&quot;./projects/wiic/video/2019_10_30/front_camera/curved approaches/2019-10-30 13-56-18.mp4&quot;" />
+      <option name="PARAMETERS" value="-s file -v &quot;$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/curved approaches/2019-10-30 13-56-18.mp4&quot; -c ./projects/wiic" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="run_script1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/imagemp" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imagemp/run_script1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="simple_display" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/imagemp" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imagemp/simple_display.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tracker_pad" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/imagemp" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imagemp/tracker_pad.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -206,19 +210,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.color_plots" />
-      <item itemvalue="Python.fiducial" />
-      <item itemvalue="Python.coloralgo" />
-      <item itemvalue="Python.fps_demo" />
       <item itemvalue="Python.ocvgrabber" />
+      <item itemvalue="Python.run_script1" />
+      <item itemvalue="Python.simple_display" />
+      <item itemvalue="Python.tracker_pad" />
+      <item itemvalue="Python.test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.ocvgrabber" />
-        <item itemvalue="Python.fps_demo" />
-        <item itemvalue="Python.color_plots" />
-        <item itemvalue="Python.fiducial" />
-        <item itemvalue="Python.coloralgo" />
+        <item itemvalue="Python.simple_display" />
+        <item itemvalue="Python.tracker_pad" />
+        <item itemvalue="Python.run_script1" />
       </list>
     </recent_temporary>
   </component>
@@ -253,6 +257,9 @@
       <workItem from="1572546744226" duration="10524000" />
       <workItem from="1572807881042" duration="479000" />
       <workItem from="1572808519748" duration="21853000" />
+      <workItem from="1574115788727" duration="20073000" />
+      <workItem from="1574202205442" duration="76298000" />
+      <workItem from="1574733134760" duration="1771000" />
     </task>
     <task id="LOCAL-00001" summary="WiTricity Project adds">
       <created>1568412949264</created>
@@ -359,7 +366,70 @@
       <option name="project" value="LOCAL" />
       <updated>1572985656186</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="grab frame using filter graph from frame grabber">
+      <created>1573802110120</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1573802110121</updated>
+    </task>
+    <task id="LOCAL-00017" summary="adding toolbox and ransac">
+      <created>1574217192490</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1574217192490</updated>
+    </task>
+    <task id="LOCAL-00018" summary="adding toolbox and ransac">
+      <created>1574224866509</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1574224866509</updated>
+    </task>
+    <task id="LOCAL-00019" summary="added combined backprojection and line segments results">
+      <created>1574308118868</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1574308118868</updated>
+    </task>
+    <task id="LOCAL-00020" summary="added hue only back projection&#10;added histogram smoothing&#10;added valid area clipping">
+      <created>1574405178043</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1574405178043</updated>
+    </task>
+    <task id="LOCAL-00021" summary="switched from drawing circle to drawing contours">
+      <created>1574407280507</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1574407280507</updated>
+    </task>
+    <task id="LOCAL-00022" summary="modularized a bit.&#10;process_frame and initialization">
+      <created>1574453667470</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1574453667470</updated>
+    </task>
+    <task id="LOCAL-00023" summary="moved all utils to utils">
+      <created>1574454221411</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1574454221411</updated>
+    </task>
+    <task id="LOCAL-00024" summary="add live camera support">
+      <created>1574454432479</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1574454432479</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -401,22 +471,20 @@
     <MESSAGE value="Added moments for determination of axis of inertia &#10;Added adaptive pupil tracking ( initial approach )" />
     <MESSAGE value="Adding unit test data" />
     <MESSAGE value="typical fiducial file" />
-    <option name="LAST_COMMIT_MESSAGE" value="typical fiducial file" />
+    <MESSAGE value="grab frame using filter graph from frame grabber" />
+    <MESSAGE value="adding toolbox and ransac" />
+    <MESSAGE value="added combined backprojection and line segments results" />
+    <MESSAGE value="added hue only back projection&#10;added histogram smoothing&#10;added valid area clipping" />
+    <MESSAGE value="switched from drawing circle to drawing contours" />
+    <MESSAGE value="modularized a bit.&#10;process_frame and initialization" />
+    <MESSAGE value="moved all utils to utils" />
+    <MESSAGE value="add live camera support" />
+    <option name="LAST_COMMIT_MESSAGE" value="add live camera support" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sobelplus.py</url>
-          <line>160</line>
-          <option name="timeStamp" value="20" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils.py</url>
-          <line>74</line>
-          <option name="timeStamp" value="40" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/zscore_1d.py</url>
           <line>81</line>
@@ -433,37 +501,69 @@
           <option name="timeStamp" value="45" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ocvgrabber.py</url>
-          <line>36</line>
-          <option name="timeStamp" value="51" />
+          <url>file://$PROJECT_DIR$/sobelplus.py</url>
+          <line>101</line>
+          <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ocvgrabber.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="52" />
+          <url>file://$PROJECT_DIR$/sobelplus.py</url>
+          <line>156</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/padChecker.py</url>
+          <line>266</line>
+          <option name="timeStamp" value="62" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/padChecker.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/imagemp/process_runners/examples/simple_display.py</url>
+          <line>21</line>
+          <option name="timeStamp" value="73" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/pydev$moments.coverage" NAME="moments Coverage Results" MODIFIED="1571791864713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$fps_demo.coverage" NAME="fps_demo Coverage Results" MODIFIED="1573075878799" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$vp_finder.coverage" NAME="vp_finder Coverage Results" MODIFIED="1574186200546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/vp" />
     <SUITE FILE_PATH="coverage/pydev$circles.coverage" NAME="circles Coverage Results" MODIFIED="1571691431870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$color_plots.coverage" NAME="color_plots Coverage Results" MODIFIED="1573075866036" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$ocvgrabber.coverage" NAME="ocvgrabber Coverage Results" MODIFIED="1573084080524" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_script.coverage" NAME="lucas_kanade_script Coverage Results" MODIFIED="1574031298010" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../naumannlab_tutorials19-master/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$color_plots.coverage" NAME="color_plots Coverage Results" MODIFIED="1574200158308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$ocvgrabber.coverage" NAME="ocvgrabber Coverage Results" MODIFIED="1574454341591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$cone.coverage" NAME="cone Coverage Results" MODIFIED="1571609655939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$pupil.coverage" NAME="pupil Coverage Results" MODIFIED="1572546147012" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$videoio.coverage" NAME="videoio Coverage Results" MODIFIED="1572558449796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$utils.coverage" NAME="utils Coverage Results" MODIFIED="1572214476328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1572996104367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$run_script1.coverage" NAME="run_script1 Coverage Results" MODIFIED="1574363236294" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$skeletonization.coverage" NAME="skeletonization Coverage Results" MODIFIED="1573688235519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$zscore_1d.coverage" NAME="zscore_1d Coverage Results" MODIFIED="1572290392062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1572546071750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$test.coverage" NAME="test Coverage Results" MODIFIED="1574734525155" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$lpolar.coverage" NAME="lpolar Coverage Results" MODIFIED="1571708154733" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$recorder.coverage" NAME="recorder Coverage Results" MODIFIED="1574360374581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$test_horizon_finder.coverage" NAME="test_horizon_finder Coverage Results" MODIFIED="1574184870590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/vp" />
     <SUITE FILE_PATH="coverage/pydev$squares.coverage" NAME="squares Coverage Results" MODIFIED="1571686601642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$blur_polar.coverage" NAME="blur_polar Coverage Results" MODIFIED="1572545953722" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$color_pixels.coverage" NAME="color_pixels Coverage Results" MODIFIED="1572904119948" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$coloralgo.coverage" NAME="coloralgo Coverage Results" MODIFIED="1572985775520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$videomotion.coverage" NAME="videomotion Coverage Results" MODIFIED="1572912141848" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$temporal_filter.coverage" NAME="temporal_filter Coverage Results" MODIFIED="1574061540265" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$find_fiducial.coverage" NAME="find_fiducial Coverage Results" MODIFIED="1572979701910" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$moments.coverage" NAME="moments Coverage Results" MODIFIED="1571791864713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$tracker_pad.coverage" NAME="tracker_pad Coverage Results" MODIFIED="1574364478689" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$video_capture_Robin_with_LK.coverage" NAME="video_capture_Robin_with_LK Coverage Results" MODIFIED="1574031087452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../naumannlab_tutorials19-master/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$dense_optical_flow_script.coverage" NAME="dense_optical_flow_script Coverage Results" MODIFIED="1574041278384" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../naumannlab_tutorials19-master/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$simple_display.coverage" NAME="simple_display Coverage Results" MODIFIED="1574364483825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$utils.coverage" NAME="utils Coverage Results" MODIFIED="1572214476328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$various_segmentation.coverage" NAME="various_segmentation Coverage Results" MODIFIED="1574202528726" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1572996104367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_class0.coverage" NAME="lucas_kanade_class0 Coverage Results" MODIFIED="1574030703047" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../naumannlab_tutorials19-master/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$track_color.coverage" NAME="track_color Coverage Results" MODIFIED="1574296382460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$run_script1__1_.coverage" NAME="run_script1 (1) Coverage Results" MODIFIED="1574356447827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1574062116327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$register.coverage" NAME="register Coverage Results" MODIFIED="1574189964674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$color_pixels.coverage" NAME="color_pixels Coverage Results" MODIFIED="1572904119948" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$coloralgo.coverage" NAME="coloralgo Coverage Results" MODIFIED="1574203480441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$videomotion.coverage" NAME="videomotion Coverage Results" MODIFIED="1572912141848" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
