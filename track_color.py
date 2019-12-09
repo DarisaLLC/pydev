@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-roi = cv2.imread('/Users/arman/PycharmProjects/pydev/projects/wiic/images/pad.png')
+roi = cv2.imread('/Users/arman/tmp/wiic/200.png')
 hsv = cv2.cvtColor(roi,cv2.COLOR_BGR2HSV)
 
 target = cv2.imread('/Users/arman/tmp/wiic/220.png')
@@ -12,7 +12,7 @@ roihist = cv2.calcHist([hsv],[0, 1], None, [180, 256], [0, 180, 0, 256] )
 hist2 = cv2.calcHist([hsvt],[0, 1], None, [180, 256], [0, 180, 0, 256] )
 cv2.normalize(roihist,roihist)
 cv2.normalize(hist2,hist2)
-comparison = cv2.compareHist(roihist, hist2, cv2.HISTCMP_INTERSECT)
+comparison = cv2.compareHist(roihist.flatten(), hist2.flatten(), cv2.HISTCMP_INTERSECT)
 print(comparison)
 
 
@@ -26,9 +26,9 @@ disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
 cv2.filter2D(dst,-1,disc,dst)
 
 # threshold and binary AND
-ret,thresh = cv2.threshold(dst,50,255,0)
+ret,thresh = cv2.threshold(dst,5,255,0)
 thresh = cv2.merge((thresh,thresh,thresh))
 res = cv2.bitwise_and(target,thresh)
 
-res = np.vstack((target,thresh,res))
+res = np.vstack((target,roi,res))
 cv2.imwrite('/Users/arman/tmp/res.jpg',res)
