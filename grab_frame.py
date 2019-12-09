@@ -8,6 +8,13 @@ from pygrabber.dshow_graph import FilterGraph
 import cv2
 import threading
 import numpy as np
+from ocvgrabber import initialize_settings, process_frame
+
+## call initialize_settings with topleft of frame and ocapture size and ( to crop the area inside of black )
+## settings = initialize_settings((10, 60), (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
+## create a pad checker by giving it path to where the pickle file is
+checker = padChecker(cachePath)
 
 image_done = threading.Event()
 image_grabbed = None
@@ -16,6 +23,7 @@ image_grabbed = None
 def img_change(image):
     global image_done
     global image_grabbed
+    image_grabbed = process_frame(frame, checker, settings)
     image_grabbed = np.flip(image, 2)
     image_done.set()
 

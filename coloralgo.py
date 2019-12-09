@@ -20,7 +20,7 @@ from collections import namedtuple
 def fetch_image_for_image_file(filename):
     return io.imread(filename)
 
-def get_dominant_color(image, k=4, image_processing_size=None):
+def get_dominant_colors(image, k=4, image_processing_size=None):
     """
     takes an image as input
     returns the dominant color of the image as a list

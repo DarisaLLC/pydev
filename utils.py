@@ -282,3 +282,4 @@ def _find_point_on_square_border(square, angle):
     border_x = center_x + math.cos(angle) * magnitude
     border_y = center_y + math.sin(angle) * magnitude
     return int(round(border_x)), int(round(border_y))
+

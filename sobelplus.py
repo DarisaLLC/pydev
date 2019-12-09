@@ -40,6 +40,8 @@ def axis(x): return int((x + 16) // 32) % 8
 
 def truePeaks(magnitudes, phases_ubyte, phases, threshold):
     height, width = magnitudes.shape[:2]
+    if threshold == 0:
+        threshold = np.median(magnitudes.flatten())
     tps = []
     u = np.zeros((height, width))
     v = np.zeros((height, width))
@@ -136,9 +138,16 @@ if __name__ == '__main__':
         img = cv2.GaussianBlur(arr, (7, 7), sigmaX=1.2)
         return img
 
+    def data_corner():
+        arr = np.zeros((16, 16), dtype=np.uint8)
+        arr = arr + 200
+        arr[0:7, 0:7] = 0
+        img = cv2.GaussianBlur(arr, (7, 7), sigmaX=1.2)
+        return img
+
     if len(sys.argv) < 2:
         # Construct some test data
-        r = data_circle()
+        r = data_corner()
         result = sobel_detect(r, 1)
         display = img_as_float(r)
         synth_case = True
@@ -153,12 +162,13 @@ if __name__ == '__main__':
     dims = display.shape
     height = dims[0]
     width = dims[1]
-    tps, u, v, axh, moc, threshold = truePeaks(result[0], result[1], result[2], 10)
+    tps, u, v, axh, moc, threshold = truePeaks(result[0], result[1], result[2], 0)
 
     if synth_case:
         dx = moc[0] - synth_center_col
         dy = moc[1] - synth_center_row
-        print("%1.3f,%1.3f", (dx, dy))
+        print((dx, dy))
+    else: print(moc)
 
     truepeaks = np.array(tps, dtype='f')
     x = np.linspace(0, width - 1, width)
@@ -176,7 +186,7 @@ if __name__ == '__main__':
 
     ax2 = plt.subplot2grid((3, 3), (1, 0))
     ax2.imshow(display, cmap='gray')
-    ax2.quiver(x, y, u, v, units='xy', scale=1, pivot='tail', color='r')
+    ax2.quiver(x, y, u, v, units='dots', angles = 'xy', scale=1, pivot='mid', color='r')
     ax2.set_title('Image + TP ')
     ax2.xaxis.set_ticks([])
     ax2.yaxis.set_ticks([])

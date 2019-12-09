@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.mixture import GaussianMixture
 
 # img = cv2.imread('/Volumes/medvedev/_SP/2019_09_06_BMWi3_natika_camera_images/empty_pad/empty_pad3/image00181.png',0)
-img = cv2.imread("/Volumes/medvedev/Users/arman/dev/Arman Garakani/image_roi.png", 0)
+img = cv2.imread("/Users/arman/tmp/wiic/195.png", 0)
 
 
 def make_skeletonization(img, show_image=False):

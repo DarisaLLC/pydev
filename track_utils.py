@@ -41,21 +41,21 @@ def initColor(cap):
         upper=upper.astype(np.uint8)
         mask=cv2.inRange(hsv,lower,upper)
         mask_3d=cv2.merge((mask,mask,mask))
-        cnts=cv2.findContours(mask.copy(),cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
-        
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+
         if len(cnts) > 0:
             # find the largest contour in the mask, then use
-            # it to compute the minimum enclosing circle 
+            # it to compute the minimum enclosing circle
             c = max(cnts, key=cv2.contourArea)
-            bounding_rect=cv2.boundingRect(c)
-            area=bounding_rect[2]*bounding_rect[3]          
-            
-            if area>100:
-                masked_roi.fill(0)
-                masked_roi[mask_3d==255]=frame[mask_3d==255]
+            bounding_rect = cv2.boundingRect(c)
+            area = bounding_rect[2] * bounding_rect[3]
 
-                [x1,y1,w1,h1]=bounding_rect
-                roi=frame[y1:y1+w1,x1:x1+h1]
+            if area > 100:
+                masked_roi.fill(0)
+                masked_roi[mask_3d == 255] = frame[mask_3d == 255]
+
+                [x1, y1, w1, h1] = bounding_rect
+                roi = frame[y1:y1 + w1, x1:x1 + h1]
         cap.showFrame(masked_roi)
         
         key = cv2.waitKey(1) & 0xFF

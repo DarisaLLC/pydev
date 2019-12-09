@@ -156,7 +156,7 @@ if __name__ == "__main__":
     is_camera = not is_file
     cachePath = os.path.abspath(os.path.join(file_folder, args['cache']))
     file_name = args['video']
-    checker = padChecker(cachePath)
+   
     if is_file:
         cap = cv2.VideoCapture(file_name)  # Capture video from camera
     if is_camera:
