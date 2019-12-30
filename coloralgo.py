@@ -38,7 +38,7 @@ def get_dominant_colors(image, k=4, image_processing_size=None):
     # resize image if new dims provided
     if image_processing_size is not None:
         image = cv2.resize(image, image_processing_size,
-                           interpolation=cv2.INTER_AREA)
+                           interpolation=cv2.INTER_NEAREST)
 
     # reshape the image to be a list of pixels
     image = image.reshape((image.shape[0] * image.shape[1], 3))
@@ -51,7 +51,9 @@ def get_dominant_colors(image, k=4, image_processing_size=None):
     label_counts = Counter(labels)
 
     # subset out most popular centroid
-    dominant_color = clt.cluster_centers_[label_counts.most_common(1)[0][0]]
+    commons = label_counts.most_common(k)
+
+    dominant_color = clt.cluster_centers_[label_counts.most_common(k)[0][0]]
 
     return list(dominant_color)
 
@@ -138,6 +140,7 @@ def geom_gray(nimg):
     Green = image[:, :, 1]
     Blue = image[:, :, 2]
     gg = Red * Green * Blue
+    pp = np.power(gg, 0.33)
     return img_as_ubyte(gg)
 
 def mean_gray(nimg):
@@ -169,7 +172,7 @@ def gray_world_median_bgr(nimg):
     Blue = image[:, :, 0]
     med = [np.median(Red), np.median(Green), np.median(Blue)]
     dst[:, :, 2] = np.minimum(Red * (med[1] / med[0]), 1.0)
-    dst[:, :, 1] = np.minimum(Blue * (med[1] / med[2]), 1.0)
+    dst[:, :, 0] = np.minimum(Blue * (med[1] / med[2]), 1.0)
     return img_as_ubyte(dst)
 
 
@@ -342,6 +345,11 @@ if __name__ == "__main__":
 
         gg = geom_gray(rgb)
         mm = mean_gray(rgb)
+        gwm = grey_world_median(rgb)
+        gwmb = gray_world  (rgb)
+
+        dc = get_dominant_colors(rgb, 8, (480,640))
+        print(dc)
 
         f, axs = plt.subplots(2, 4, figsize=(20, 10), frameon=False,
                               subplot_kw={'xticks': [], 'yticks': []})
@@ -349,8 +357,10 @@ if __name__ == "__main__":
         axs[0, 1].imshow(Red, cmap='gray')
         axs[0, 2].imshow(Green, cmap='gray')
         axs[0, 3].imshow(Blue, cmap='gray')
-        axs[1, 0].imshow(gg, cmap='gray')
-        axs[0, 1].imshow(mm, cmap='gray')
+        axs[1, 0].imshow(gwm, cmap='gray')
+        axs[1, 1].imshow(gwmb, cmap='gray')
+        axs[1, 2].imshow(gg, cmap='gray')
+        axs[1, 2].imshow(mm, cmap='gray')
 
         plt.autoscale
         plt.show()

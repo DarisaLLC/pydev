@@ -496,6 +496,12 @@ class vp_detection(object):
         if isinstance(img, str):
             img = cv2.imread(img, -1)
 
+        shape = img.shape
+        if shape[0] < shape[1]:
+            img = cv2.transpose(img)
+            shape = img.shape
+            print(shape)
+
         self.__img = img  # Keep a copy for later
 
         # Reset principal point if we haven't set it yet
@@ -589,7 +595,7 @@ def main(input_path):
     # Extract command line arguments
     length_thresh = 60
     principal_point = None
-    focal_length = 28 #1102.79
+    focal_length = 1102.79
     debug_mode = 1
     debug_show = 1
     debug_path = None

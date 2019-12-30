@@ -3,106 +3,83 @@ import cv2
 import numpy as np
 import matplotlib as plt
 import math
-import rospy
+import sys
+from pathlib import Path
 
-from std_msgs.msg import UInt8
-from geometry_msgs.msg import Point
-
-from calibrate import *
-
+import cv2
+import numpy as np
+import opencv_utils
+from matplotlib import pyplot as plt
+from skimage import draw
+from skimage import img_as_float
+from skimage import img_as_ubyte
+from skimage import measure
+import math
+from numpy.random import rand, randint, randn
+from color_segmentation import color_cluster_seg
 
 class FindFiducial():
-    def __init__(self):
-        # Video capture variables
-        self.cap = cv2.VideoCapture(1)
-        self.frame_width = self.cap.get(3)
-        self.frame_height = self.cap.get(4)
+    def __init__(self, image):
+        self.image = image
+        shape = image.shape
+        self.frame_width = shape[1]
+        self.frame_height = shape[0]
+
 
         # Image variables for displaying data
         self.img = None
         self.canny = None
 
-        # Initializes ROS
-        rospy.init_node('camera')
+        self.find_squares()
 
-        self.pub_fiducial = rospy.Publisher('fiducial', Point, queue_size=10)
-
-        r = rospy.Rate(30)
-        while not rospy.is_shutdown():
-            self.find_squares()
-
-            if self.img != None:
-                cv2.imshow('camera', self.img)
-                cv2.imshow('canny', self.canny)
-                cv2.waitKey(1)
-
-            r.sleep()
+        if not (self.img is None):
+            cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+            cv2.imshow('Display', self.img)
+            cv2.namedWindow('canny', cv2.WINDOW_NORMAL)
+            cv2.imshow('canny', self.canny)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
     def find_squares(self):
-        ret, img = self.cap.read()
-        img = calibrate(img)
+        rng = np.random.RandomState(1234)
+        img = self.image
         img_display = img
-        img = cv2.inRange(img, np.array([150, 150, 150], dtype=np.uint8), np.array([255, 255, 255], dtype=np.uint8))
-        img = cv2.GaussianBlur(img, (5, 5), 0)
-        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, (9, 9))
+        #img = cv2.GaussianBlur(img, (5, 5), 0)
+        #img = cv2.morphologyEx(img, cv2.MORPH_OPEN, (9, 9))
 
         squares = []
-        img = cv2.Canny(img, 200, 250, apertureSize=5)
+        img = cv2.Canny(img, 1, 100, apertureSize=3)
         self.canny = img
         img = cv2.dilate(img, None)
-        retval, img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY)
-        contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        retval, img = cv2.threshold(img, 1, 255, cv2.THRESH_OTSU and cv2.THRESH_BINARY)
+        image, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        i1 = 0
-        for cnt in contours:
-            children = []
-            children_final = []
-            children_areas = 0
-            average_area = 0.0
-
-            if cv2.contourArea(cnt) > self.frame_height * self.frame_width * 0.7:
-                i1 += 1
+        contours_poly = []
+        boundRect = []
+        cc = 0
+        for i, c in enumerate(contours):
+            area = cv2.contourArea(c)
+            is_convex = cv2.isContourConvex(c)
+            if area < 100: #or (not is_convex):
                 continue
 
-            if len(hierarchy[0]) > 0:
-                i2 = hierarchy[0][i1][2]
-                while i2 != -1:
-                    children.append(contours[i2])
-                    children_areas += cv2.contourArea(contours[i2])
-                    i2 = hierarchy[0][i2][0]
-            i1 += 1
+            poly = cv2.approxPolyDP(c, 3, True)
+            bb = cv2.boundingRect(poly)
+            mind = min(bb[2],bb[3])
+            maxd = max(bb[2],bb[3])
+            ar = maxd // mind
+            if ar < 10: continue
+            cc += 1
+            contours_poly.append(poly)
+            boundRect.append(cv2.boundingRect(poly))
 
-            if len(children) > 0:
-                average_area = float(children_areas) / len(children)
-                for cld in children:
-                    if abs(cv2.contourArea(cld) - average_area) < 100:
-                        children_final.append(cld)
-
-            cnt, cnt_square = self.is_square(cnt, 0.02)
-            if cnt_square and len(children_final) >= 5:
-                squares.append(cnt)
-
-                if len(squares) == 2:
-                    if cv2.contourArea(squares[0]) > cv2.contourArea(squares[1]):
-                        squares.pop(0)
-                    else:
-                        squares.pop(1)
-
-        if len(squares) != 0:
-            M = cv2.moments(np.array(squares))
-            x = (int(M['m10'] / M['m00']) * 2.0 / self.frame_width) - 1.0
-            y = (int(M['m01'] / M['m00']) * 2.0 / self.frame_height) - 1.0
-            z = cv2.contourArea(squares[0])
-
-            cv2.drawContours(img_display, squares, -1, (0, 255, 0), 2)
-
-            fiducial_msg = Point()
-            (fiducial_msg.x, fiducial_msg.y, fiducial_msg.z) = (x, y, z)
-            self.pub_fiducial.publish(fiducial_msg)
-        else:
-            fiducial_msg = Point()
-            (fiducial_msg.x, fiducial_msg.y, fiducial_msg.z) = (0, 0, 0)
-            self.pub_fiducial.publish(fiducial_msg)
+            # Draw polygonal contour + bonding rects + circles
+        for i in range(cc):
+            color = (rng.randint(0, 256), rng.randint(0, 256), rng.randint(0, 256))
+            cv2.drawContours(img_display, contours_poly, i, color)
+            cv2.rectangle(img_display, (int(boundRect[i][0]), int(boundRect[i][1])), \
+                         (int(boundRect[i][0] + boundRect[i][2]), int(boundRect[i][1] + boundRect[i][3])), color, 2)
+         #   cv2.circle(img_display, (int(centers[i][0]), int(centers[i][1])), int(radius[i]), color, 2)
 
         self.img = img_display
 
@@ -110,13 +87,14 @@ class FindFiducial():
         cnt_len = cv2.arcLength(cnt, True)
         cnt = cv2.approxPolyDP(cnt, epsilon * cnt_len, True)
 
-        if len(cnt) != 4 or not cv2.isContourConvex(cnt):
-            return (cnt, False)
-        else:
-            cnt = cnt.reshape(-1, 2)
-            max_cos = np.max([self.angle_cos(cnt[i], cnt[(i + 1) % 4], cnt[(i + 2) % 4]) for i in xrange(4)])
+        # if len(cnt) != 4 or not cv2.isContourConvex(cnt):
+        #     return (cnt, False)
+        # else:
+        cnt = cnt.reshape(-1, 2)
+        count = len(cnt)
+        max_cos = np.max([self.angle_cos(cnt[i], cnt[(i + 1) % count], cnt[(i + 2) % count]) for i in range(count)])
 
-            return (cnt, max_cos < 0.1)
+        return (cnt, max_cos < 0.1)
 
     def angle_cos(self, p0, p1, p2):
         d1, d2 = (p0 - p1).astype('float'), (p2 - p1).astype('float')
@@ -124,8 +102,8 @@ class FindFiducial():
 
 
 if __name__ == '__main__':
-    try:
-        var = FindFiducial()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    if not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists():
+        print(sys.argv[1] + '  Does not exist ')
+    lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
+
+    var = FindFiducial(lab_tuple[0])
