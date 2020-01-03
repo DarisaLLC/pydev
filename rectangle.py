@@ -72,6 +72,29 @@ def overlaps(box1, box2):
     return overlaps_touches
 
 
+def contains(box1, box2):
+    '''
+    Returns if box1 contains box2
+    :param box1:
+    :param box2:
+    :return: true if box1 contains box2
+    '''
+    print(box1)
+    b1 = fix(box1)
+    b2 = fix(box2)
+    if b1 == b2: return True
+
+    # Get the coordinates of bounding boxes
+    b1_x1, b1_y1, b1_x2, b1_y2 = b1[0], b1[1], b1[2], b1[3]
+    b2_x1, b2_y1, b2_x2, b2_y2 = b2[0], b2[1], b2[2], b2[3]
+
+    cx = b2_x1 >= b1_x1 and b2_x1 <= b1_x2 and b2_x2 >= b1_x1 and b2_x2 <= b1_x2
+    cy = b2_y1 >= b1_y1 and b2_y1 <= b1_y2 and b2_y2 >= b1_y1 and b2_y2 <= b1_y2
+
+
+    return cx and cy
+
+
 __all__ = ['TestBBoxes']
 
 
@@ -81,16 +104,19 @@ class TestBBoxes(unittest.TestCase):
         """
         Tests presence of required methods.
         """
+
     def test_bboxes(self):
         self.test_same()
         self.test_fix()
         self.test_overlaps()
+        self.test_contains()
 
     def test_same(self):
         b0 = [15, 17, 10, 12]
         bb0 = [15, 17, 10, 12]
-        ok = same(b0,bb0)
+        ok = same(b0, bb0)
         self.assertTrue(ok)
+
         bb0[0] = 16
         ok = same(b0, bb0)
         self.assertTrue(not ok)
@@ -99,11 +125,10 @@ class TestBBoxes(unittest.TestCase):
         b0 = [15, 17, 10, 12]
         b1 = [10, 12, 15, 17]
         bf = fix(b0)
-        ok = same(bf,b1)
+        ok = same(bf, b1)
         self.assertTrue(ok)
 
     def test_overlaps(self):
-
         b1 = [10, 12, 15, 17]
         b2 = [17, 12, 22, 17]
         ok = overlaps(b1, b2)
@@ -111,6 +136,16 @@ class TestBBoxes(unittest.TestCase):
 
         b3 = [13, 12, 16, 17]
         ok = overlaps(b1, b3)
+        self.assertTrue(ok)
+
+    def test_contains(self):
+        b1 = [10, 12, 25, 17]
+        b2 = [17, 12, 17, 17]
+        ok = contains(b1, b2)
+        self.assertTrue(ok)
+
+        b3 = [10, 12, 16, 17]
+        ok = contains(b1, b3)
         self.assertTrue(ok)
 
 

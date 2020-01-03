@@ -113,7 +113,7 @@ class padChecker:
         thresh_bgr = cv2.merge((thresh, thresh, thresh))
         res = cv2.bitwise_and(image_in, thresh_bgr)
 
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[1]
         return y,thresh, res, cnts
 
     def polyLinePoints(self, width, height):

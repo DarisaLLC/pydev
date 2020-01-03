@@ -5,10 +5,12 @@ et al. - http://xiaohulugo.github.io/papers/Vanishing_Point_Detection_WACV2017.p
 Author: Ray Phan (https://github.com/rayryeng)
 """
 
+import sys
 import cv2
 import numpy as np
 from itertools import combinations
 from pathlib import Path
+from rectangle import contains
 
 class vp_detection(object):
     """
@@ -478,12 +480,12 @@ class vp_detection(object):
         # Each element contains which line index corresponds to which VP
         self.__clusters = [np.where(np.logical_and(mask, idx_ang == i))[0] for i in range(3)]
 
-    def find_vps(self, img):
+    def find_image_vps (self, img):
         """
         Find the vanishing points given the input image
 
         Args:
-            img: Either the path to the image or the image read in with `cv2.imread`
+            img: the image read in with `cv2.imread`
 
         Returns:
             A numpy array where each row is a point and each column is a component / coordinate.
@@ -491,16 +493,6 @@ class vp_detection(object):
             first row, the left most VP is the second row and the vertical VP is
             the last row
         """
-
-        # Detect the lines in the image
-        if isinstance(img, str):
-            img = cv2.imread(img, -1)
-
-        shape = img.shape
-        if shape[0] < shape[1]:
-            img = cv2.transpose(img)
-            shape = img.shape
-            print(shape)
 
         self.__img = img  # Keep a copy for later
 
@@ -591,7 +583,7 @@ class vp_detection(object):
         return img
 
 
-def main(input_path):
+def main(input_path, roi):
     # Extract command line arguments
     length_thresh = 60
     principal_point = None
@@ -610,7 +602,15 @@ def main(input_path):
     vpd = vp_detection(length_thresh, principal_point, focal_length, seed)
 
     # Run VP detection algorithm
-    vps = vpd.find_vps(input_path)
+    img = cv2.imread(input_path, -1)
+    shape = img.shape
+    iroi = [0,0,shape[1]-1,shape[0]-1]
+    if not (roi is None):
+        if contains(iroi, roi):
+            img=img[roi[1]:roi[3],roi[0]:roi[2]]
+
+
+    vps = vpd.find_image_vps(img)
     print('Principal point: {}'.format(vpd.principal_point))
 
     # Show VP information
@@ -638,9 +638,20 @@ def main(input_path):
 
 if __name__ == "__main__":
     import sys
+    import math
 
-    if len(sys.argv) < 2 or (not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists()):
+    argcnt = len(sys.argv)
+    if argcnt < 2 or (not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists()):
         print(' File Does not exist or found ')
-        exit(1)
-
-    main(sys.argv[1])
+    else:
+        roi = None
+        if argcnt == 6:
+            '''
+            Indicate roi in the image
+            '''
+            tlx = int(sys.argv[2])
+            tly = int(sys.argv[3])
+            brx = int(sys.argv[4])
+            bry = int(sys.argv[5])
+            roi = [tlx,tly,brx,bry]
+        main(sys.argv[1], roi)

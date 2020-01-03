@@ -10,7 +10,6 @@ import argparse  # provide interface for calling this script
 import utils
 import opencv_utils
 from ransac_vanishing_point import ransac_vanishing_point_detection
-from exif import Image
 from circles import find_circle
 
 
@@ -92,27 +91,8 @@ if __name__ == '__main__':
     display = None
     if len(sys.argv) < 2 or (not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists()):
         print(' File Does not exist or found ')
-        exit(1)
-    #
-    # with open(sys.argv[1], 'rb') as image_file:
-    #     my_image = Image(image_file)
-    #     print(dir(my_image))
-    #     ok = my_image.has_exif
-    #     if ok:
-    #         fl = my_image.focal_length
-    #         xd = my_image.pixel_x_dimension
-    #         yd = my_image.pixel_y_dimension
-    #         fpy = my_image.focal_plane_y_resolution
-    #         fpx = my_image.focal_plane_x_resolution
-    #         fpu = my_image.focal_plane_resolution_unit
-    #         xr = my_image.x_resolution
-    #         yr = my_image.y_resolution
-    #         print(fpu)
-    #         print((xr,yr))
-    #         print((fpx,fpy))
-    #         print((xd,yd))
-    #         print('focal length from EXIF: ' + str(fl))
-    #
+        sys.exit(1)
+
 
     lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 1)
     display = opencv_utils.convert_lab2bgr(lab_tuple)
@@ -133,7 +113,7 @@ if __name__ == '__main__':
         b, g, r = bgrFromHue(angle)
         cv2.line(display, (x1, y1), (x2, y2), (b * 1.0, g * 1.0, r * 1.0, 0.5), 2)
 
-    hough_radii = np.arange(15, 30, 2)
+    hough_radii = np.arange(20, 50, 3)
     circle_zip, edges = find_circle(lab_tuple[0], hough_radii, 1)
     # note row column to x y to width height
     circles = []
@@ -141,6 +121,6 @@ if __name__ == '__main__':
         circles.append((center_x, center_y, radius))
         cv2.circle(display, (center_x, center_y), radius, (0.0, 1.0, 1.0), 0, 3)
 
-cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
-cv2.imshow("Display", display)
-key = cv2.waitKey(0) & 0xFF
+    cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+    cv2.imshow("Display", display)
+    key = cv2.waitKey(0) & 0xFF
