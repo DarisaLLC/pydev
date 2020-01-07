@@ -84,7 +84,14 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     kmeansImage = np.zeros(image.shape[:2], dtype=np.uint8)
     for i, label in enumerate(sortedLabels):
         kmeansImage[clustering == label] = int(255 / (numClusters - 1)) * i
-
+        kImage = np.zeros(image.shape[:2], dtype=np.uint8)
+        kImage[clustering == label] = 255
+        filename = '/Users/arman/Pictures/ceye/slices/slice_' + str(i) + '.png'
+        cv2.imwrite(filename, kImage)
+        print(i)
+        cv2.namedWindow('Slice', cv2.WINDOW_NORMAL)
+        cv2.imshow('Slice', kImage)
+        cv2.waitKey(0)
     ret, thresh = cv2.threshold(kmeansImage, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     return thresh, kmeansImage, ret
@@ -92,7 +99,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
 
 '''
 def medial_axis_image(thresh):
-
+ 
     #convert an image from OpenCV to skimage
     thresh_sk = img_as_float(thresh)
 
@@ -116,7 +123,9 @@ if __name__ == '__main__':
     cols = cols // 2
     rows = rows // 2
 
-    thresh, kmimage, ret = color_cluster_seg(img, 'lab', 'all', 10)
+    #img = cv2.medianBlur(img, 5)
+
+    thresh, kmimage, ret = color_cluster_seg(img, 'hsv', 'all', 8)
     print(thresh)
 
     cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
