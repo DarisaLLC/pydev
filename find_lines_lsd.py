@@ -11,7 +11,9 @@ import utils
 import opencv_utils
 from ransac_vanishing_point import ransac_vanishing_point_detection
 from circles import find_circle
-
+from skimage.feature import corner_harris, corner_subpix, corner_peaks
+from skimage.transform import warp, AffineTransform
+from skimage.draw import ellipse
 
 def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_precision=0):
     """LSD algorithm for line detection.
@@ -98,6 +100,17 @@ if __name__ == '__main__':
     display = opencv_utils.convert_lab2bgr(lab_tuple)
     dshape = display.shape
     print(dshape)
+
+    coords = corner_peaks(corner_harris(lab_tuple[0]), min_distance=32)
+    coords_subpix = corner_subpix(lab_tuple[0], coords, window_size=32)
+
+    fig, ax = plt.subplots()
+    ax.imshow(lab_tuple[0], cmap=plt.cm.gray)
+    ax.plot(coords[:, 1], coords[:, 0], color='cyan', marker='o',
+            linestyle='None', markersize=6)
+    ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=15)
+    ax.axis((0, dshape[1], dshape[0], 0))
+    plt.show()
 
     lines = lsd_lines(lab_tuple[0])
 
