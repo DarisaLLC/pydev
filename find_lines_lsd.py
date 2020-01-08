@@ -29,8 +29,8 @@ def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_pre
     """
     height, width = source_image.shape[:2]
     diagonal = math.sqrt(height ** 2 + width ** 2)
-    min_line_length = 10  # min_line_length * diagonal
-    max_line_length = 2660  # max_line_length * diagonal
+    min_line_length = 16  # min_line_length * diagonal
+    max_line_length = 96  # max_line_length * diagonal
     """
       createLineSegmentDetector([, _refine[, _scale[, _sigma_scale[, _quant[, _ang_th[, _log_eps[, _density_th[, _n_bins]]]]]]]]) -> retval
       .   @brief Creates a smart pointer to a LineSegmentDetector object and initializes it.
