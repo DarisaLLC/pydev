@@ -24,7 +24,7 @@ def build_lappyr(img, leveln=6, dtype=np.uint8):
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
-        exit(1)
+        sys.exit(1)
     print(sys.argv[1])
 
     if not Path(sys.argv[1]).is_file(): exit(1)
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     print(f"Quickshift number of segments: {len(np.unique(segments_quick))}")
 
     fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
+    cv2.imwrite('/Users/arman/tmp/watershed.png', segments_watershed)
 
     ax[0, 0].imshow(mark_boundaries(img, segments_fz))
     ax[0, 0].set_title("Felzenszwalbs's method")

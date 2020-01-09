@@ -6,27 +6,23 @@ import json
 
 parser = argparse.ArgumentParser(description='meanshift-tracking')
 parser.add_argument('image', type=str, help='path to image file')
+parser.add_argument('fiducial', type=str, help='path to fiducial file')
 args = parser.parse_args()
 
 mdata = getMetaData(args.image)
 print(mdata.keys())
 print(json.dumps(mdata["video"], indent=4))
 
+fid = cv2.imread(args.fiducial)
+fidhsv = cv2.cvtColor(fid,cv2.COLOR_BGR2HSV)
+fid_hist = cv.calcHist([hsv_roi],[0],None,[180],[0,180])
+cv.normalize(fid_hist,fid_hist,0,255,cv.NORM_MINMAX)
+
 cap = cv.VideoCapture(args.image)
 
 # take first frame of the video
 ret,frame = cap.read()
 
-# setup initial location of window
-x, y, w, h = 250, 192, 300, 100 # simply hardcoded the values
-track_window = (x, y, w, h)
-
-# set up the ROI for tracking
-roi = frame[y:y+h, x:x+w]
-hsv_roi =  cv.cvtColor(roi, cv.COLOR_BGR2HSV)
-#mask = cv.inRange(hsv_roi, np.array((0., 60.,32.)), np.array((180.,255.,255.)))
-roi_hist = cv.calcHist([hsv_roi],[0],None,[180],[0,180])
-cv.normalize(roi_hist,roi_hist,0,255,cv.NORM_MINMAX)
 
 # Setup the termination criteria, either 10 iteration or move by atleast 1 pt
 term_crit = ( cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 1 )
@@ -36,9 +32,8 @@ while(1):
     ret, frame = cap.read()
 
     if ret == True:
-        cv.imwrite('/Users/arman/tmp/wiic/' + str(i) + '.png', frame)
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        dst = cv.calcBackProject([hsv],[0],roi_hist,[0,180],1)
+        dst = cv2.calcBackProject([hsv],[0],fid_hist,[0,180],1)
 
         # apply meanshift to get the new location
         ret, track_window = cv.meanShift(dst, track_window, term_crit)

@@ -101,14 +101,14 @@ if __name__ == '__main__':
     dshape = display.shape
     print(dshape)
 
-    coords = corner_peaks(corner_harris(lab_tuple[0]), min_distance=32)
-    coords_subpix = corner_subpix(lab_tuple[0], coords, window_size=32)
+    coords = corner_peaks(corner_harris(lab_tuple[0]), min_distance=16)
+    coords_subpix = corner_subpix(lab_tuple[0], coords, window_size=16)
 
     fig, ax = plt.subplots()
-    ax.imshow(lab_tuple[0], cmap=plt.cm.gray)
-    ax.plot(coords[:, 1], coords[:, 0], color='cyan', marker='o',
+    ax.imshow(display)
+    ax.plot(coords[:, 1], coords[:, 0], color='r', marker='+',
             linestyle='None', markersize=6)
-    ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=15)
+    #ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=7)
     ax.axis((0, dshape[1], dshape[0], 0))
     plt.show()
 

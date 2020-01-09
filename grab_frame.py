@@ -8,7 +8,7 @@ from pygrabber.dshow_graph import FilterGraph
 import cv2
 import threading
 import numpy as np
-from ocvgrabber import initialize_settings, process_frame
+from auxcameragrabber import initialize_settings, process_frame
 
 ## call initialize_settings with topleft of frame and ocapture size and ( to crop the area inside of black )
 ## settings = initialize_settings((10, 60), (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
