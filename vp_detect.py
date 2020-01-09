@@ -564,10 +564,25 @@ class vp_detection(object):
                      (0, 0, 0), 2, cv2.LINE_AA)
 
         # For each cluster of lines, draw them in their right colour
+        # For each lines mark the end that is further from the vp
         for i in range(3):
             for (x1, y1, x2, y2) in self.__lines[self.__clusters[i]]:
+                vp_x = self._vps_2D[i][0]
+                vp_y = self._vps_2D[i][1]
+                dx = vp_x - x1
+                dy = vp_y - y1
+                d1 = np.sqrt(dx * dx + dy * dy)
+                dx = vp_x - x2
+                dy = vp_y - y2
+                d2 = np.sqrt(dx * dx + dy * dy)
                 cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
                          colours[i], 2, cv2.LINE_AA)
+                if d2 > d1:
+                    cv2.circle(img, (x2, y2), 7, colours[i], 2, cv2.LINE_AA)
+                else:
+                    cv2.circle(img, (x1, y1), 7, colours[i], 2, cv2.LINE_AA)
+
+
 
         # Show image if necessary
         if show_image:
