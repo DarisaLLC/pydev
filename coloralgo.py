@@ -117,21 +117,25 @@ def gray_world (img):
     return img_as_ubyte (dst)
 
 
-def omf(image):
+def wbc(image):
     Red = image[:, :, 0]
     Green = image[:, :, 1]
     Blue = image[:, :, 2]
-    RL = np.pow(np.add(Red,1),0.3)
-    GL = np.pow(np.add(Green,1),0.6)
-    BL = np.pow(np.add(Blue,1),0.1)
-
-
-    omf_r = channel_omf(Red)
-    omf_g = channel_omf(Green)
-    omf_b = channel_omf(Blue)
-    omf_all = (omf_r,omf_g, omf_b)
-    print(omf_all)
-    return omf_all
+    tob = np.minimum(Red, Green)
+    tob = np.minimum(Blue, tob)
+    tow = np.maximum(Red, Green)
+    tow = np.maximum(Blue, tow)
+    color = np.add(tob,tow)
+    color = np.subtract(255,color)
+    Redm = np.subtract(Red, tob)
+    Greenm = np.subtract(Green, tob)
+    Bluem = np.subtract(Blue, tob)
+    all = (tob,tow,color)
+    newImage = image
+    image[:, :, 0] = Redm
+    image[:, :, 1] = Greenm
+    image[:, :, 0] = Redm
+    return all
 
 
 def geom_gray(nimg):
@@ -343,6 +347,8 @@ if __name__ == "__main__":
         Green = rgb[:, :, 1]
         Blue = rgb[:, :, 2]
 
+        w_b_c = wbc(rgb)
+
         gg = geom_gray(rgb)
         mm = mean_gray(rgb)
         gwm = grey_world_median(rgb)
@@ -357,9 +363,9 @@ if __name__ == "__main__":
         axs[0, 1].imshow(Red, cmap='gray')
         axs[0, 2].imshow(Green, cmap='gray')
         axs[0, 3].imshow(Blue, cmap='gray')
-        axs[1, 0].imshow(gwm, cmap='gray')
-        axs[1, 1].imshow(gwmb, cmap='gray')
-        axs[1, 2].imshow(gg, cmap='gray')
+        axs[1, 0].imshow(w_b_c[0], cmap='gray')
+        axs[1, 1].imshow(w_b_c[1], cmap='gray')
+        axs[1, 2].imshow(w_b_c[2], cmap='gray')
         axs[1, 2].imshow(mm, cmap='gray')
 
         plt.autoscale

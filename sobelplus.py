@@ -241,10 +241,12 @@ if __name__ == '__main__':
             print(sys.argv[1] + '  Does not exist ')
         lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
         display = opencv_utils.convert_lab2rgb(lab_tuple)
-        img = cv2.GaussianBlur(lab_tuple[0], (11, 11), sigmaX=1.2)
+        img = cv2.GaussianBlur(lab_tuple[0], (11, 11), sigmaX=3.0)
         result = sobel_detect(img, 1)
         gdm = gradient_magnitude_mask(img, 3, (10, 255))
         gdm = cv2.bitwise_and(result[1], result[1], mask=gdm)
+        cv2.imwrite("/Users/arman/tmp/directionMask.png", gdm)
+
 
     dims = display.shape
     height = dims[0]
