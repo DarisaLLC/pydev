@@ -7,6 +7,8 @@ from pathlib import Path
 from skimage.feature import peak_local_max
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
 from skimage import measure
+from collections import Counter
+import colorsys
 
 from scipy.spatial import distance as dist
 from scipy import optimize
@@ -23,14 +25,11 @@ args_colorspace hsv, lab, ycc, ycrcb, bgr
 args_channels single character channel identifier or all
 args_num_clusters = number of expected clusters
 
-
-
-
 '''
 
 
 
-def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, args_plot=False):
+def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, args_plot=False, debug=False):
     # Change image color space, if necessary.
     colorSpace = args_colorspace.lower()
 
@@ -43,6 +42,8 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, 
     elif colorSpace == 'lab':
         image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
 
+    elif colorSpace == 'rgb':
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     else:
         colorSpace = 'bgr'  # set for file naming purposes
 
@@ -67,7 +68,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, 
     numClusters = max(2, args_num_clusters)
 
     # clustering method. Could use OpenCv. Skitlearn is a lot better
-    kmeans = KMeans(n_clusters=numClusters, n_init=40, max_iter=500).fit(reshaped)
+    kmeans = KMeans(n_clusters=numClusters).fit(reshaped)
 
     # get lables
     pred_label = kmeans.labels_
@@ -78,32 +79,43 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, 
     # Sort the cluster labels in order of the frequency with which they occur.
     sortedLabels = sorted([n for n in range(numClusters)], key=lambda x: -np.sum(clustering == x))
 
+    counts = Counter(pred_label)
+
+    def RGB2HEX(color):
+        return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
+
+    center_colors = kmeans.cluster_centers_
+    # We get ordered colors by iterating through the keys
+    ordered_colors = [center_colors[i] for i in counts.keys()]
+
+    #ordered_colors are in the space we chose. Convert them to RGB for display
+
+    hex_colors = [RGB2HEX(ordered_colors[i]) for i in counts.keys()]
+    space_colors = [ordered_colors[i] for i in counts.keys()]
+
 
     # Initialize K-means grayscale image; set pixel colors based on clustering.
+    slices = []
     kmeansImage = np.zeros(image.shape[:2], dtype=np.uint8)
     for i, label in enumerate(sortedLabels):
         kmeansImage[clustering == label] = int(255 / (numClusters - 1)) * i
         kImage = np.zeros(image.shape[:2], dtype=np.uint8)
         kImage[clustering == label] = 255
-        filename = '/Users/arman/Pictures/ceye/slices/slice_' + str(i) + '.png'
-        cv2.imwrite(filename, kImage)
-        print(i)
-        cv2.namedWindow('Slice', cv2.WINDOW_NORMAL)
-        cv2.imshow('Slice', kImage)
-        cv2.waitKey(0)
-    ret, thresh = cv2.threshold(kmeansImage, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        slices.append(kImage)
+        if debug:
+            filename = '/Users/arman/Pictures/ceye/slices/slice_' + str(i) + '.png'
+            cv2.imwrite(filename, kImage)
+            print(i)
+            cv2.namedWindow('Slice', cv2.WINDOW_NORMAL)
+            cv2.imshow('Slice', kImage)
+            cv2.waitKey(0)
 
     if args_plot:
-        hist = centroid_histogram(kmeans)
-        bar = plot_colors(hist, kmeans.cluster_centers_)
-
-        # show our color bart
-        plt.figure()
-        plt.axis("off")
-        plt.imshow(bar)
+        plt.figure(figsize=(8, 6))
+        plt.pie(counts.values(), labels=hex_colors, colors=hex_colors)
         plt.show()
 
-    return thresh, kmeansImage, ret
+    return slices, kmeansImage, space_colors
 
 
 '''
@@ -125,23 +137,16 @@ if __name__ == '__main__':
         print(sys.argv[1] + '  Does not exist ')
     img = cv2.imread(sys.argv[1])
     rows, cols, channels = map(int, img.shape)
+    rows = rows // 8
+    cols = cols // 8
+    img = cv2.resize(img, (cols,rows), interpolation=cv2.INTER_AREA)
 
-
-#    cols = cols // 2
-#    rows = rows // 2
-
-
-    #img = cv2.medianBlur(img, 5)
-
-    thresh, kmimage, ret = color_cluster_seg(img, 'hsv', 'all', 8, True)
-    print(thresh)
+    slices, kmimage, space_colors = color_cluster_seg(img, 'rgb', 'all', 16, True)
 
     cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
     cv2.imshow('Display', img)
     cv2.namedWindow('colorSeg', cv2.WINDOW_NORMAL)
     cv2.imshow('colorSeg', kmimage)
-    cv2.namedWindow('colorThreshold', cv2.WINDOW_NORMAL)
-    cv2.imshow('colorThreshold', kmimage)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

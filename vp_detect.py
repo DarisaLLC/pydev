@@ -11,6 +11,9 @@ import numpy as np
 from itertools import combinations
 from pathlib import Path
 from rectangle import contains
+import scipy
+from scipy import linalg
+from utils import get_line_angle
 
 class vp_detection(object):
     """
@@ -34,7 +37,7 @@ class vp_detection(object):
         self.__img = None  # Stores the image locally
         self.__clusters = None  # Stores which line index corresponds to what VP
         self.__tol = 1e-8  # Tolerance for floating point comparison
-        self.__angle_tol = np.pi / 3  # (pi / 180 * (60 degrees)) --> +/- 30 deg
+        self.__angle_tol = np.pi / 2.5  # (pi / 180 * (60 degrees)) --> +/- 30 deg
         self.__lines = None  # Stores the line detections internally
         self.__zero_value = 0.001  # Threshold to check augmented coordinate
         # Anything less than __tol gets set to this
@@ -134,7 +137,7 @@ class vp_detection(object):
         Vanishing points of the image in 3D space.
 
         Returns:
-            A numpy array where each row is a point and each column is a component / coordinate
+            A np array where each row is a point and each column is a component / coordinate
         """
         return self._vps
 
@@ -144,7 +147,7 @@ class vp_detection(object):
         Vanishing points of the image in 2D image coordinates.
 
         Returns:
-            A numpy array where each row is a point and each column is a component / coordinate
+            A np array where each row is a point and each column is a component / coordinate
         """
         return self._vps_2D
 
@@ -488,7 +491,7 @@ class vp_detection(object):
             img: the image read in with `cv2.imread`
 
         Returns:
-            A numpy array where each row is a point and each column is a component / coordinate.
+            A np array where each row is a point and each column is a component / coordinate.
             Additionally, the VPs are ordered such that the right most VP is the
             first row, the left most VP is the second row and the vertical VP is
             the last row
@@ -517,6 +520,112 @@ class vp_detection(object):
         self.__final_vps = best_vps  # Save a copy
         self.__clusters = None  # Reset because of new image
         return best_vps
+
+    def get_intrinsic_camera_transformation(self):
+        """
+        Gets the 3x3 intrinsic camera matrix to transform from camera space to image (pixel) space
+
+        :Rtype:
+            `np.array`
+        """
+        # form the appropriate transformation matrix from unit space
+        xform = np.zeros((3, 3))
+        xform[2, 2] = 1
+        xform[0, 0] = xform[1, 1] = self.focal_length
+        xform[0, 2] = self.principal_point[0]
+        xform[1, 2] = self.principal_point[1]
+        return xform
+
+    def calculate_focal_length(self):
+
+        # compute focal length as in "Camera calibration using 2 or 3 vanishing points" (Orghidan et al. 2012)
+        vps = self._vps_2D
+        vpmin = np.linalg.norm(vps, axis=1).argmin()
+        vpsecond = 0 if vpmin == 1 else 1
+
+        self.focal_length = math.sqrt(
+            np.linalg.norm((self.principal_point - vps[vpmin]) * (vps[vpsecond] - self.principal_point)))
+        print(self.focal_length)
+
+    def solve_world_to_cam(self, origin=(0, 0)):
+        """
+        Solve for the rotation and translation to get from world space to camera space
+
+        :Parameters:
+            origin : `tuple`
+                Where the origin lies in image space
+
+        :Returns:
+            A tuple of (R,t) where R is the rotation matrix and t is the translation vector to get
+            into world space
+        """
+        # based on "Camera calibration using 2 or 3 vanishing points" (Orghidan et al. 2012)
+
+        # first, need to solve for the scaling factor so can get rotation matrix R
+        vs = self._vps_2D
+        A = np.array([[vs[0][0], vs[1][0], vs[2][0]],
+                         [vs[0][1], vs[1][1], vs[2][1]],
+                         [vs[0][0] ** 2, vs[1][0] ** 2, vs[2][0] ** 2],
+                         [vs[0][1] ** 2, vs[1][1] ** 2, vs[2][1] ** 2],
+                         [vs[0][0] * vs[0][1], vs[1][0] * vs[1][1], vs[2][0] * vs[2][1]]])
+        b = np.array([self.principal_point[0], self.principal_point[1],
+                         self.focal_length ** 2 + self.principal_point[0] ** 2,
+                         self.focal_length ** 2 + self.principal_point[1] ** 2,
+                         self.principal_point[0] * self.principal_point[1]])
+        x = scipy.linalg.pinv2(A).dot(b)
+        l1 = math.sqrt(abs(x[0]))
+        l2 = math.sqrt(abs(x[1]))
+        l3 = math.sqrt(abs(x[2]))
+
+        # now, plug this in to get the rotation matrix
+        u1 = vs[0][0]
+        v1 = vs[0][1]
+        u2 = vs[1][0]
+        v2 = vs[1][1]
+        u3 = vs[2][0]
+        v3 = vs[2][1]
+        u0 = self.principal_point[0]
+        v0 = self.principal_point[1]
+
+        R = np.array([[l1 * (u1 - u0) / self.focal_length, l2 * (u2 - u0) / self.focal_length,
+                          l3 * (u3 - u0) / self.focal_length],
+                         [l1 * (v1 - v0) / self.focal_length, l2 * (v2 - v0) / self.focal_length,
+                          l3 * (v3 - v0) / self.focal_length],
+                         [l1, l2, l3]])
+
+        # finally solve for the translation in image space
+        # to do this, we assume the matrix KR maps to a space whose origin is at the camera
+        # once we figure out where our given origin maps to in world space, that tells us
+        # how much we want to translate in world space to get there
+        K = self.get_intrinsic_camera_transformation()
+        t = np.linalg.inv(K.dot(R)).dot(np.array([origin[0], origin[1], 1]))
+        print(R)
+        print(t)
+
+        def isclose(x, y, rtol=1.e-5, atol=1.e-8):
+            return abs(x - y) <= atol + rtol * abs(y)
+
+        def euler_angles_from_rotation_matrix(R):
+            '''
+            From a paper by Gregory G. Slabaugh (undated),
+            "Computing Euler angles from a rotation matrix
+            '''
+            phi = 0.0
+            if isclose(R[2, 0], -1.0):
+                theta = math.pi / 2.0
+                psi = math.atan2(R[0, 1], R[0, 2])
+            elif isclose(R[2, 0], 1.0):
+                theta = -math.pi / 2.0
+                psi = math.atan2(-R[0, 1], -R[0, 2])
+            else:
+                theta = -math.asin(R[2, 0])
+                cos_theta = math.cos(theta)
+                psi = math.atan2(R[2, 1] / cos_theta, R[2, 2] / cos_theta)
+                phi = math.atan2(R[1, 0] / cos_theta, R[0, 0] / cos_theta)
+            return psi, theta, phi
+
+        print(euler_angles_from_rotation_matrix(R))
+        return (R, t)
 
     def create_debug_VP_image(self, show_image=False, save_image=None):
         """
@@ -563,8 +672,14 @@ class vp_detection(object):
             cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
                      (0, 0, 0), 2, cv2.LINE_AA)
 
+        for i in range(3):
+            vp_x = self._vps_2D[i][0]
+            vp_y = self._vps_2D[i][1]
+            cv2.circle(img, (vp_x,vp_y), 10, colours[i], 5, cv2.LINE_AA)
+
         # For each cluster of lines, draw them in their right colour
         # For each lines mark the end that is further from the vp
+
         for i in range(3):
             for (x1, y1, x2, y2) in self.__lines[self.__clusters[i]]:
                 vp_x = self._vps_2D[i][0]
@@ -575,14 +690,34 @@ class vp_detection(object):
                 dx = vp_x - x2
                 dy = vp_y - y2
                 d2 = np.sqrt(dx * dx + dy * dy)
-                cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
-                         colours[i], 2, cv2.LINE_AA)
+             #   cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
+                #         colours[i], 2, cv2.LINE_AA)
                 if d2 > d1:
                     cv2.circle(img, (x2, y2), 7, colours[i], 2, cv2.LINE_AA)
                 else:
                     cv2.circle(img, (x1, y1), 7, colours[i], 2, cv2.LINE_AA)
 
+        radians = np.arctan2(self._vps_2D[1][1] - self._vps_2D[0][1],
+                             self._vps_2D[1][0] - self._vps_2D[0][0])
+        print((radians,radians*57.3))
+        radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[0][1],
+                             self._vps_2D[2][0] - self._vps_2D[0][0])
+        print((radians, radians * 57.3))
+        radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[1][1],
+                             self._vps_2D[2][0] - self._vps_2D[1][0])
+        print((radians, radians * 57.3))
 
+
+        # draw a line between first 2 vps
+        cv2.line(img, (int(self._vps_2D[0][0]), int(self._vps_2D[0][1])),
+                 (int(self._vps_2D[1][0]), int(self._vps_2D[1][1])),
+                 (255, 0, 0), 4, cv2.LINE_AA)
+        cv2.line(img, (int(self._vps_2D[0][0]), int(self._vps_2D[0][1])),
+                 (int(self._vps_2D[2][0]), int(self._vps_2D[2][1])),
+                 (0, 255, 0), 4, cv2.LINE_AA)
+        cv2.line(img, (int(self._vps_2D[1][0]), int(self._vps_2D[1][1])),
+                 (int(self._vps_2D[2][0]), int(self._vps_2D[2][1])),
+                 (0, 0, 255), 4, cv2.LINE_AA)
 
         # Show image if necessary
         if show_image:
@@ -600,9 +735,9 @@ class vp_detection(object):
 
 def main(input_path, roi):
     # Extract command line arguments
-    length_thresh = 60
+    length_thresh = 30
     principal_point = None
-    focal_length = 1102.79
+    focal_length = 20
     debug_mode = 1
     debug_show = 1
     debug_path = None
@@ -626,6 +761,14 @@ def main(input_path, roi):
 
 
     vps = vpd.find_image_vps(img)
+    vpd.calculate_focal_length()
+    vpd.solve_world_to_cam()
+    K = vpd.get_intrinsic_camera_transformation()
+    kp1 = K * np.transpose(K)
+    w = np.linalg.inv(kp1)
+    print(vpd.get_intrinsic_camera_transformation())
+    print(w)
+
     print('Principal point: {}'.format(vpd.principal_point))
 
     # Show VP information
@@ -637,6 +780,18 @@ def main(input_path, roi):
     print("\nThe vanishing points in image coordinates are: ")
     for i, vp in enumerate(vp2D):
         print("Vanishing Point {:d}: {}".format(i + 1, vp))
+
+    vpsT = np.transpose(vps)
+    vt12 = vpsT[0] * w * vps[1]
+    vt13 = vpsT[0] * w * vps[2]
+    vt23 = vpsT[1] * w * vps[2]
+    print((vt12))
+    print((vt13))
+    print((vt23))
+
+    d = kp1 * vps
+    d = d / np.linalg.norm(d)
+    print((d))
 
     # Extra stuff
     if debug_mode or debug_show:
