@@ -1,4 +1,4 @@
-# The original code taken from https://docs.opencv.org/3.4/d7/d8b/tutorial_py_lucas_kanade.html
+
 
 import cv2 as cv
 import numpy as np
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             next = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
 
             # prev, next, flow, pyr_scale, levels, winsize, iterations, poly_n, poly_sigma, flags
-            flow = cv.calcOpticalFlowFarneback(prvs, next, None, 0.5, 2, 15, 7, 5, 1.1, 0)
+            flow = cv.calcOpticalFlowFarneback(prvs, next, None, 0.75, 3, 5, 7, 5, 1.1, 0)
             mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1])
             vert = ang % (np.pi / 2.0)
             vert = vert < (np.pi / 16.)
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
             bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
 
-            cv.imshow('frame2', bgr)
+            cv.imshow('frame2', mag)
             k = cv.waitKey(30) & 0xff
             if k == 27:
                 break
