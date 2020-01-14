@@ -19,7 +19,7 @@ def get_line_angle(line):
     """
     x1, y1, x2, y2 = np.array(line, dtype=np.float64)
     radians = np.arctan2(y2 - y1, x2 - x1)
-    return math.degrees(radians) % 360
+    return radians
 
 
 def point_to_point_dist(point_a, point_b):
@@ -70,6 +70,8 @@ class movement_direction:
         self.debug = False
         self.direction = []
         self.avg_angle = None
+        self.show_vectors = False
+        self.show_axis = False
 
     def is_loaded(self):
         return self._is_loaded
@@ -106,8 +108,9 @@ class movement_direction:
             self.prev_frame = frame.copy()
 
             disp_frame = self.draw_tracks(self.display, self.keypoints, self.new_points)
-            cv.line(disp_frame, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
-            cv.line(disp_frame, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
+            if self.show_axis:
+                cv.line(disp_frame, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
+                cv.line(disp_frame, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
             cv.imshow("Frame", disp_frame)
 
             key = cv.waitKey(1) & 0xFF
@@ -134,9 +137,10 @@ class movement_direction:
             self.get_features()
             if self.debug: print('max distance passed: reset ')
             avg_angle = self.measure_tracks(self.keypoints, self.new_points)
+            avg_angle = math.degrees(avg_angle) % 360
             self.direction.append(avg_angle)
-            avg_angle = np.average(self.direction)
-            print(('frame, direction:', self.frame_count, int(avg_angle)))
+            self.avg_angle = int(np.average(self.direction))
+            print(('frame, direction:', self.frame_count, self.avg_angle))
 
 
         # if few new points create features on the prev frame
@@ -201,27 +205,40 @@ class movement_direction:
         return dist
 
     def draw_tracks(self, frame, points1, points2):
-        for i, (new, old) in enumerate(zip(points1, points2)):
-            a, b = new.ravel()
-            c, d = old.ravel()
-            frame = cv.line(frame, (a, b), (c, d), (0, 255, 0), 1)
+        if self.show_vectors:
+            for i, (new, old) in enumerate(zip(points1, points2)):
+                a, b = new.ravel()
+                c, d = old.ravel()
+                cl = (0,255,0)
+                if a < self.width / 2: cl = (255,0,0)
+                frame = cv.line(frame, (c, d), (a, b), cl, 1)
+                cv.circle(frame, (a,b), 5, cl, 0, 3)
 
         if not (self.avg_angle is None):
-            drawString(frame, self.avg_angle)
-
+            direction = 'Straight'
+            if self.avg_angle < 75: direction = 'Right'
+            elif self.avg_angle > 120: direction = 'Left'
+            cv.putText(frame, direction, (self.width//2, self.height//2), cv.FONT_HERSHEY_COMPLEX_SMALL,
+                        3, (225, 0, 0), 10)
         return frame
 
     def measure_tracks(self, points1, points2):
-        avg_angle = 0
+        angles = []
         for i, (new, old) in enumerate(zip(points1, points2)):
             a, b = new.ravel()
             c, d = old.ravel()
             line = [c, d, a, b]
-            angle = int(get_line_angle(line))
-            avg_angle += angle
-        avg_angle = avg_angle / len(points1)
-        avg_angle = avg_angle % 180
-        return avg_angle
+            angle = get_line_angle(line)
+            angles.append(angle)
+
+        angles = np.asanyarray(angles)
+        mean_angle = np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())
+        if mean_angle < 0:
+            mean_angle = math.pi + math.pi + mean_angle
+
+        return mean_angle
+
+
 
 
 if __name__ == "__main__":
@@ -236,107 +253,6 @@ if __name__ == "__main__":
         exit(1)
     runner.run()
 
-#  video_file = sys.argv[1]
-#  filename =
-#
-#  # Create some random colors
-#  color = np.random.randint(0,255,(100,3))
-#  # Take first frame and find corners in it
-#  ret, old_frame = cap.read()
-#  old_frame = old_frame[53:350, 6:708]
-#  old_gray = cv.cvtColor(old_frame, cv.COLOR_BGR2GRAY)
-#  p0 = cv.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
-#  keypoints = np.reshape(p0, (-1, 2))
-#  m0 = geometric_median_2d(keypoints)
-#  m1 = m0
-#
-#  # Create a mask image for drawing purposes
-#
-#
-#  fc = 1
-#  directions = []
-#  lhist = np.zeros((1,360), np.int)
-#  while cap.isOpened():
-#      ret, frame = cap.read()
-#      frame = get_roi(frame, )
-#      if not ret:
-#          break
-#
-#      if prev_frame is None:
-#          prev_frame = cv2.resize(frame, dsize=(w, h))
-#          prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
-#          mask = np.zeros_like(old_frame)
-#          continue
-#
-#      frame = cv2.resize(frame, dsize=(w, h))
-#      gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#
-#  while(1):
-#      ret,frame = cap.read()
-#      if frame is None: break
-#      frame = frame[53:350, 6: 708]
-#
-#      frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-#      # calculate optical flow
-#      p1, st, err = cv.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-#      p0r, st, err = cv.calcOpticalFlowPyrLK(frame_gray, old_gray, p1, None, **lk_params)
-#      d = abs(p0 - p0r).reshape(-1, 2).max(-1)
-#      st = d < 1.0
-#
-#      if len(p1) < 1:
-#          continue
-#      if fc == 1:
-#          cv.imwrite('/Users/arman/tmp/first.png', frame_gray)
-#
-#      # Select good points
-#      good_new = p1[st==1]
-#      good_old = p0[st==1]
-#      # caclulate median flow position
-#      keypoints = np.reshape(good_new, (-1, 2))
-#      m1 = geometric_median_2d(keypoints)
-#      path = [m1[0], m1[1], m0[0], m0[1]]
-#      angle = int(get_line_angle(path))
-#      dis = point_to_point_dist(m0, m1)
-#      if dis < 1.0: continue
-#      if dis > max_dist:continue
-#          #old_points = cv2.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
-#          #p0 = np.copy()
-#      tcl = (0,0,255)
-#      if dis > 10.0: tcl = (0,255,0)
-#      mask = cv.line(mask, (int(m1[0]),int(m1[1])),(int(m0[0]),int(m0[1])), tcl, 2)
-#
-#      m0 = m1
-#      # draw the tracks
-#  #    print('------>' + str(fc))
-#  #     for i,(new,old) in enumerate(zip(good_new,good_old)):
-#  #         a,b = new.ravel()
-#  #         c,d = old.ravel()
-#  #         line = [a,b,c,d]
-#    #  #         angle = int(get_line_angle(line))
-#    #  #         dis = point_to_point_dist((a,b),(c,d)) // 1
-#  #         lhist[0][angle] = lhist[0][angle] + dis
-#  #         if dis > 0:
-#  #          #   print (str(angle) + '......' + str(dis))
-#  #             directions.append(angle)
-#  #         cl = bgrFromHue(angle)
-#  #         mask = cv.line(mask, (a,b),(c,d), cl, 2)
-#  #         frame = cv.circle(frame,(a,b),5,color[i].tolist(),-1)
-# #         cv.circle(frame, m0, 10, (0, 0, 255), -1)
-#  #    print('<------' + str(fc))
-#      img = cv.add(frame,mask)
-#      cv.namedWindow('frame', cv.WINDOW_NORMAL)
-#      cv.imshow('frame',img)
-#      fc = fc + 1
-#      k = cv.waitKey(30) & 0xff
-#      if k == 27:
-#          break
-#      # Now update the previous frame and previous points
-#      old_gray = frame_gray.copy()
-#      p0 = good_new.reshape(-1,1,2)
-#
-#  _ = plt.hist(lhist , fc='k', ec='k')  # arguments are passed to np.histogram
-#  plt.title(filename)
-#  plt.show()
 #  cv.waitKey(0)
 #  cv.destroyAllWindows()
 #  cap.release()
