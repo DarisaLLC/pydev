@@ -139,7 +139,7 @@ feature_params = dict(maxCorners=8000,
 Rpos = np.eye(3, 3, dtype=np.float32)
 Tpos = np.zeros((3, 1), dtype=np.float32)
 
-cap = cv2.VideoCapture('VID_20171120_134746.mp4')
+cap = cv2.VideoCapture("/Users/arman/PycharmProjects/pydev/projects/wiic/video/2019_11_11/fiducial_curved_approach_2.mp4")
 prev_frame = None
 prev_gray = None
 
@@ -168,10 +168,10 @@ while cap.isOpened():
     if keypoint_dist > max_dist:
         # update motion
         if len(keypoints) > 7 and len(new_points) > 7:
-            old_pos = np.copy(Tpos) # copy old position for drawing of path
+            old_pos = np.copy(Tpos)  # copy old position for drawing of path
             Rpos, Tpos = update_motion(new_points, keypoints, Rpos, Tpos, scale=keypoint_dist)
 
-            #draw path
+            # draw path
             path.append(Tpos)
             canvas = draw_path(canvas, path, Rpos)
 
@@ -200,19 +200,19 @@ while cap.isOpened():
         sw = 0
         se = 0
         for x, y in new_points:
-            if x > w//2:
-                if y > h//2:
+            if x > w // 2:
+                if y > h // 2:
                     se += 1
                 else:
                     ne += 1
             else:
-                if y > h//2:
+                if y > h // 2:
                     sw += 1
                 else:
                     nw += 1
 
         num_features = min((nw, ne, sw, se))
-        if num_features < min_features//4:
+        if num_features < min_features // 4:
             # update motion
             if len(keypoints) > 7 and len(new_points) > 7:
                 old_pos = np.copy(Tpos)  # copy old position for drawing of path
@@ -231,7 +231,7 @@ while cap.isOpened():
             old_points = np.reshape(new_points, (-1, 1, 2))
 
     new_points, status, error = cv2.calcOpticalFlowPyrLK(prev_gray, gray, old_points, None, **lk_params)
-    keypoints = np.reshape(keypoints, (-1, 1, 2)) # TODO find out why this is necessary?!
+    keypoints = np.reshape(keypoints, (-1, 1, 2))  # TODO find out why this is necessary?!
     old_points = old_points[status == 1]
     new_points = new_points[status == 1]
     keypoints = keypoints[status == 1]

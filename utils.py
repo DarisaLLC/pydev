@@ -3,46 +3,57 @@ import numpy as np
 import itertools
 import math
 
-'''
-From PyImageSearch
-'''
-
-
-def plot_colors(hist, centroids):
-    # initialize the bar chart representing the relative frequency
-    # of each of the colors
-    bar = np.zeros((50, 300, 3), dtype="uint8")
-    startX = 0
-
-    # loop over the percentage of each cluster and the color of
-    # each cluster
-    for (percent, color) in zip(hist, centroids):
-        # plot the relative percentage of each cluster
-        endX = startX + (percent * 300)
-        cv2.rectangle(bar, (int(startX), 0), (int(endX), 50),
-                      color.astype("uint8").tolist(), -1)
-        startX = endX
-
-    # return the bar chart
-    return bar
-
-def centroid_histogram(clt):
-    # grab the number of different clusters and create a histogram
-    # based on the number of pixels assigned to each cluster
-    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-    (hist, _) = np.histogram(clt.labels_, bins=numLabels)
-
-    # normalize the histogram, such that it sums to one
-    hist = hist.astype("float")
-    hist /= hist.sum()
-
-    # return the histogram
-    return hist
 
 '''
 Variety of sources including mine
 
 '''
+
+
+def bgrFromHue(degrees):
+    hsv = np.zeros((1, 1, 3), np.uint8)
+    hsv[0, 0, 0] = ((degrees % 360) * 256) / 360.0
+    hsv[0, 0, 1] = ((degrees % 90) * 256) / 90.0
+    hsv[0, 0, 2] = ((degrees % 45) * 256) / 45.0
+    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
+    tp = tuple([int(x) for x in bgr[0, 0, :]])
+    return tp
+
+
+def get_mean_distance_2d(features1, features2):
+    num_features = min((len(features1), len(features2)))
+    features1 = np.reshape(features1, (num_features, 2))
+    features2 = np.reshape(features2, (num_features, 2))
+
+    features = zip(features1, features2)
+    n = 0
+    dist = 0
+    for f1, f2 in features:
+        dx = f1[0]-f2[0]
+        dy = f1[1]-f2[1]
+        d = math.sqrt(dx**2+dy**2)
+        dist += d
+        n += 1
+
+    if n == 0:
+        return 0
+
+    dist /= n
+    return dist
+
+def get_rotation(mat, axis=0):
+    if axis == 0:
+        v0 = np.array([[1.], [0.], [0.]], dtype=np.float32)
+    elif axis == 1:
+        v0 = np.array([[0.], [1.], [0.]], dtype=np.float32)
+    else:
+        v0 = np.array([[0.], [0.], [1.]], dtype=np.float32)
+
+    v1 = np.dot(mat, v0)
+    dot = np.vdot(v0, v1)
+    a = np.arccos(dot)
+    return a
+
 def drawString(img, text):
     font_scale = 1.5
     font = cv2.FONT_HERSHEY_PLAIN
