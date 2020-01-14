@@ -151,12 +151,13 @@ new_points = []
 keypoints = []
 
 path = []
-
+fc = 0
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
-
+    print(('frame: ',fc))
+    fc = fc + 1
     if prev_frame is None:
         prev_frame = cv2.resize(frame, dsize=(w, h))
         prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
@@ -179,6 +180,7 @@ while cap.isOpened():
         keypoint_dist = 0
         old_points = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feature_params)
         keypoints = np.copy(old_points)
+        print('max distance passed: reset ')
     elif len(new_points) < min_features:
         # update motion
         if len(keypoints) > 7 and len(new_points) > 7:
@@ -193,6 +195,7 @@ while cap.isOpened():
         keypoint_dist = 0
         old_points = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feature_params)
         keypoints = np.copy(old_points)
+        print('copied old_points to keypoints ')
     else:
         # check number of features in each quadrant to ensure a good distribution of features across entire image
         nw = 0
@@ -226,9 +229,12 @@ while cap.isOpened():
             keypoint_dist = 0
             old_points = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feature_params)
             keypoints = np.copy(old_points)
+            print('too few features reset  ')
         else:
             dim = np.shape(new_points)
             old_points = np.reshape(new_points, (-1, 1, 2))
+            print('ok')
+
 
     new_points, status, error = cv2.calcOpticalFlowPyrLK(prev_gray, gray, old_points, None, **lk_params)
     keypoints = np.reshape(keypoints, (-1, 1, 2))  # TODO find out why this is necessary?!

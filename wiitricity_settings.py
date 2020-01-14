@@ -46,8 +46,8 @@ def initialize_settings(frame_tl, capture_size):
                           blockSize=3,
                           useHarrisDetector=False,
                           k=0.04)
-    settings['max_distance'] = 15
-    settings['min_features'] = 150
+    settings['max_distance'] = 25
+    settings['min_features'] = 300
 
 
 

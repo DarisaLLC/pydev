@@ -20,6 +20,8 @@ class movement_direction:
         self.row_range = (video_roi['row_low'], video_roi['row_high'])
         self.column_range = (video_roi['column_low'], video_roi['column_high'])
         self.settings =  initialize_settings_from_video_roi(video_roi)
+        self.width = video_roi['column_high'] -  video_roi['column_low']
+        self.height = video_roi['row_high'] -  video_roi['row_low']
 
         self.feature_params = self.settings['feature_params']
         self.lk_params = self.settings['lk_params']
@@ -34,8 +36,7 @@ class movement_direction:
         self.new_points = []
         self.keypoints = []
         self.m0 = self.m1 = 0
-        self.width = 0
-        self.height = 0
+        self.display = None
 
     def is_loaded(self):
         return self._is_loaded
@@ -48,8 +49,8 @@ class movement_direction:
         self._is_loaded = True
         self.frame_count = 0
         self.prev_frame = None
-        self.width = int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+        assert(self.width < int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)))
+        assert(self.height < int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
 
     def run(self):
         if not self._is_loaded:self.load()
@@ -57,24 +58,32 @@ class movement_direction:
         if not ret:
             return
         self.prev_frame = self.prepare_frame(captured_frame)
+        print('frame: ', self.frame_count)
+        self.frame_count = self.frame_count + 1
+
 
         while self.cap.isOpened():
             ret, captured_frame = self.cap.read()
             if not ret: break
+            print('frame: ', self.frame_count)
+            self.frame_count = self.frame_count + 1
             frame = self.prepare_frame(captured_frame)
             assert (not (self.prev_frame is None))
             self.update_features()
             self.get_flow(frame)
-            frame = self.draw_tracks(frame, self.keypoints, self.new_points)
-            cv.line(frame, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
-            cv.line(frame, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
-            cv.imshow("Frame", frame)
-            #cv.imshow("Path", self.canvas)
             self.prev_frame = frame.copy()
+
+            disp_frame = self.draw_tracks(self.display, self.keypoints, self.new_points)
+            cv.line(disp_frame, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
+            cv.line(disp_frame, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
+            cv.imshow("Frame", disp_frame)
+            #cv.imshow("Path", self.canvas)
+
             key = cv.waitKey(1) & 0xFF
 
     def prepare_frame(self,frame):
         frame = self.get_roi(frame)
+        self.display = frame.copy()
         frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         return frame
 
@@ -83,6 +92,7 @@ class movement_direction:
         return frame[self.row_range[0]:self.row_range[1], self.column_range[0]:self.column_range[1]]
 
     def get_features(self):
+        self.keypoint_dist = 0
         # collect features on the prev frame and compute its geometric median
         self.old_points = cv.goodFeaturesToTrack(self.prev_frame, mask=None, **self.feature_params)
         self.keypoints = np.copy(self.old_points)
@@ -94,9 +104,11 @@ class movement_direction:
         # if moved too much re create features on the prev frame
         if self.keypoint_dist > self.max_dist:
             self.get_features()
+            print('max distance passed: reset ')
         # if few new points create features on the prev frame
         elif len(self.new_points) < self.min_features:
             self.get_features()
+            print('copied old points to keypoints   ')
         else:
             # check number of features in each quadrant to ensure a good distribution of features across entire image
             nw = ne = sw = se = 0
@@ -110,13 +122,15 @@ class movement_direction:
                     if y > h // 2:sw += 1
                     else:nw += 1
 
-            self.num_features = min((nw, ne, sw, se))
+            self.num_features = min((nw, ne))
             if self.num_features < self.min_features // 4:
                 self.get_features()
+                print('too few features reset  ')
             else:
                 # just copy new points to old points
                 dim = np.shape(self.new_points)
-                old_points = np.reshape(self.new_points, (-1, 1, 2))
+                self.old_points = np.reshape(self.new_points, (-1, 1, 2))
+                print('ok')
 
     def get_flow(self, frame):
         self.new_points, self.status, self.error = cv.calcOpticalFlowPyrLK(self.prev_frame, frame, self.old_points,
