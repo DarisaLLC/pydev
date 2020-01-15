@@ -37,25 +37,43 @@ def point_to_point_dist(point_a, point_b):
 
 class movement_direction:
 
-    def __init__(self, video_source_info, video_roi):
+    def __init__(self, video_source_info, video_roi ):
         self.source_info = video_source_info
         self.source = None
-        if isinstance(self.source_info, int) and self.source_info == 0:
+        if self.source_info == '0' or self.source_info == '1':
             self.source = 'Camera'
         elif isinstance(self.source_info, str) and Path(self.source_info).exists() and Path(sys.argv[1]).is_file():
             self.source = self.source_info
         self._is_valid = not (self.source is None)
-        self.row_range = (video_roi['row_low'], video_roi['row_high'])
-        self.column_range = (video_roi['column_low'], video_roi['column_high'])
-        self.settings = initialize_settings_from_video_roi(video_roi)
-        self.width = video_roi['column_high'] - video_roi['column_low']
-        self.height = video_roi['row_high'] - video_roi['row_low']
 
+        if self.source == 'Camera':
+            self.cap = cv.VideoCapture(int(self.source_info))
+        else:
+            self.cap = cv.VideoCapture(self.source_info)
+        self._is_loaded = True
+        self.frame_count = 0
+        self.prev_frame = None
+
+
+        if self.source == 'Camera':
+            self.row_range = (0, self.cap.get(cv.CAP_PROP_FRAME_HEIGHT-1))
+            self.column_range = (0, self.cap.get(cv.CAP_PROP_FRAME_WIDTH))
+            self.width =  self.cap.get(cv.CAP_PROP_FRAME_WIDTH)
+            self.height =  self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
+            self.settings = initialize_settings ((10, 60),
+                                       (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        else:
+            self.row_range = (video_roi['row_low'], video_roi['row_high'])
+            self.column_range = (video_roi['column_low'], video_roi['column_high'])
+            self.settings = initialize_settings_from_video_roi(video_roi)
+            self.width = video_roi['column_high'] - video_roi['column_low']
+            self.height = video_roi['row_high'] - video_roi['row_low']
+
+        assert (self.width <= int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)))
+        assert (self.height <= int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
         self.feature_params = self.settings['feature_params']
         self.lk_params = self.settings['lk_params']
         self.max_dist = self.settings['max_distance']
-        self.cap = None
-        self._is_loaded = False
         self.prev_frame = None
         self.canvas = None
         self.keypoint_dist = 0
@@ -77,16 +95,7 @@ class movement_direction:
     def is_valid(self):
         return self._is_valid
 
-    def load(self):
-        self.cap = cv.VideoCapture(self.source_info)
-        self._is_loaded = True
-        self.frame_count = 0
-        self.prev_frame = None
-        assert (self.width < int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)))
-        assert (self.height < int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
-
     def run(self):
-        if not self._is_loaded: self.load()
         ret, captured_frame = self.cap.read()
         if not ret:
             return
@@ -243,8 +252,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit(1)
 
+    # use video_roi['hd'] for newer video
     runner = movement_direction(sys.argv[1], video_rois['one'])
-    runner.load()
     loaded = runner.is_loaded()
     if not loaded:
         print('Video Did not Load')
