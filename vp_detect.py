@@ -1,8 +1,8 @@
 """
-Python + OpenCV Implementation of the vanishing point algorithm by Xiaohu Lu
+Based on Python + OpenCV Implementation of the vanishing point algorithm by Xiaohu Lu
 et al. - http://xiaohulugo.github.io/papers/Vanishing_Point_Detection_WACV2017.pdf.
 
-Author: Ray Phan (https://github.com/rayryeng)
+
 """
 
 import sys
