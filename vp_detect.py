@@ -27,10 +27,11 @@ class vp_detection(object):
     """
 
     def __init__(self, length_thresh=30, principal_point=None,
-                 focal_length=1500, seed=None):
+                 focal_length=20, seed=None):
         self._length_thresh = length_thresh
         self._principal_point = principal_point
-        self._focal_length = focal_length
+        self._estimated_focal_length = focal_length
+        self._focal_length = None
         self._angle_thresh = np.pi / 30  # For displaying debug image
         self._vps = None  # For storing the VPs in 3D space
         self._vps_2D = None  # For storing the VPs in 2D space
@@ -114,22 +115,6 @@ class vp_detection(object):
             The focal length in pixels
         """
         return self._focal_length
-
-    @focal_length.setter
-    def focal_length(self, value):
-        """
-        Focal length for VP detection algorithm
-
-        Args:
-            value: The focal length in pixels
-
-        Raises:
-            ValueError: If the input is 0 or negative
-        """
-        if value < self.__tol:  # If the focal length is too small, reject
-            raise ValueError('Invalid focal length: {}'.format(value))
-
-        self._focal_length = value
 
     @property
     def vps(self):
@@ -250,7 +235,7 @@ class vp_detection(object):
             # Find where it intersects in the sphere
             vp1 = np.zeros(3, dtype=np.float32)
             vp1[:2] = vp1_img[:2] / vp1_img[2] - self._principal_point
-            vp1[2] = self._focal_length
+            vp1[2] = self._estimated_focal_length
 
             # Normalize
             vp1 /= np.sqrt(np.sum(np.square(vp1)))
@@ -327,7 +312,7 @@ class vp_detection(object):
         # Determine corresponding lat and lon mapped to the sphere
         X = (pt_intersect[:, 0] / pt_intersect[:, 2]) - self._principal_point[0]
         Y = (pt_intersect[:, 1] / pt_intersect[:, 2]) - self._principal_point[1]
-        Z = self._focal_length
+        Z = self._estimated_focal_length
         lat = np.arccos(Z / np.sqrt(X * X + Y * Y + Z * Z))
         lon = np.arctan2(X, Y) + np.pi
 
@@ -394,7 +379,7 @@ class vp_detection(object):
         # votes
         best_idx = np.argmax(votes)
         final_vps = vp_hypos[best_idx]
-        vps_2D = self._focal_length * (final_vps[:, :2] / final_vps[:, 2][:, None])
+        vps_2D = self._estimated_focal_length * (final_vps[:, :2] / final_vps[:, 2][:, None])
         vps_2D += self._principal_point
 
         # Find the coordinate with the largest vertical value
@@ -543,9 +528,11 @@ class vp_detection(object):
         vpmin = np.linalg.norm(vps, axis=1).argmin()
         vpsecond = 0 if vpmin == 1 else 1
 
-        self.focal_length = math.sqrt(
+
+        self._focal_length = math.sqrt(
             np.linalg.norm((self.principal_point - vps[vpmin]) * (vps[vpsecond] - self.principal_point)))
-        print(self.focal_length)
+        error = self._focal_length - self._estimated_focal_length
+        print('focal length',self.focal_length, ' computed vs EXIF ', error * error)
 
     def solve_world_to_cam(self, origin=(0, 0)):
         """
@@ -599,8 +586,8 @@ class vp_detection(object):
         # how much we want to translate in world space to get there
         K = self.get_intrinsic_camera_transformation()
         t = np.linalg.inv(K.dot(R)).dot(np.array([origin[0], origin[1], 1]))
-        print(R)
-        print(t)
+        print('world to cam rotation\n', R)
+        print('world to cam translation\n', t)
 
         def isclose(x, y, rtol=1.e-5, atol=1.e-8):
             return abs(x - y) <= atol + rtol * abs(y)
@@ -624,7 +611,7 @@ class vp_detection(object):
                 phi = math.atan2(R[1, 0] / cos_theta, R[0, 0] / cos_theta)
             return psi, theta, phi
 
-        print(euler_angles_from_rotation_matrix(R))
+        # print(euler_angles_from_rotation_matrix(R))
         return (R, t)
 
     def create_debug_VP_image(self, show_image=False, save_image=None):
@@ -655,6 +642,9 @@ class vp_detection(object):
             raise ValueError('The save_image path should be a string')
 
         img = self.__img.copy()
+        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hue,satu,vol = cv2.split(img_hsv)
+        img = np.dstack([hue,hue,hue])
         if len(img.shape) == 2:  # If grayscale, artificially make into RGB
             img = np.dstack([img, img, img])
 
@@ -662,6 +652,7 @@ class vp_detection(object):
         # BGR format
         # First row is red, second green, third blue
         colours = colours[:, ::-1].astype(np.int).tolist()
+        colours[2][1] = colours[2][2] = 255
 
         # Draw the outlier lines as black
         all_clusters = np.hstack(self.__clusters)
@@ -690,22 +681,21 @@ class vp_detection(object):
                 dx = vp_x - x2
                 dy = vp_y - y2
                 d2 = np.sqrt(dx * dx + dy * dy)
-             #   cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
-                #         colours[i], 2, cv2.LINE_AA)
+                cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),colours[i], 2, cv2.LINE_AA)
                 if d2 > d1:
                     cv2.circle(img, (x2, y2), 7, colours[i], 2, cv2.LINE_AA)
                 else:
                     cv2.circle(img, (x1, y1), 7, colours[i], 2, cv2.LINE_AA)
 
-        radians = np.arctan2(self._vps_2D[1][1] - self._vps_2D[0][1],
-                             self._vps_2D[1][0] - self._vps_2D[0][0])
-        print((radians,radians*57.3))
-        radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[0][1],
-                             self._vps_2D[2][0] - self._vps_2D[0][0])
-        print((radians, radians * 57.3))
-        radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[1][1],
-                             self._vps_2D[2][0] - self._vps_2D[1][0])
-        print((radians, radians * 57.3))
+        # radians = np.arctan2(self._vps_2D[1][1] - self._vps_2D[0][1],
+        #                      self._vps_2D[1][0] - self._vps_2D[0][0])
+        # print((radians,radians*57.3))
+        # radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[0][1],
+        #                      self._vps_2D[2][0] - self._vps_2D[0][0])
+        # print((radians, radians * 57.3))
+        # radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[1][1],
+        #                      self._vps_2D[2][0] - self._vps_2D[1][0])
+        # print((radians, radians * 57.3))
 
 
         # draw a line between first 2 vps
@@ -742,6 +732,7 @@ def main(input_path, roi):
     debug_show = 1
     debug_path = None
     seed = 1337
+    reduce = 8
 
     print('Input path: {}'.format(input_path))
     print('Seed: {}'.format(seed))
@@ -753,12 +744,12 @@ def main(input_path, roi):
 
     # Run VP detection algorithm
     img = cv2.imread(input_path, -1)
-    shape = img.shape
-    iroi = [0,0,shape[1]-1,shape[0]-1]
+    rows, cols, channels = img.shape
     if not (roi is None):
-        if contains(iroi, roi):
+        if roi[3] > roi[1] and roi[2] > roi[0] and roi[3] < rows and roi[2] < cols:
             img=img[roi[1]:roi[3],roi[0]:roi[2]]
-
+    rows, cols, channels = img.shape
+    img = cv2.resize(img, (int(cols / reduce), int(rows / reduce)), cv2.INTER_AREA)
 
     vps = vpd.find_image_vps(img)
     vpd.calculate_focal_length()
@@ -766,9 +757,10 @@ def main(input_path, roi):
     K = vpd.get_intrinsic_camera_transformation()
     kp1 = K * np.transpose(K)
     w = np.linalg.inv(kp1)
-    print(vpd.get_intrinsic_camera_transformation())
-    print(w)
-
+    print(' Camera Intrinsic Matrix \n', vpd.get_intrinsic_camera_transformation())
+    print(' Projective Transformation of the absolute conic\n', w)
+    print('Zero Skew', w[0][1] == 0)
+    print('Square Pixels', w[0][1] == 0 and w[0][0] == w[1][1])
     print('Principal point: {}'.format(vpd.principal_point))
 
     # Show VP information
@@ -778,20 +770,22 @@ def main(input_path, roi):
 
     vp2D = vpd.vps_2D
     print("\nThe vanishing points in image coordinates are: ")
+    x_coords = []
+    y_coords = []
     for i, vp in enumerate(vp2D):
+        x_coords.append(vp[0])
+        y_coords.append(vp[1])
         print("Vanishing Point {:d}: {}".format(i + 1, vp))
 
-    vpsT = np.transpose(vps)
-    vt12 = vpsT[0] * w * vps[1]
-    vt13 = vpsT[0] * w * vps[2]
-    vt23 = vpsT[1] * w * vps[2]
-    print((vt12))
-    print((vt13))
-    print((vt23))
+    x_max = np.max(x_coords)
+    x_min = np.min(x_coords)
+    y_max = np.max(y_coords)
+    y_min = np.min(y_coords)
 
-    d = kp1 * vps
-    d = d / np.linalg.norm(d)
-    print((d))
+    print(x_coords)
+    print(y_coords)
+    print((x_min, x_max,y_min,y_max))
+
 
     # Extra stuff
     if debug_mode or debug_show:
