@@ -12,6 +12,7 @@ capture_size is the image size
 
 '''
 video_rois = {'one' : dict(row_low=53,row_high=350,column_low=6,column_high=708),
+              'hd2' : dict(row_low=0,row_high=759,column_low=0,column_high=1919),
               'hd' : dict(row_low=0,row_high=519,column_low=0,column_high=1279)}
 
 def initialize_settings_from_video_roi(video_roi):

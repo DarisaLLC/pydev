@@ -4,7 +4,30 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2 as cv
 import math
-from wiitricity_settings import video_rois, initialize_settings_from_video_roi
+from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
+import logging
+from datetime import datetime
+from enum import Enum, unique
+
+# create logger with 'wiirunner'
+def get_logger():
+    logfilename = 'wiirunner'+datetime.now().strftime("-%d-%m-%Y_%I-%M-%S_%p")+'.log'
+    logger = logging.getLogger('wiirunner')
+    logger.setLevel(logging.DEBUG)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler(logfilename)
+    fh.setLevel(logging.DEBUG)
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
 
 def get_line_angle(line):
     """Calculates the angle of a line.
@@ -34,10 +57,16 @@ def point_to_point_dist(point_a, point_b):
     x2, y2 = np.array(point_b, dtype=np.float64)
     return math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
 
+@unique
+class State(Enum):
+    eRight=1,
+    eLeft=-1,
+    eSame=0,
+    eUnknown=-2
 
 class movement_direction:
 
-    def __init__(self, video_source_info, video_roi ):
+    def __init__(self, video_source_info, user_roi ):
         self.source_info = video_source_info
         self.source = None
         if self.source_info == '0' or self.source_info == '1':
@@ -53,21 +82,33 @@ class movement_direction:
         self._is_loaded = True
         self.frame_count = 0
         self.prev_frame = None
-
-
+        self.prev_angle = None
+        self.current_angle = None
+        self.angle_estimate_available = False
+        self.angle_posts = dict(Right=75,Left=120)
+        self.angle_diff_threshold = 7
+        self.current_state = State.eUnknown
+        self.prev_state = self.current_state
+        self.logger = get_logger()
+        self.logger.info('Source is ' + self.source)
+        self.angle_states = {}
+        self.angle_states[State.eRight] = 'Right'
+        self.angle_states[State.eLeft] = 'Left'
+        self.angle_states[State.eSame] = 'Straight'
+        self.angle_states[State.eUnknown] = 'Unknown'
+        video_roi = user_roi
         if self.source == 'Camera':
-            self.row_range = (0, self.cap.get(cv.CAP_PROP_FRAME_HEIGHT-1))
-            self.column_range = (0, self.cap.get(cv.CAP_PROP_FRAME_WIDTH))
-            self.width =  self.cap.get(cv.CAP_PROP_FRAME_WIDTH)
-            self.height =  self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)
-            self.settings = initialize_settings ((10, 60),
-                                       (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-        else:
-            self.row_range = (video_roi['row_low'], video_roi['row_high'])
-            self.column_range = (video_roi['column_low'], video_roi['column_high'])
-            self.settings = initialize_settings_from_video_roi(video_roi)
-            self.width = video_roi['column_high'] - video_roi['column_low']
-            self.height = video_roi['row_high'] - video_roi['row_low']
+            camera_roi = dict(row_low=0, row_high=int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))-1,
+                                column_low=0, column_high=int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH))-1)
+            video_roi = camera_roi
+
+        self.logger.info(video_roi)
+
+        self.row_range = (video_roi['row_low'], video_roi['row_high'])
+        self.column_range = (video_roi['column_low'], video_roi['column_high'])
+        self.settings = initialize_settings_from_video_roi(video_roi)
+        self.width = video_roi['column_high'] - video_roi['column_low']
+        self.height = video_roi['row_high'] - video_roi['row_low']
 
         assert (self.width <= int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)))
         assert (self.height <= int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
@@ -100,13 +141,13 @@ class movement_direction:
         if not ret:
             return
         self.prev_frame = self.prepare_frame(captured_frame)
-        print('frame: ', self.frame_count)
+        self.logger.info(('frame: ', self.frame_count))
         self.frame_count = self.frame_count + 1
+        cv.namedWindow('Frame', cv.WINDOW_NORMAL)
 
         while self.cap.isOpened():
             ret, captured_frame = self.cap.read()
             if not ret: break
-            if self.debug: print('frame: ', self.frame_count)
             self.frame_count = self.frame_count + 1
             frame = self.prepare_frame(captured_frame)
             assert (not (self.prev_frame is None))
@@ -114,11 +155,11 @@ class movement_direction:
             self.get_flow(frame)
             self.prev_frame = frame.copy()
 
-            disp_frame = self.draw_tracks(self.display, self.keypoints, self.new_points)
+            self.draw_tracks( self.keypoints, self.new_points)
             if self.show_axis:
-                cv.line(disp_frame, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
-                cv.line(disp_frame, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
-            cv.imshow("Frame", disp_frame)
+                cv.line(self.display, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
+                cv.line(self.display, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
+            cv.imshow("Frame", self.display)
 
             key = cv.waitKey(1) & 0xFF
 
@@ -142,18 +183,47 @@ class movement_direction:
         # if moved too much re create features on the prev frame
         if self.keypoint_dist > self.max_dist:
             self.get_features()
-            if self.debug: print('max distance passed: reset ')
+
+            def set_state(_instant_angle):
+                if _instant_angle <= self.angle_posts['Right']:
+                    self.current_state = State.eRight
+                elif _instant_angle >= self.angle_posts['Left']:
+                    self.current_state = State.eLeft
+                else:
+                    self.current_state = State.eSame
+
+            if self.debug: self.logger.debug('max distance passed: reset ')
             avg_angle = self.measure_tracks(self.keypoints, self.new_points)
             avg_angle = math.degrees(avg_angle) % 360
             self.direction.append(avg_angle)
-            self.avg_angle = int(np.average(self.direction))
-            print(('frame, direction:', self.frame_count, self.avg_angle))
+            instant_angle = int(np.average(self.direction))
+            if self.prev_angle is None:
+                self.prev_angle = instant_angle
+                self.prev_state = State.eUnknown
+
+            self.current_angle = instant_angle
+            diff = self.current_angle - self.prev_angle
+            ok = diff < self.angle_diff_threshold
+            if ok and self.current_state == self.prev_state:
+                self.current_state = State.eSame
+            else:
+                set_state(instant_angle)
+
+            self.prev_angle = self.current_angle
+            self.prev_state = self.current_state
+
+            ## determine current direction:
+            ## difference = current - prev
+            ## if difference < 0 threshold and current is not Unknow ==> Straight
+            ## if prev != current ==> current
+
+            self.logger.info(('frame, direction:', self.frame_count, instant_angle, self.current_state ))
 
 
         # if few new points create features on the prev frame
         elif len(self.new_points) < self.min_features:
             self.get_features()
-            if self.debug: print('copied old points to keypoints   ')
+            if self.debug: self.logger.debug('copied old points to keypoints   ')
         else:
             # check number of features in each quadrant to ensure a good distribution of features across entire image
             nw = ne = sw = se = 0
@@ -174,12 +244,12 @@ class movement_direction:
             self.num_features = min((nw, ne))
             if self.num_features < self.min_features // 4:
                 self.get_features()
-                if self.debug: print('too few features reset  ')
+        #        if self.debug: self.logger.debug('too few features reset  ')
             else:
                 # just copy new points to old points
                 dim = np.shape(self.new_points)
                 self.old_points = np.reshape(self.new_points, (-1, 1, 2))
-                if self.debug: print('ok')
+                if self.debug: self.logger.debug('ok')
 
     def get_flow(self, frame):
         self.new_points, self.status, self.error = cv.calcOpticalFlowPyrLK(self.prev_frame, frame, self.old_points,
@@ -211,23 +281,25 @@ class movement_direction:
         dist /= n
         return dist
 
-    def draw_tracks(self, frame, points1, points2):
+    def draw_direction(self):
+        if self.prev_state != State.eUnknown and self.current_state != State.eUnknown:
+            direction = self.angle_states[self.current_state]
+            cv.putText(self.display, direction, (self.width // 2, self.height // 2), cv.FONT_HERSHEY_DUPLEX,
+                       2, (225, 0, 0), 7)
+
+    def draw_tracks(self, points1, points2):
         if self.show_vectors:
             for i, (new, old) in enumerate(zip(points1, points2)):
                 a, b = new.ravel()
                 c, d = old.ravel()
                 cl = (0,255,0)
                 if a < self.width / 2: cl = (255,0,0)
-                frame = cv.line(frame, (c, d), (a, b), cl, 1)
-                cv.circle(frame, (a,b), 5, cl, 0, 3)
+                frame = cv.line(self.display, (c, d), (a, b), cl, 1)
+                cv.circle(self.display, (a,b), 5, cl, 0, 3)
 
-        if not (self.avg_angle is None):
-            direction = 'Straight'
-            if self.avg_angle < 75: direction = 'Right'
-            elif self.avg_angle > 120: direction = 'Left'
-            cv.putText(frame, direction, (self.width//2, self.height//2), cv.FONT_HERSHEY_COMPLEX_SMALL,
-                        3, (225, 0, 0), 10)
-        return frame
+        self.draw_direction()
+        cv.putText(self.display, str(self.frame_count), (self.width // 16, (15*self.height) // 16), cv.FONT_HERSHEY_SIMPLEX,
+                   1, (0, 255, 0), 2)
 
     def measure_tracks(self, points1, points2):
         angles = []
@@ -253,10 +325,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # use video_roi['hd'] for newer video
-    runner = movement_direction(sys.argv[1], video_rois['one'])
+    runner = movement_direction(sys.argv[1], video_rois['hd'])
     loaded = runner.is_loaded()
     if not loaded:
-        print('Video Did not Load')
+        self.logger.info('Video Did not Load')
         exit(1)
     runner.run()
 
