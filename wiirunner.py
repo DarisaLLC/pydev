@@ -8,6 +8,8 @@ from wiitricity_settings import video_rois, initialize_settings_from_video_roi, 
 import logging
 from datetime import datetime
 from enum import Enum, unique
+import stats
+
 
 # create logger with 'wiirunner'
 def get_logger():
@@ -42,20 +44,6 @@ def get_line_angle(line):
     radians = np.arctan2(y2 - y1, x2 - x1)
     return radians
 
-
-def point_to_point_dist(point_a, point_b):
-    """Finds euclidean distance between two points.
-
-    Args:
-        point_a: Tuple (x, y) point.
-        point_b: Tuple (x, y) point.
-
-    Returns:
-        Float, distance.
-    """
-    x1, y1 = np.array(point_a, dtype=np.float64)
-    x2, y2 = np.array(point_b, dtype=np.float64)
-    return math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
 
 @unique
 class State(Enum):
