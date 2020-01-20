@@ -1,10 +1,11 @@
-
 from exif import Image
 from PIL import Image
 from PIL.ExifTags import TAGS
 import sys
 from pathlib import Path
 import cameratransform
+import cv2
+import numpy as np
 
 def get_exif(fn):
     ret = {}
@@ -18,6 +19,18 @@ def get_exif(fn):
 def main(fqfn):
 
     camp = cameratransform.getCameraParametersFromExif(fqfn, verbose=True)
+    xform = np.zeros((3, 3))
+    xform[2, 2] = 1
+    xform[0, 0] = xform[1, 1] = camp[0]
+    xform[0, 2] = camp[1][0]/2
+    xform[1, 2] = camp[1][1]/2
+    fovx, fovy, focalLength, principalPoint, aspectRatio = cv2.calibrationMatrixValues(xform, (camp[2][0],camp[2][1]),camp[1][0],camp[1][1])
+    print((fovx, fovy))
+    fovxx = 2 * np.arctan(camp[1][0] / (2*camp[0]))
+    fovxy = 2 * np.arctan(camp[1][1] / (2*camp[0]))
+    print((fovxx, fovxy))
+
+
     return camp
 
     # # read the exif information of the file
