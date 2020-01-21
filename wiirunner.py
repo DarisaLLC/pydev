@@ -8,7 +8,7 @@ from wiitricity_settings import video_rois, initialize_settings_from_video_roi, 
 import logging
 from datetime import datetime
 from enum import Enum, unique
-import stats
+
 
 
 # create logger with 'wiirunner'
