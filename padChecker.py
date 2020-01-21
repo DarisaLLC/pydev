@@ -6,6 +6,7 @@ from pathlib import Path
 import pickle
 from imutils import contours
 from matplotlib import pyplot as plt
+from skimage.util import img_as_ubyte
 
 class padChecker:
 
@@ -84,17 +85,15 @@ class padChecker:
     def history(self):
         return self.intersection
 
-    def check(self, image_in):
+    def check(self, image_in, mask):
 
         hsv_image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
         hsv_image = self.preprocessHSV(hsv_image)
 
-        image_hist = cv2.calcHist([hsv_image], self.channels, None, self.hist_size, self.hist_range)
-      #  cv2.imshow('image_hist', image_hist)
-      #  cv2.waitKey(0);
+        image_hist = cv2.calcHist([hsv_image], self.channels, mask, self.hist_size, self.hist_range)
 
         image_hist = cv2.normalize(image_hist, image_hist).flatten()
-        y = cv2.compareHist(self.hist, image_hist, cv2.HISTCMP_INTERSECT)
+        y = cv2.compareHist(self.hist, image_hist, cv2.HISTCMP_BHATTACHARYYA) #  cv2.HISTCMP_INTERSECT
         y = np.log(y)
         y = 1.0 / np.fabs(y)
         self.intersection.append(y)
@@ -102,224 +101,136 @@ class padChecker:
 
         # use normalized histogram and apply backprojection
         dst = cv2.calcBackProject([hsv_image], self.channels, self.bphist, self.hist_range, 1)
+        dst = cv2.bitwise_and(dst, mask)
 
         # Now convolute with circular disc
-        disc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        disc = cv2.getStructuringElement(cv2.MORPH_CROSS, (5, 5))
         cv2.filter2D(dst, -1, disc, dst)
 
         # threshold and binary AND
-        median = np.median(dst)
-        ret, thresh = cv2.threshold(dst, median, 255, 0)
+        ret, thresh = cv2.threshold(dst, 1, 255,  cv2.THRESH_OTSU )
+        hulls = []
+        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[1]
+        for contour in cnts:
+            hull = cv2.convexHull(contour)
+            hulls.append(hull)
+
         thresh_bgr = cv2.merge((thresh, thresh, thresh))
         res = cv2.bitwise_and(image_in, thresh_bgr)
+        return y,thresh, res, cnts, hulls
 
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[1]
-        return y,thresh, res, cnts
+def region_of_interest(img):
+    rows, cols, channels = map(int, img.shape)
+    mask = np.zeros((rows, cols), dtype=np.uint8)
+    left = int(cols / 2.5)
+    right = int(cols - left)
 
-    def polyLinePoints(self, width, height):
-        vals = self.history()
-        maxi = np.max(vals)
-        x = np.arange(len(vals))
-        vals = np.multiply(height, vals)
-        vals = np.subtract(height, vals)
-        pts = np.vstack((x, vals)).astype(np.int32).T
-        return pts
+    triangle = np.array([[
+        (left, 0),(right, 0), (cols-1, rows - 1),(0, rows-1) ]], np.int32)
 
-class ColorClassifier:
-    """Classifier for comparing an image I with a model M. The comparison is based on color
-    histograms. It included an implementation of the Histogram Intersection algorithm.
+    cv2.fillConvexPoly(mask, triangle, 255)
+    return mask
 
+import numpy as np
+from itertools import combinations
 
+# https://stackoverflow.com/a/13981450
+
+def intersection(s1, s2):
     """
+    Return the intersection point of line segments `s1` and `s2`, or
+    None if they do not intersect.
+    """
+    p, r = s1[0], s1[1] - s1[0]
+    q, s = s2[0], s2[1] - s2[0]
+    rxs = float(np.cross(r, s))
+    if rxs == 0: return None
+    t = np.cross(q - p, s) / rxs
+    u = np.cross(q - p, r) / rxs
+    if 0 < t < 1 and 0 < u < 1:
+        return p + t * r
+    return None
 
-    def __init__(self, channels=[0, 1], hist_size=[180, 256], hist_range=[0, 180, 0, 256], hist_type='HSV'):
-        """Init the classifier.
+def convex_quadrilaterals(points):
+    """
+    Generate the convex quadrilaterals among `points`.
+    """
+    segments = combinations(points, 2)
+    for s1, s2 in combinations(segments, 2):
+        if intersection(s1, s2) != None:
+            yield s1, s2
 
-        This class has an internal list containing all the models.
-        it is possible to append new models. Using the default values
-        it extracts a 3D BGR color histogram from the image, using
-	10 bins per channel.
-        @param channels list where we specify the index of the channel
-           we want to compute a histogram for. For a grayscale image,
-           the list would be [0]. For all three (red, green, blue) channels,
-           the channels list would be [0, 1, 2].
-        @param hist_size number of bins we want to use when computing a histogram.
-            It is a list (one value for each channel). Note: the bin sizes can
-            be different for each channel.
-        @param hist_range it is the min-max value of the values stored in the histogram.
-            For three channels can be [0, 256, 0, 256, 0, 256], if there is only one
-            channel can be [0, 256]
-        @param hsv_type Convert the input BGR frame in HSV or GRAYSCALE. before taking
-            the histogram. The HSV representation can get more reliable results in
-            situations where light have a strong influence.
-            BGR: (default) do not convert the input frame
-            HSV: convert in HSV represantation
-            GRAY: convert in grayscale
-        """
-        self.channels = channels
-        self.hist_size = hist_size
-        self.hist_range = hist_range
-        self.hist_type = hist_type
-        self.model_list = list()
-        self.name_list = list()
+if __name__ == '__main__':
 
+    # Equalize Histogram of Color Images
+    def equalize_histogram_color(img):
+        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+        img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
+        img = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+        return img
 
-
-    def addModelByHistogram(self, hist, name=''):
-        """Add the histogram to internal container. If the name of the object
-           is already present then replace that histogram with a new one.
-
-        @param hist to add to the model, its histogram
-            is obtained and saved in internal list.
-        @param name a string representing the name of the model.
-            If nothing is specified then the name will be the index of the element.
-        """
-        if name == '': name = str(len(self.model_list))
-        if name not in self.name_list:
-            self.model_list.append(hist)
-            self.name_list.append(name)
-        else:
-            for i in range(len(self.name_list)):
-                if self.name_list[i] == name:
-                    self.model_list[i] = hist
-                    break
-
-    def addModelByFrame(self, model_frame, name=''):
-        """Add the histogram to internal container. If the name of the object
-           is already present then replace that histogram with a new one.
-
-        @param model_frame the frame to add to the model, its histogram
-            is obtained and saved in internal list.
-        @param name a string representing the name of the model.
-            If nothing is specified then the name will be the index of the element.
-        """
-        hist = self.generateModelHistogram(model_frame)
-        if name == '': name = str(len(self.model_list))
-        if name not in self.name_list:
-            self.model_list.append(hist)
-            self.name_list.append(name)
-        else:
-            for i in range(len(self.name_list)):
-                if self.name_list[i] == name:
-                    self.model_list[i] = hist
-                    break
-
-    def removeModelHistogramByName(self, name):
-        """Remove the specific model using the name as index.
-
-        @param: name the index of the element to remove
-        @return: True if the object has been deleted, otherwise False.
-        """
-        if name not in self.name_list:
-            return False
-        for i in range(len(self.name_list)):
-            if self.name_list[i] == name:
-                del self.name_list[i]
-                del self.model_list[i]
-                return True
-
-    def returnHistogramComparison(self, hist_1, hist_2, method='intersection'):
-        """Return the comparison value of two histograms.
-
-        Comparing an histogram with itself return 1.
-        @param hist_1
-        @param hist_2
-        @param method the comparison method.
-            intersection: (default) the histogram intersection (Swain, Ballard)
-        """
-        assert(cv2.__version__.split(".")[0] == '3')
-        if(method=="intersection"):
-            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_INTERSECT)
-        elif(method=="correlation"):
-            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CORREL)
-        elif(method=="chisqr"):
-            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_CHISQR)
-        elif(method=="bhattacharyya"):
-            comparison = cv2.compareHist(hist_1, hist_2, cv2.HISTCMP_BHATTACHARYYA)
-        else:
-            raise ValueError('[DarisaLLC] color_classification.py: the method specified ' + str(method) + ' is not supported.')
+    def detect_ga(frame, mask, checker):
+        display = frame.copy()
+        frame = cv2.medianBlur(frame, 7)
+        y, mask, seethrough, cnts, hulls = checker.check(frame, mask)
+        res = np.vstack((display, seethrough))
+        return (display, res, y, mask, seethrough, cnts, hulls)
 
 
-        return comparison
+    def crop_image_mask_equalize(image):
+        rows, cols, channels = map(int, image.shape)
+        tl = (6, 53)
+        br = (709, 362)
+        frame = image[tl[1]: br[1], tl[0]: br[0]]
+        mask = region_of_interest(frame)
+        runi = frame.copy()
+        runih = equalize_histogram_color(runi)
+        return runih, mask
 
-    def returnHistogramComparisonArray(self, image_in, method='intersection'):
-        """Return the comparison array between all the model and the input image.
+    def process (fqfn):
+        file_folder = os.path.dirname(os.path.realpath(__file__)) + '/projects/wiic/'
+        cache_path = file_folder
+        img = cv2.imread(fqfn)
+        checker = padChecker(cache_path)
+        frame, mask = crop_image_mask_equalize(img)
+        all = detect_ga(frame, mask, checker)
+        mmm = cv2.merge([all[3], all[3], all[3]])
+        im = cv2.drawContours(mmm, all[6], -1, (0, 255, 0), 3)
+        return im
 
-        The highest value represents the best match.
-        @param image the image to compare
-        @param method the comparison method.
-            intersection: (default) the histogram intersection (Swain, Ballard)
-        @return a numpy array containg the comparison value between each pair image-model
-        """
-        if(self.hist_type=='HSV'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2HSV)
-        elif(self.hist_type=='GRAY'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2GRAY)
-        elif(self.hist_type=='RGB'): image = cv2.cvtColor(image_in, cv2.COLOR_BGR2RGB)
-        comparison_array = np.zeros(len(self.model_list))
-        masks = {}
-        image_hist = cv2.calcHist([image], self.channels, None, self.hist_size, self.hist_range)
-        image_hist = cv2.normalize(image_hist, image_hist).flatten()
-        counter = 0
-        for model_hist in self.model_list:
-            comparison_array[counter] = self.returnHistogramComparison(image_hist, model_hist, method=method)
-            cv2.normalize(model_hist,model_hist, 0,255,cv2.NORM_MINMAX)
-            dst = cv2.calcBackProject([image], self.channels, model_hist, self.hist_range, 1)
+    if len(sys.argv) < 2:
+        exit(1)
 
-            masks[counter] = dst
-            counter += 1
-        return (comparison_array, masks)
 
-    def returnHistogramComparisonProbability(self, image, method='intersection'):
-        """Return the probability distribution of the comparison between
-        all the model and the input image. The sum of the elements in the output
-        array sum up to 1.
+    if Path(sys.argv[1]).is_file():
+        file_folder = os.path.dirname(os.path.realpath(__file__)) + '/projects/wiic/'
+        cache_path = file_folder
+        checker = padChecker(cache_path)
+        img = cv2.imread(sys.argv[1])
+        frame, mask = crop_image_mask_equalize(img)
+        all = detect_ga(frame, mask, checker)
+        mmm = cv2.merge([all[3], all[3], all[3]])
+        im = cv2.drawContours(mmm, all[6], -1, (0, 255, 0), 3)
 
-        The highest value represents the best match.
-        @param image the image to compare
-        @param method the comparison method.
-            intersection: (default) the histogram intersection (Swain, Ballard)
-        @return a numpy array containg the comparison value between each pair image-model
-        """
-        comparison_array = self.returnHistogramComparisonArray(image=image, method=method)
-        #comparison_array[comparison_array < 0] = 0 #Remove negative values
-        comparison_distribution = np.divide(comparison_array, np.sum(comparison_array))
-        return comparison_distribution
+        cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+        cv2.imshow('Display', all[0])
+        cv2.namedWindow('PadChecker', cv2.WINDOW_NORMAL)
+        cv2.imshow('PadChecker', all[1])
+        cv2.namedWindow('PadChecker2', cv2.WINDOW_NORMAL)
+        cv2.imshow('PadChecker2', im)
 
-    def returnBestMatchIndex(self, image, method='intersection'):
-        """Return the index of the best match between the image and the internal models.
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-        @param image the image to compare
-        @param method the comparison method.
-            intersection: (default) the histogram intersection (Swain, Ballard)
-        @return a numpy array containg the comparison value between each pair image-model
-        """
-        comparison_array = self.returnHistogramComparisonArray(image, method=method)
-        return np.argmax(comparison_array)
-
-    def returnBestMatchName(self, image, method='intersection'):
-        """Return the name of the best match between the image and the internal models.
-
-        @param image the image to compare
-        @param method the comparison method.
-            intersection: (default) the histogram intersection (Swain, Ballard)
-        @return a string representing the name of the best matching model
-        """
-        comparison_array = self.returnHistogramComparisonArray(image, method=method)
-        arg_max = np.argmax(comparison_array)
-        return self.name_list[arg_max]
-
-    def returnNameList(self):
-        """Return a list containing all the names stored in the model.
-
-        @return: a list containing the name of the models.
-        """
-        return self.name_list
-
-    def returnSize(self):
-        """Return the number of elements stored.
-
-        @return: an integer representing the number of elements stored
-        """
-        return len(self.model_list)
+    elif Path(sys.argv[1]).is_dir():
+        output_dir = '/Users/arman/tmpout/'
+        for file in os.listdir(sys.argv[1]):
+            if file.endswith(".png"):
+                fqfn = os.path.join(sys.argv[1], file)
+                out_img = process(fqfn)
+                ofqfn = os.path.join(output_dir,file)
+                cv2.imwrite(ofqfn, out_img)
+                print((fqfn,ofqfn,' Done'))
 
 
 
