@@ -31,24 +31,34 @@ def get_logger():
     logger.addHandler(ch)
     return logger
 
+
+def bgrFromHue(degrees):
+    hsv = np.zeros((1, 1, 3), np.uint8)
+    hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
+    hsv[0, 0, 1] = 255
+    hsv[0, 0, 2] = 255
+    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
+    tp = tuple([int(x) for x in bgr[0, 0, :]])
+    return tp
+
 def get_line_angle(line):
-    """Calculates the angle of a line.
-
-    Args:
-        line: Vector of x1, y1, x2, y2, i.e. two points on the line.
-
-    Returns:
-        Float, angle in degrees.
-    """
     x1, y1, x2, y2 = np.array(line, dtype=np.float64)
     radians = np.arctan2(y2 - y1, x2 - x1)
     return radians
 
+def circular_mean(weights, angles):
+    x = y = 0.
+    for angle, weight in zip(angles, weights):
+        x += math.cos(math.radians(angle)) * weight
+        y += math.sin(math.radians(angle)) * weight
+
+    mean = math.degrees(math.atan2(y, x))
+    return mean
 
 @unique
 class State(Enum):
-    eRight=1,
-    eLeft=-1,
+    eRight=-1,
+    eLeft=+1,
     eSame=0,
     eUnknown=-2
 
@@ -68,12 +78,14 @@ class movement_direction:
         else:
             self.cap = cv.VideoCapture(self.source_info)
         self._is_loaded = True
-        self.frame_count = 0
+        self.frame_count = -1
         self.prev_frame = None
         self.prev_angle = None
+        self.prev_time = None
         self.current_angle = None
+        self.current_time = None
+        self.cycles = 0
         self.angle_estimate_available = False
-        self.angle_posts = dict(Right=75,Left=120)
         self.angle_diff_threshold = 7
         self.current_state = State.eUnknown
         self.prev_state = self.current_state
@@ -103,8 +115,6 @@ class movement_direction:
         self.feature_params = self.settings['feature_params']
         self.lk_params = self.settings['lk_params']
         self.max_dist = self.settings['max_distance']
-        self.prev_frame = None
-        self.canvas = None
         self.keypoint_dist = 0
         self.min_features = self.settings['min_features']
         self.old_points = []
@@ -125,6 +135,7 @@ class movement_direction:
         return self._is_valid
 
     def run(self):
+        ## get first frame to set prev
         ret, captured_frame = self.cap.read()
         if not ret:
             return
@@ -172,13 +183,32 @@ class movement_direction:
         if self.keypoint_dist > self.max_dist:
             self.get_features()
 
+            ## left is positive angle difference, right is negative angle difference
             def set_state(_instant_angle):
-                if _instant_angle <= self.angle_posts['Right']:
-                    self.current_state = State.eRight
-                elif _instant_angle >= self.angle_posts['Left']:
-                    self.current_state = State.eLeft
-                else:
-                    self.current_state = State.eSame
+                leaning_left = _instant_angle > (self.prev_angle + self.angle_diff_threshold)
+                leaning_right = _instant_angle < (self.prev_angle - self.angle_diff_threshold)
+                leaning_straight = (not leaning_left) and (not leaning_right)
+
+                if self.current_state == State.eUnknown or self.current_state == State.eSame:
+                    if leaning_right: self.current_state = State.eRight
+                    elif leaning_left: self.current_state = State.eLeft
+                    else: self.current_state = State.eSame
+
+                elif self.current_state == State.eRight:
+                    if leaning_right or leaning_straight:
+                        self.current_state == State.eRight
+                    elif leaning_left:
+                        self.current_state = State.eSame
+
+                elif self.current_state == State.eLeft:
+                    if leaning_left or leaning_straight:
+                        self.current_state == State.eLeft
+                    elif leaning_right:
+                        self.current_state = State.eSame
+                self.cycles += 1
+
+                self.logger.info(('cycle, time, frame, direction:', self.cycles, self.current_time - self.prev_time,
+                                  instant_angle, self.current_state, leaning_left, leaning_right ))
 
             if self.debug: self.logger.debug('max distance passed: reset ')
             avg_angle = self.measure_tracks(self.keypoints, self.new_points)
@@ -188,25 +218,15 @@ class movement_direction:
             if self.prev_angle is None:
                 self.prev_angle = instant_angle
                 self.prev_state = State.eUnknown
-
-            self.current_angle = instant_angle
-            diff = self.current_angle - self.prev_angle
-            ok = diff < self.angle_diff_threshold
-            if ok and self.current_state == self.prev_state:
-                self.current_state = State.eSame
+                self.prev_time = self.frame_count
             else:
+                self.current_angle = instant_angle
+                self.current_time = self.frame_count
                 set_state(instant_angle)
 
-            self.prev_angle = self.current_angle
-            self.prev_state = self.current_state
-
-            ## determine current direction:
-            ## difference = current - prev
-            ## if difference < 0 threshold and current is not Unknow ==> Straight
-            ## if prev != current ==> current
-
-            self.logger.info(('frame, direction:', self.frame_count, instant_angle, self.current_state ))
-
+                self.prev_angle = self.current_angle
+                self.prev_state = self.current_state
+                self.prev_time = self.current_time
 
         # if few new points create features on the prev frame
         elif len(self.new_points) < self.min_features:
@@ -232,7 +252,8 @@ class movement_direction:
             self.num_features = min((nw, ne))
             if self.num_features < self.min_features // 4:
                 self.get_features()
-        #        if self.debug: self.logger.debug('too few features reset  ')
+                if self.debug: self.logger.debug('too few features reset  ')
+
             else:
                 # just copy new points to old points
                 dim = np.shape(self.new_points)
@@ -270,7 +291,7 @@ class movement_direction:
         return dist
 
     def draw_direction(self):
-        if self.prev_state != State.eUnknown and self.current_state != State.eUnknown:
+        if self.prev_state != State.eUnknown and self.current_state != State.eUnknown and self.cycles > 1:
             direction = self.angle_states[self.current_state]
             cv.putText(self.display, direction, (self.width // 2, self.height // 2), cv.FONT_HERSHEY_DUPLEX,
                        2, (225, 0, 0), 7)
@@ -280,7 +301,8 @@ class movement_direction:
             for i, (new, old) in enumerate(zip(points1, points2)):
                 a, b = new.ravel()
                 c, d = old.ravel()
-                cl = (0,255,0)
+                angle = get_line_angle([c, d, a, b])
+                cl = bgrFromHue(math.degrees(angle))
                 if a < self.width / 2: cl = (255,0,0)
                 frame = cv.line(self.display, (c, d), (a, b), cl, 1)
                 cv.circle(self.display, (a,b), 5, cl, 0, 3)
@@ -291,15 +313,20 @@ class movement_direction:
 
     def measure_tracks(self, points1, points2):
         angles = []
+        mags = []
         for i, (new, old) in enumerate(zip(points1, points2)):
             a, b = new.ravel()
             c, d = old.ravel()
             line = [c, d, a, b]
             angle = get_line_angle(line)
+            mag = math.sqrt((a-c)*(a-c)+(b-d)*(b-d))
             angles.append(angle)
+            mags.append(mag)
 
         angles = np.asanyarray(angles)
-        mean_angle = np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())
+        mags = np.asanyarray(mags)
+        mean_angle = circular_mean(mags,angles)
+    #    mean_angle = np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())
         if mean_angle < 0:
             mean_angle = math.pi + math.pi + mean_angle
 
@@ -313,7 +340,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # use video_roi['hd'] for newer video
-    runner = movement_direction(sys.argv[1], video_rois['hd'])
+    runner = movement_direction(sys.argv[1], video_rois['one'])
     loaded = runner.is_loaded()
     if not loaded:
         self.logger.info('Video Did not Load')
