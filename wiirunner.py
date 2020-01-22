@@ -4,71 +4,15 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2 as cv
 import math
-from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings, region_of_interest, vertical
-from common import anorm2, draw_str
+from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
+from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
+from wiitricity_settings import circular_mean
+
 
 import logging
 from datetime import datetime
-from enum import Enum, unique
 
-def _draw_str(dst, target, s, scale=1.0):
-    x, y = target
-    cv.putText(dst, s, (x+1, y+1), cv.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness = 2, lineType=cv.LINE_AA)
-    cv.putText(dst, s, (x, y), cv.FONT_HERSHEY_PLAIN, scale, (128,128,128), lineType=cv.LINE_AA)
-
-
-# create logger with 'wiirunner'
-def get_logger():
-    logfilename = 'wiirunner'+datetime.now().strftime("-%d-%m-%Y_%I-%M-%S_%p")+'.log'
-    logger = logging.getLogger('wiirunner')
-    logger.setLevel(logging.DEBUG)
-    # create file handler which logs even debug messages
-    fh = logging.FileHandler(logfilename)
-    fh.setLevel(logging.DEBUG)
-    # create console handler with a higher log level
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    # create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    # add the handlers to the logger
-    logger.addHandler(fh)
-    logger.addHandler(ch)
-    return logger
-
-
-def bgrFromHue(degrees):
-    hsv = np.zeros((1, 1, 3), np.uint8)
-    hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
-    hsv[0, 0, 1] = 255
-    hsv[0, 0, 2] = 255
-    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
-    tp = tuple([int(x) for x in bgr[0, 0, :]])
-    return tp
-
-def get_line_angle(line):
-    x1, y1, x2, y2 = np.array(line, dtype=np.float64)
-    radians = np.arctan2(y2 - y1, x2 - x1)
-    return radians
-
-def circular_mean(weights, angles):
-    x = y = 0.
-    for angle, weight in zip(angles, weights):
-        x += math.cos(math.radians(angle)) * weight
-        y += math.sin(math.radians(angle)) * weight
-
-    mean = math.degrees(math.atan2(y, x))
-    return mean
-
-@unique
-class State(Enum):
-    eRight=-1,
-    eLeft=+1,
-    eSame=0,
-    eUnknown=-2
-
-class movement_direction:
+class gpad_odometry:
 
     def __init__(self, video_source_info, user_roi ):
         self.source_info = video_source_info
@@ -98,15 +42,8 @@ class movement_direction:
         self.mask = None
         self.cycles = 0
         self.angle_diff_threshold = 5
-        self.current_state = State.eUnknown
-        self.prev_state = self.current_state
         self.logger = get_logger()
         self.logger.info('Source is ' + self.source)
-        self.angle_states = {}
-        self.angle_states[State.eRight] = 'Right'
-        self.angle_states[State.eLeft] = 'Left'
-        self.angle_states[State.eSame] = 'Straight'
-        self.angle_states[State.eUnknown] = 'Unknown'
         video_roi = user_roi
         if self.source == 'Camera':
             camera_roi = dict(row_low=0, row_high=int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))-1,
@@ -178,52 +115,6 @@ class movement_direction:
 
 
 
-    ## left is positive angle difference, right is negative angle difference
-    def update_direction(self):
-        def set_state(_instant_angle):
-            leaning_left = _instant_angle > (self.prev_angle + self.angle_diff_threshold)
-            leaning_right = _instant_angle < (self.prev_angle - self.angle_diff_threshold)
-            leaning_straight = (not leaning_left) and (not leaning_right)
-
-            if self.current_state == State.eUnknown or self.current_state == State.eSame:
-                if leaning_right: self.current_state = State.eRight
-                elif leaning_left: self.current_state = State.eLeft
-                else: self.current_state = State.eSame
-
-            elif self.current_state == State.eRight:
-                if leaning_right or leaning_straight:
-                    self.current_state == State.eRight
-                elif leaning_left:
-                    self.current_state = State.eSame
-
-            elif self.current_state == State.eLeft:
-                if leaning_left or leaning_straight:
-                    self.current_state == State.eLeft
-                elif leaning_right:
-                    self.current_state = State.eSame
-            self.cycles += 1
-
-            self.logger.info(('cycle, time, frame, direction:', self.cycles, self.current_time - self.prev_time,
-                              instant_angle, self.current_state, leaning_left, leaning_right ))
-
-        avg_angle = self.measure_tracks(self.keypoints, self.new_points)
-        avg_angle = math.degrees(avg_angle) % 360
-        self.direction.append(avg_angle)
-        instant_angle = int(np.average(self.direction))
-        if self.prev_angle is None:
-            self.prev_angle = instant_angle
-            self.prev_state = State.eUnknown
-            self.prev_time = self.frame_idx
-        else:
-            self.current_angle = instant_angle
-            self.current_time = self.frame_idx
-            set_state(instant_angle)
-
-            self.prev_angle = self.current_angle
-            self.prev_state = self.current_state
-            self.prev_time = self.current_time
-
- 
 
     def get_flow(self, frame_gray):
         if len(self.tracks) > 0:
@@ -358,7 +249,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # use video_roi['hd'] for newer video
-    runner = movement_direction(sys.argv[1], video_rois['hd'])
+    runner = gpad_odometry(sys.argv[1], video_rois['hd'])
     loaded = runner.is_loaded()
     if not loaded:
         self.logger.info('Video Did not Load')

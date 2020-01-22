@@ -1,7 +1,18 @@
 import numpy as np
 import sys
 import math
-import cv2
+import cv2 as cv
+import datetime
+import logging
+from datetime import datetime
+from enum import Enum, unique
+
+@unique
+class State(Enum):
+    eRight=-1,
+    eLeft=+1,
+    eSame=0,
+    eUnknown=-2
 
 '''
 Initialization of common settings for WiiTricity image & videos
@@ -37,7 +48,7 @@ def initialize_settings(frame_tl, capture_size):
     # Parameters for lucas kanade optical flow
     settings['lk_params'] = dict(winSize=(15, 15),
                      maxLevel=2,
-                     criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+                     criteria=(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 
     # params for ShiTomasi corner detection
     settings['feature_params'] = dict(maxCorners=500,
@@ -76,7 +87,7 @@ def region_of_interest(img, diagonal_ratio=2.5):
     poly = np.array([[
         (left, 50), (right, 50), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv2.fillConvexPoly(mask, poly, 255)
+    cv.fillConvexPoly(mask, poly, 255)
     return mask
 
 
@@ -98,6 +109,56 @@ def vertical(img, top_portion=0.667):
     poly = np.array([[
         (0, top), (cols-1, top), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv2.fillConvexPoly(mask, poly, 255)
+    cv.fillConvexPoly(mask, poly, 255)
     return mask
 
+
+def _draw_str(dst, target, s, scale=1.0):
+    x, y = target
+    cv.putText(dst, s, (x+1, y+1), cv.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness = 2, lineType=cv.LINE_AA)
+    cv.putText(dst, s, (x, y), cv.FONT_HERSHEY_PLAIN, scale, (128,128,128), lineType=cv.LINE_AA)
+
+
+# create logger with 'wiirunner'
+def get_logger():
+    logfilename = 'wiirunner'+datetime.now().strftime("-%d-%m-%Y_%I-%M-%S_%p")+'.log'
+    logger = logging.getLogger('wiirunner')
+    logger.setLevel(logging.DEBUG)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler(logfilename)
+    fh.setLevel(logging.DEBUG)
+    # create console handler with a higher log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+    return logger
+
+
+def bgrFromHue(degrees):
+    hsv = np.zeros((1, 1, 3), np.uint8)
+    hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
+    hsv[0, 0, 1] = 255
+    hsv[0, 0, 2] = 255
+    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
+    tp = tuple([int(x) for x in bgr[0, 0, :]])
+    return tp
+
+def get_line_angle(line):
+    x1, y1, x2, y2 = np.array(line, dtype=np.float64)
+    radians = np.arctan2(y2 - y1, x2 - x1)
+    return radians
+
+def circular_mean(weights, angles):
+    x = y = 0.
+    for angle, weight in zip(angles, weights):
+        x += math.cos(math.radians(angle)) * weight
+        y += math.sin(math.radians(angle)) * weight
+
+    mean = math.degrees(math.atan2(y, x))
+    return mean
