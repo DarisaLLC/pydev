@@ -54,6 +54,7 @@ def initialize_settings(frame_tl, capture_size):
 
     return settings
 
+
 '''
 Create a mask like this. 
 diagonal ratio is  ration of ... to ...-----...
@@ -62,17 +63,41 @@ diagonal ratio is  ration of ... to ...-----...
    /      \
   /        \
   ----------
-  
+
 '''
+
+
 def region_of_interest(img, diagonal_ratio=2.5):
     rows, cols, channels = img.shape
     mask = np.zeros((rows, cols), dtype=np.uint8)
     left = int(cols / diagonal_ratio)
     right = int(cols - left)
 
-    triangle = np.array([[
-        (left, 50),(right, 50), (cols-1, rows - 1),(0, rows-1) ]], np.int32)
+    poly = np.array([[
+        (left, 50), (right, 50), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv2.fillConvexPoly(mask, triangle, 255)
+    cv2.fillConvexPoly(mask, poly, 255)
+    return mask
+
+
+'''
+Create a mask like this. 
+Higher portion
+
+  ----------
+  ----------
+
+'''
+
+
+def vertical(img, top_portion=0.667):
+    rows, cols, channels = img.shape
+    mask = np.zeros((rows, cols), dtype=np.uint8)
+    top = int(rows * top_portion)
+
+    poly = np.array([[
+        (0, top), (cols-1, top), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
+
+    cv2.fillConvexPoly(mask, poly, 255)
     return mask
 

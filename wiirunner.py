@@ -4,13 +4,17 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2 as cv
 import math
-from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings, region_of_interest
+from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings, region_of_interest, vertical
 from common import anorm2, draw_str
 
 import logging
 from datetime import datetime
 from enum import Enum, unique
 
+def _draw_str(dst, target, s, scale=1.0):
+    x, y = target
+    cv.putText(dst, s, (x+1, y+1), cv.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness = 2, lineType=cv.LINE_AA)
+    cv.putText(dst, s, (x, y), cv.FONT_HERSHEY_PLAIN, scale, (128,128,128), lineType=cv.LINE_AA)
 
 
 # create logger with 'wiirunner'
@@ -86,10 +90,11 @@ class movement_direction:
         self.frame_idx = 0
         self.prev_gray_frame = None
         self.prev_frame = None
-        self.prev_angle = None
         self.prev_time = None
         self.current_angle = None
+        self.current_distance = None
         self.current_time = None
+        self.flow_mask = None
         self.mask = None
         self.cycles = 0
         self.angle_diff_threshold = 5
@@ -131,7 +136,7 @@ class movement_direction:
         self.debug = False
         self.direction = []
         self.avg_angle = None
-        self.show_vectors = True
+        self.show_vectors = False
         self.show_axis = False
 
     def is_loaded(self):
@@ -156,10 +161,13 @@ class movement_direction:
             ch = cv.waitKey(1)
             if ch == 27:
                 break
+            elif ch == ord("v"):
+                self.show_vectors = not self.show_vectors
 
     def prepare_frame(self, frame):
         frame = self.get_roi(frame)
         self.mask = region_of_interest(frame)
+        self.flow_mask = vertical(frame)
         self.display = frame.copy()
         gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         return gray_frame, frame
@@ -233,7 +241,8 @@ class movement_direction:
                 if len(tr) > self.track_len:
                     del tr[0]
                 new_tracks.append(tr)
-                cv.circle(self.display, (x, y), 2, (0, 255, 0), -1)
+                if self.show_vectors:
+                    cv.circle(self.display, (x, y), 2, (0, 255, 0), -1)
             self.tracks = new_tracks
             angles = []
             mags = []
@@ -252,14 +261,21 @@ class movement_direction:
             mean_angle = circular_mean(mags, angles)
             if mean_angle < 0:
                 mean_angle = math.pi + math.pi + mean_angle
-            mean_angle = mean_angle % math.pi / 2
-            degrees = math.degrees(mean_angle)
-            draw_str(self.display, (200, 200), 'Mean Angle: %d' % degrees)
-            cv.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
-            draw_str(self.display, (20, 20), 'track count: %d' % len(self.tracks))
+            mean_angle = mean_angle % (2*math.pi)
+            mean_mags = np.mean(mags)
+            self.current_distance = mean_mags
+            if self.current_distance > 0:
+                self.current_angle = mean_angle
+
+            _draw_str(self.display, (200, 200), 'Mean Direction: %d' % math.degrees(self.current_angle), 2.0)
+            _draw_str(self.display, (200, 250), 'Mean Distance: %d' % mean_mags, 2.0)
+
+            if self.show_vectors:
+                cv.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+            _draw_str(self.display, (20, self.height-100), ' %d' % len(self.tracks), 2.0)
 
         if self.frame_idx % self.detect_interval == 0:
-            mask = self.mask.copy()
+            mask = self.flow_mask.copy()
             for x, y in [np.int32(tr[-1]) for tr in self.tracks]:
                 cv.circle(mask, (x, y), 5, 0, -1)
             p = cv.goodFeaturesToTrack(frame_gray, mask = mask, **self.settings['feature_params'])
