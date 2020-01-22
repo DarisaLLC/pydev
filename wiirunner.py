@@ -4,7 +4,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2 as cv
 import math
-from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
+from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings, region_of_interest
+from common import anorm2, draw_str
+
 import logging
 from datetime import datetime
 from enum import Enum, unique
@@ -78,15 +80,19 @@ class movement_direction:
         else:
             self.cap = cv.VideoCapture(self.source_info)
         self._is_loaded = True
-        self.frame_count = -1
+        self.track_len = 10
+        self.detect_interval = 5
+        self.tracks = []
+        self.frame_idx = 0
+        self.prev_gray_frame = None
         self.prev_frame = None
         self.prev_angle = None
         self.prev_time = None
         self.current_angle = None
         self.current_time = None
+        self.mask = None
         self.cycles = 0
-        self.angle_estimate_available = False
-        self.angle_diff_threshold = 7
+        self.angle_diff_threshold = 5
         self.current_state = State.eUnknown
         self.prev_state = self.current_state
         self.logger = get_logger()
@@ -125,7 +131,7 @@ class movement_direction:
         self.debug = False
         self.direction = []
         self.avg_angle = None
-        self.show_vectors = False
+        self.show_vectors = True
         self.show_axis = False
 
     def is_loaded(self):
@@ -135,139 +141,133 @@ class movement_direction:
         return self._is_valid
 
     def run(self):
-        ## get first frame to set prev
-        ret, captured_frame = self.cap.read()
-        if not ret:
-            return
-        self.prev_frame = self.prepare_frame(captured_frame)
-        self.logger.info(('frame: ', self.frame_count))
-        self.frame_count = self.frame_count + 1
-        cv.namedWindow('Frame', cv.WINDOW_NORMAL)
-
-        while self.cap.isOpened():
+        while True:
             ret, captured_frame = self.cap.read()
             if not ret: break
-            self.frame_count = self.frame_count + 1
-            frame = self.prepare_frame(captured_frame)
-            assert (not (self.prev_frame is None))
-            self.update_features()
-            self.get_flow(frame)
+
+            gray_frame, frame = self.prepare_frame(captured_frame)
+            self.get_flow(gray_frame)
             self.prev_frame = frame.copy()
+            self.prev_gray_frame = gray_frame.copy()
+            self.frame_idx = self.frame_idx + 1
 
-            self.draw_tracks( self.keypoints, self.new_points)
-            if self.show_axis:
-                cv.line(self.display, (0, self.height // 2), (self.width, self.height // 2), (255, 0, 0), 1)
-                cv.line(self.display, (self.width // 2, 0), (self.width // 2, self.height), (255, 0, 0), 1)
-            cv.imshow("Frame", self.display)
-
-            key = cv.waitKey(1) & 0xFF
+            cv.namedWindow('Display', cv.WINDOW_NORMAL)
+            cv.imshow("Display", self.display)
+            ch = cv.waitKey(1)
+            if ch == 27:
+                break
 
     def prepare_frame(self, frame):
         frame = self.get_roi(frame)
+        self.mask = region_of_interest(frame)
         self.display = frame.copy()
-        frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        return frame
+        gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        return gray_frame, frame
 
     def get_roi(self, frame):
         assert (self._is_valid)
         return frame[self.row_range[0]:self.row_range[1], self.column_range[0]:self.column_range[1]]
 
-    def get_features(self):
-        self.keypoint_dist = 0
-        # collect features on the prev frame and compute its geometric median
-        self.old_points = cv.goodFeaturesToTrack(self.prev_frame, mask=None, **self.feature_params)
-        self.keypoints = np.copy(self.old_points)
 
-    def update_features(self):
-        # if moved too much re create features on the prev frame
-        if self.keypoint_dist > self.max_dist:
-            self.get_features()
 
-            ## left is positive angle difference, right is negative angle difference
-            def set_state(_instant_angle):
-                leaning_left = _instant_angle > (self.prev_angle + self.angle_diff_threshold)
-                leaning_right = _instant_angle < (self.prev_angle - self.angle_diff_threshold)
-                leaning_straight = (not leaning_left) and (not leaning_right)
+    ## left is positive angle difference, right is negative angle difference
+    def update_direction(self):
+        def set_state(_instant_angle):
+            leaning_left = _instant_angle > (self.prev_angle + self.angle_diff_threshold)
+            leaning_right = _instant_angle < (self.prev_angle - self.angle_diff_threshold)
+            leaning_straight = (not leaning_left) and (not leaning_right)
 
-                if self.current_state == State.eUnknown or self.current_state == State.eSame:
-                    if leaning_right: self.current_state = State.eRight
-                    elif leaning_left: self.current_state = State.eLeft
-                    else: self.current_state = State.eSame
+            if self.current_state == State.eUnknown or self.current_state == State.eSame:
+                if leaning_right: self.current_state = State.eRight
+                elif leaning_left: self.current_state = State.eLeft
+                else: self.current_state = State.eSame
 
-                elif self.current_state == State.eRight:
-                    if leaning_right or leaning_straight:
-                        self.current_state == State.eRight
-                    elif leaning_left:
-                        self.current_state = State.eSame
+            elif self.current_state == State.eRight:
+                if leaning_right or leaning_straight:
+                    self.current_state == State.eRight
+                elif leaning_left:
+                    self.current_state = State.eSame
 
-                elif self.current_state == State.eLeft:
-                    if leaning_left or leaning_straight:
-                        self.current_state == State.eLeft
-                    elif leaning_right:
-                        self.current_state = State.eSame
-                self.cycles += 1
+            elif self.current_state == State.eLeft:
+                if leaning_left or leaning_straight:
+                    self.current_state == State.eLeft
+                elif leaning_right:
+                    self.current_state = State.eSame
+            self.cycles += 1
 
-                self.logger.info(('cycle, time, frame, direction:', self.cycles, self.current_time - self.prev_time,
-                                  instant_angle, self.current_state, leaning_left, leaning_right ))
+            self.logger.info(('cycle, time, frame, direction:', self.cycles, self.current_time - self.prev_time,
+                              instant_angle, self.current_state, leaning_left, leaning_right ))
 
-            if self.debug: self.logger.debug('max distance passed: reset ')
-            avg_angle = self.measure_tracks(self.keypoints, self.new_points)
-            avg_angle = math.degrees(avg_angle) % 360
-            self.direction.append(avg_angle)
-            instant_angle = int(np.average(self.direction))
-            if self.prev_angle is None:
-                self.prev_angle = instant_angle
-                self.prev_state = State.eUnknown
-                self.prev_time = self.frame_count
-            else:
-                self.current_angle = instant_angle
-                self.current_time = self.frame_count
-                set_state(instant_angle)
-
-                self.prev_angle = self.current_angle
-                self.prev_state = self.current_state
-                self.prev_time = self.current_time
-
-        # if few new points create features on the prev frame
-        elif len(self.new_points) < self.min_features:
-            self.get_features()
-            if self.debug: self.logger.debug('copied old points to keypoints   ')
+        avg_angle = self.measure_tracks(self.keypoints, self.new_points)
+        avg_angle = math.degrees(avg_angle) % 360
+        self.direction.append(avg_angle)
+        instant_angle = int(np.average(self.direction))
+        if self.prev_angle is None:
+            self.prev_angle = instant_angle
+            self.prev_state = State.eUnknown
+            self.prev_time = self.frame_idx
         else:
-            # check number of features in each quadrant to ensure a good distribution of features across entire image
-            nw = ne = sw = se = 0
-            w = self.width
-            h = self.height
-            for x, y in self.new_points:
-                if x > w // 2:
-                    if y > h // 2:
-                        se += 1
-                    else:
-                        ne += 1
-                else:
-                    if y > h // 2:
-                        sw += 1
-                    else:
-                        nw += 1
+            self.current_angle = instant_angle
+            self.current_time = self.frame_idx
+            set_state(instant_angle)
 
-            self.num_features = min((nw, ne))
-            if self.num_features < self.min_features // 4:
-                self.get_features()
-                if self.debug: self.logger.debug('too few features reset  ')
+            self.prev_angle = self.current_angle
+            self.prev_state = self.current_state
+            self.prev_time = self.current_time
 
-            else:
-                # just copy new points to old points
-                dim = np.shape(self.new_points)
-                self.old_points = np.reshape(self.new_points, (-1, 1, 2))
-                if self.debug: self.logger.debug('ok')
+ 
 
-    def get_flow(self, frame):
-        self.new_points, self.status, self.error = cv.calcOpticalFlowPyrLK(self.prev_frame, frame, self.old_points,
-                                                                           None, **self.lk_params)
-        self.keypoints = np.reshape(self.keypoints, (-1, 1, 2))  # TODO find out why this is necessary?!
-        self.old_points = self.old_points[self.status == 1]
-        self.new_points = self.new_points[self.status == 1]
-        self.keypoints = self.keypoints[self.status == 1]
-        self.keypoint_dist += self.get_mean_distance_2d(self.old_points, self.new_points)
+    def get_flow(self, frame_gray):
+        if len(self.tracks) > 0:
+            img0, img1 = self.prev_gray_frame, frame_gray
+            p0 = np.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
+            p1, _st, _err = cv.calcOpticalFlowPyrLK(img0, img1, p0, None, **self.settings['lk_params'])
+            p0r, _st, _err = cv.calcOpticalFlowPyrLK(img1, img0, p1, None, **self.settings['lk_params'])
+            d = abs(p0-p0r).reshape(-1, 2).max(-1)
+            good = d < 1
+            new_tracks = []
+            for tr, (x, y), good_flag in zip(self.tracks, p1.reshape(-1, 2), good):
+                if not good_flag:
+                    continue
+                tr.append((x, y))
+                if len(tr) > self.track_len:
+                    del tr[0]
+                new_tracks.append(tr)
+                cv.circle(self.display, (x, y), 2, (0, 255, 0), -1)
+            self.tracks = new_tracks
+            angles = []
+            mags = []
+            for track in self.tracks:
+                a = track[0][0]
+                b = track[0][1]
+                c = track[1][0]
+                d = track[1][1]
+                line = [c, d, a, b]
+                angle = get_line_angle(line)
+                mag = math.sqrt((a - c) * (a - c) + (b - d) * (b - d))
+                angles.append(angle)
+                mags.append(mag)
+            angles = np.asanyarray(angles)
+            mags = np.asanyarray(mags)
+            mean_angle = circular_mean(mags, angles)
+            if mean_angle < 0:
+                mean_angle = math.pi + math.pi + mean_angle
+            mean_angle = mean_angle % math.pi / 2
+            degrees = math.degrees(mean_angle)
+            draw_str(self.display, (200, 200), 'Mean Angle: %d' % degrees)
+            cv.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+            draw_str(self.display, (20, 20), 'track count: %d' % len(self.tracks))
+
+        if self.frame_idx % self.detect_interval == 0:
+            mask = self.mask.copy()
+            for x, y in [np.int32(tr[-1]) for tr in self.tracks]:
+                cv.circle(mask, (x, y), 5, 0, -1)
+            p = cv.goodFeaturesToTrack(frame_gray, mask = mask, **self.settings['feature_params'])
+            if p is not None:
+                for x, y in np.float32(p).reshape(-1, 2):
+                    self.tracks.append([(x, y)])
+
+
 
     def get_mean_distance_2d(self, features1, features2):
         num_features = min((len(features1), len(features2)))
@@ -305,32 +305,34 @@ class movement_direction:
                 cl = bgrFromHue(math.degrees(angle))
                 if a < self.width / 2: cl = (255,0,0)
                 frame = cv.line(self.display, (c, d), (a, b), cl, 1)
-                cv.circle(self.display, (a,b), 5, cl, 0, 3)
+                cv.circle(self.display, (c,d), 5, cl, 0, 3)
 
         self.draw_direction()
-        cv.putText(self.display, str(self.frame_count), (self.width // 16, (15*self.height) // 16), cv.FONT_HERSHEY_SIMPLEX,
+        cv.putText(self.display, str(self.frame_idx), (self.width // 16, (15*self.height) // 16), cv.FONT_HERSHEY_SIMPLEX,
                    1, (0, 255, 0), 2)
 
-    def measure_tracks(self, points1, points2):
+    def measure_tracks(self):
         angles = []
         mags = []
-        for i, (new, old) in enumerate(zip(points1, points2)):
-            a, b = new.ravel()
-            c, d = old.ravel()
+        for track in self.tracks:
+            a = track[0][0]
+            b = track[0][1]
+            c = track[1][0]
+            d = track[1][1]
             line = [c, d, a, b]
             angle = get_line_angle(line)
-            mag = math.sqrt((a-c)*(a-c)+(b-d)*(b-d))
+            mag = math.sqrt((a - c) * (a - c) + (b - d) * (b - d))
             angles.append(angle)
             mags.append(mag)
-
         angles = np.asanyarray(angles)
         mags = np.asanyarray(mags)
-        mean_angle = circular_mean(mags,angles)
-    #    mean_angle = np.arctan2(np.sin(angles).mean(), np.cos(angles).mean())
+        mean_angle = circular_mean(mags, angles)
         if mean_angle < 0:
             mean_angle = math.pi + math.pi + mean_angle
 
-        return mean_angle
+        degrees = math.degrees(mean_angle)
+        draw_str(self.display, (200, 200), 'Mean Angle: %d' % degrees)
+        return mean_angle % (2 * math.pi)
 
 
 
@@ -340,7 +342,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # use video_roi['hd'] for newer video
-    runner = movement_direction(sys.argv[1], video_rois['one'])
+    runner = movement_direction(sys.argv[1], video_rois['hd'])
     loaded = runner.is_loaded()
     if not loaded:
         self.logger.info('Video Did not Load')

@@ -22,7 +22,8 @@ def initialize_settings_from_video_roi(video_roi):
 
 def initialize_settings(frame_tl, capture_size):
     settings = {'frameTopLeft': frame_tl, 'active_center_norm': (0.5, 0.5), 'active_radius_norm': 0.4,
-                'capture_size': capture_size}
+                'capture_size': capture_size, 'cache':'.'}
+
     width = int(settings['capture_size'][0] + 0.5) - settings['frameTopLeft'][0] * 2
     height = int(settings['capture_size'][1] + 0.5) - settings['frameTopLeft'][1] * 2
     settings['frame_size'] = (width, height)
@@ -39,17 +40,39 @@ def initialize_settings(frame_tl, capture_size):
                      criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
     # params for ShiTomasi corner detection
-    settings['feature_params'] = dict(maxCorners=8000,
-                          qualityLevel=0.01,
-                          minDistance=9,
-                          blockSize=7,
-                          useHarrisDetector=False,
-                          k=0.04)
-    settings['max_distance'] = 25
+    settings['feature_params'] = dict(maxCorners=500,
+                          qualityLevel=0.3,
+                          minDistance=7,
+                          blockSize=7)
+#                          useHarrisDetector=False,
+#                          k=0.04)
+    settings['max_distance'] = 5
     settings['min_features'] = 300
+    settings['mask_diagonal_ratio'] = 2.5
 
 
 
     return settings
 
+'''
+Create a mask like this. 
+diagonal ratio is  ration of ... to ...-----...
+
+ ...------...
+   /      \
+  /        \
+  ----------
+  
+'''
+def region_of_interest(img, diagonal_ratio=2.5):
+    rows, cols, channels = img.shape
+    mask = np.zeros((rows, cols), dtype=np.uint8)
+    left = int(cols / diagonal_ratio)
+    right = int(cols - left)
+
+    triangle = np.array([[
+        (left, 50),(right, 50), (cols-1, rows - 1),(0, rows-1) ]], np.int32)
+
+    cv2.fillConvexPoly(mask, triangle, 255)
+    return mask
 
