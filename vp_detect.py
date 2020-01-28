@@ -55,7 +55,6 @@ class vp_detection(object):
     def length_thresh(self):
         """
         Length threshold for line segment detector
-
         Returns:
             The minimum length required for a line
         """
@@ -65,10 +64,8 @@ class vp_detection(object):
     def length_thresh(self, value):
         """
         Length threshold for line segment detector
-
         Args:
             value: The minimum length required for a line
-
         Raises:
             ValueError: If the threshold is 0 or negative
         """
@@ -81,7 +78,6 @@ class vp_detection(object):
     def principal_point(self):
         """
         Principal point for VP Detection algorithm
-
         Returns:
             The minimum length required for a line
         """
@@ -91,7 +87,6 @@ class vp_detection(object):
     def principal_point(self, value):
         """
         Principal point for VP Detection algorithm
-
         Args:
             value: A list or tuple of two elements denoting the x and y coordinates
 
@@ -110,7 +105,6 @@ class vp_detection(object):
     def focal_length(self):
         """
         Focal length for VP detection algorithm
-
         Returns:
             The focal length in pixels
         """
@@ -120,7 +114,6 @@ class vp_detection(object):
     def vps(self):
         """
         Vanishing points of the image in 3D space.
-
         Returns:
             A np array where each row is a point and each column is a component / coordinate
         """
@@ -130,11 +123,32 @@ class vp_detection(object):
     def vps_2D(self):
         """
         Vanishing points of the image in 2D image coordinates.
-
         Returns:
             A np array where each row is a point and each column is a component / coordinate
         """
         return self._vps_2D
+
+    @property
+    def lines(self):
+        """
+        Vanishing points of the image in 2D image coordinates.
+        Returns:
+            A np array where each row is a point and each column is a component / coordinate
+        """
+        return self.__lines
+
+    @property
+    def clusters(self):
+        """
+        Cluster of based on which VP they contributed to.
+
+        Returns:
+        # For each VP
+        # Returns a list of 3 elements
+        # Each element contains which line index corresponds to which VP
+    """
+
+        return self.__clusters
 
     def __detect_lines(self, img):
         """
@@ -415,7 +429,6 @@ class vp_detection(object):
     def __cluster_lines(self, vps_hypos):
         """
         Groups the lines based on which VP they contributed to.
-        Primarily for display purposes only when debugging the algorithm
         """
 
         # Extract out line coordinates
@@ -471,7 +484,6 @@ class vp_detection(object):
     def find_image_vps (self, img):
         """
         Find the vanishing points given the input image
-
         Args:
             img: the image read in with `cv2.imread`
 
@@ -481,7 +493,7 @@ class vp_detection(object):
             first row, the left most VP is the second row and the vertical VP is
             the last row
         """
-
+        self.__clusters = None
         self.__img = img  # Keep a copy for later
 
         # Reset principal point if we haven't set it yet
@@ -503,7 +515,10 @@ class vp_detection(object):
         # Find the final VPs
         best_vps = self.__get_best_vps_hypo(sphere_grid, vps_hypos)
         self.__final_vps = best_vps  # Save a copy
-        self.__clusters = None  # Reset because of new image
+        # Cluster lines based on which VP they contributed to
+        if self.__clusters is None:
+            self.__cluster_lines(self.__vps_hypos)
+#        self.__clusters = None  # Reset because of new image
         return best_vps
 
     def get_intrinsic_camera_transformation(self):
@@ -512,6 +527,8 @@ class vp_detection(object):
 
         :Rtype:
             `np.array`
+
+        cv2.calibrationMatrixValues(cameraMatrix, imageSize, apertureWidth, apertureHeight) → fovx, fovy, focalLength, principalPoint, aspectRatio¶
         """
         # form the appropriate transformation matrix from unit space
         xform = np.zeros((3, 3))
@@ -614,39 +631,9 @@ class vp_detection(object):
         # print(euler_angles_from_rotation_matrix(R))
         return (R, t)
 
-    def create_debug_VP_image(self, show_image=False, save_image=None):
-        """
-        Once the VP detection algorithm runs, show which lines belong to
-        which clusters by colouring the lines according to which VP they
-        contributed to
 
-        Args:
-            show_image: Show the image in an OpenCV imshow window
-                        (default=false)
-            save_image: Provide a path to save the image to file
-                       (default=None - no image is saved)
 
-        Returns:
-            The debug image
-
-        Raises:
-            ValueError: If the path to the image is not a string or None
-        """
-
-        # Group the line detections based on which VP they belong to
-        # Only run if we haven't done it yet for this image
-        if self.__clusters is None:
-            self.__cluster_lines(self.__vps_hypos)
-
-        if save_image is not None and not isinstance(save_image, str):
-            raise ValueError('The save_image path should be a string')
-
-        img = self.__img.copy()
-        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        hue,satu,vol = cv2.split(img_hsv)
-        img = np.dstack([hue,hue,hue])
-        if len(img.shape) == 2:  # If grayscale, artificially make into RGB
-            img = np.dstack([img, img, img])
+    def render_vp_output (self, img):
 
         colours = 255 * np.eye(3)
         # BGR format
@@ -660,8 +647,8 @@ class vp_detection(object):
         status[all_clusters] = False
         ind = np.where(status)[0]
         for (x1, y1, x2, y2) in self.__lines[ind]:
-            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),
-                     (0, 0, 0), 2, cv2.LINE_AA)
+            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 0), 2, cv2.LINE_AA)
+            cv2.putText(img, 'X', (int(x1), int(y1)), cv2.FONT_HERSHEY_PLAIN, 0.8, (0,0,0), 1)
 
         for i in range(3):
             vp_x = self._vps_2D[i][0]
@@ -682,21 +669,13 @@ class vp_detection(object):
                 dy = vp_y - y2
                 d2 = np.sqrt(dx * dx + dy * dy)
                 cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)),colours[i], 2, cv2.LINE_AA)
+
                 if d2 > d1:
-                    cv2.circle(img, (x2, y2), 7, colours[i], 2, cv2.LINE_AA)
+                    #cv2.circle(img, (x2, y2), 7, colours[i], 2, cv2.LINE_AA)
+                    cv2.putText(img, str(i), (int(x2), int(y2)), cv2.FONT_HERSHEY_PLAIN, 0.8,colours[i], 1)
                 else:
-                    cv2.circle(img, (x1, y1), 7, colours[i], 2, cv2.LINE_AA)
-
-        # radians = np.arctan2(self._vps_2D[1][1] - self._vps_2D[0][1],
-        #                      self._vps_2D[1][0] - self._vps_2D[0][0])
-        # print((radians,radians*57.3))
-        # radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[0][1],
-        #                      self._vps_2D[2][0] - self._vps_2D[0][0])
-        # print((radians, radians * 57.3))
-        # radians = np.arctan2(self._vps_2D[2][1] - self._vps_2D[1][1],
-        #                      self._vps_2D[2][0] - self._vps_2D[1][0])
-        # print((radians, radians * 57.3))
-
+                    #cv2.circle(img, (x1, y1), 7, colours[i], 2, cv2.LINE_AA)
+                    cv2.putText(img, str(i), (int(x1), int(y1)), cv2.FONT_HERSHEY_PLAIN, 0.8,colours[i], 1)
 
         # draw a line between first 2 vps
         cv2.line(img, (int(self._vps_2D[0][0]), int(self._vps_2D[0][1])),
@@ -708,6 +687,26 @@ class vp_detection(object):
         cv2.line(img, (int(self._vps_2D[1][0]), int(self._vps_2D[1][1])),
                  (int(self._vps_2D[2][0]), int(self._vps_2D[2][1])),
                  (0, 0, 255), 4, cv2.LINE_AA)
+
+        return img
+
+
+    def create_debug_VP_image(self, show_image=False, save_image=None):
+        if self.__clusters is None:
+            self.__cluster_lines(self.__vps_hypos)
+
+        if save_image is not None and not isinstance(save_image, str):
+            raise ValueError('The save_image path should be a string')
+
+        img = self.__img.copy()
+        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        hue, satu, vol = cv2.split(img_hsv)
+        img = np.dstack([gray, gray, gray])
+        if len(img.shape) == 2:  # If grayscale, artificially make into RGB
+            img = np.dstack([img, img, img])
+
+        self.render_vp_output(img)
 
         # Show image if necessary
         if show_image:
@@ -732,7 +731,7 @@ def main(input_path, roi):
     debug_show = 1
     debug_path = None
     seed = 1337
-    reduce = 8
+    reduce = 1
 
     print('Input path: {}'.format(input_path))
     print('Seed: {}'.format(seed))
