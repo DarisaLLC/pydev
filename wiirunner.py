@@ -3,13 +3,13 @@ import os
 from pathlib import Path
 from matplotlib import pyplot as plt
 import numpy as np
-import cv2 as cv
+import cv2
 import math
 from padChecker import padChecker
 from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
 from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
-from wiitricity_settings import circular_mean, line_yhist, compute_lines, quadrilateral_detection
-from eval_homography import image_change
+from wiitricity_settings import circular_mean, compute_lines, quasi_quadrilateral_detection
+import geometry as utils
 from skimage.feature import peak_local_max
 from skimage.util import img_as_float, img_as_ubyte
 
@@ -33,9 +33,9 @@ class gpad_odometry:
         self._is_valid = not (self.source is None)
 
         if self.source == 'Camera':
-            self.cap = cv.VideoCapture(int(self.source_info))
+            self.cap = cv2.VideoCapture(int(self.source_info))
         else:
-            self.cap = cv.VideoCapture(self.source_info)
+            self.cap = cv2.VideoCapture(self.source_info)
         self._is_loaded = True
         self.track_len = 10
         self.detect_interval = 5
@@ -59,8 +59,8 @@ class gpad_odometry:
         self.logger.info('Source is ' + self.source)
         video_roi = user_roi
         if self.source == 'Camera':
-            camera_roi = dict(row_low=0, row_high=int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)) - 1,
-                              column_low=0, column_high=int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)) - 1)
+            camera_roi = dict(row_low=0, row_high=int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) - 1,
+                              column_low=0, column_high=int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) - 1)
             video_roi = camera_roi
 
         self.logger.info(video_roi)
@@ -71,8 +71,8 @@ class gpad_odometry:
         self.width = video_roi['column_high'] - video_roi['column_low']
         self.height = video_roi['row_high'] - video_roi['row_low']
 
-        assert (self.width <= int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)))
-        assert (self.height <= int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
+        assert (self.width <= int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
+        assert (self.height <= int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         self.feature_params = self.settings['feature_params']
         self.lk_params = self.settings['lk_params']
         self.max_dist = self.settings['max_distance']
@@ -121,9 +121,9 @@ class gpad_odometry:
 
             self.draw_direction()
             self.draw_frame_info()
-            cv.namedWindow('Display', cv.WINDOW_NORMAL)
-            cv.imshow("Display", self.display)
-            ch = cv.waitKey(1)
+            cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+            cv2.imshow("Display", self.display)
+            ch = cv2.waitKey(0)
             if ch == 27:
                 break
             elif ch == ord("v"):
@@ -134,9 +134,9 @@ class gpad_odometry:
         self.mask = region_of_interest(frame)
         self.flow_mask = vertical(frame)
         self.display = frame.copy()
-        gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
-        # cv.imwrite(filename, frame)
+        # cv2.imwrite(filename, frame)
         return gray_frame, frame
 
     def line_processing(self, gray_frame):
@@ -147,14 +147,10 @@ class gpad_odometry:
         botright = half_width - topleft[0], half_height - topleft[1]
         lines_valid_region = (topleft, botright)
         lines_mask_region = [(0,0),(half_width-1, half_height//3)]
-        half_res = cv.resize(gray_frame,(half_width,half_height))
-        half_res = cv.GaussianBlur(half_res, (0,0), 1)
-
+        half_res = cv2.pyrDown(gray_frame, dstsize=(half_width,half_height))
+        half_res = cv2.medianBlur(half_res, 7)
         (lines, locations, directions, strengths, kde) = compute_lines(half_res, lines_valid_region,(15, 100))
         print((len(locations), ' Lines '))
-       # parallels = quadrilateral_detection(lines, locations, directions, strengths, kde, (15,100))
-
-
         if self.prev_gray_frame is None:
             self.prev_gray_frame = half_res
             self.prev_lines = lines
@@ -162,51 +158,102 @@ class gpad_odometry:
             self.prev_lines = self.lines
             self.lines = lines
 
+        # if not (self.prev_lines is None):
+        #     for line in self.prev_lines:
+        #         x1, y1, x2, y2 = line
+        #         cv2.line(self.display, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+        vornoi = np.zeros((self.height, self.width, 1), dtype="uint8")
+        vornoi += 255
+
+
+        cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+        cv2.imshow("Display", self.display)
+        ch = cv2.waitKey(0)
+        indexs, mids, quads = quasi_quadrilateral_detection(lines, directions)
+        self.draw_segments(lines, self.display, mids)
+        self.draw_rectangles(quads, self.display)
+
+        # if not (self.lines is None):
+        #     for line in self.lines:
+        #         x1, y1, x2, y2 = line
+        #         radians = np.arctan2(y2 - y1, x2 - x1)
+        #         #                cl = bgrFromHue(math.degrees(radians))
+        #         #                cv2.line(self.display, (x1+x1, y1+y1), (x2+x2, y2+y2), cl, 2)
+        #         cv2.line(vornoi, (x1 + x1, y1 + y1), (x2 + x2, y2 + y2), (0, 0, 0), 2)
+        #
+        # dist_transform = cv2.distanceTransform(vornoi, cv2.DIST_L2, 5, None, cv2.CV_32F)
+        #
+        # ## Find all local maximas in the distance image
+        # peaks = peak_local_max(img_as_float(dist_transform), min_distance=50, indices=False)
+        # peaks_img = img_as_ubyte(peaks)
+        # for y in range(0, self.height):
+        #     for x in range(0, self.width):
+        #         # threshold the pixel
+        #         if peaks_img[y, x]:
+        #             cv2.circle(self.display, (x, y), 30, (0, 0, 255), 5)
+        #
+        # cv2.imwrite('/Users/arman/vtmp/' + str(self.frame_idx) + '.png', dist_transform)
+        # cv2.imwrite('/Users/arman/vvtmp/' + str(self.frame_idx) + '.png', vornoi)
+        # cv2.imwrite('/Users/arman/vvvtmp/' + str(self.frame_idx) + '.png', peaks_img)
+        #
+        # # dist2 = cv2.normalize(dist_transform, None, 255, 0, cv2.NORM_MINMAX, cv2.CV_8UC1)
+        # # cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+        # # cv2.imshow("Display", dist2)
+        # # ch = cv2.waitKey(10)
+
+    def draw_segments(self, segments: list, base_image: np.ndarray,  mids: list = None, render_indices: bool = True,
+                      up_res: int = 2):
+        """Draws the segments contained in the first parameter onto the base image passed as second parameter.
+
+        This function displays the image using the third parameter as title.
+        The indices associated to the segments are rendered on the image depending on 'render_indices'.
+        A list of colors can be passed as argument to specify the colors to be used for different segment clusters.
+
+        :param segments: List of segment clusters.
+        :param base_image: Base image over which to render the segments.
+        :param render_indices: Boolean flag indicating whether to render the segment indices or not.
+        """
+
         def bgrFromHue(degrees):
             hsv = np.zeros((1, 1, 3), np.uint8)
             hsv[0, 0, 0] = ((degrees % 360) * 255) / 360.0
             hsv[0, 0, 1] = 255
             hsv[0, 0, 2] = 255
-            bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
+            bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
             tp = tuple([int(x) for x in bgr[0, 0, :]])
             return tp
 
-        # if not (self.prev_lines is None):
-        #     for line in self.prev_lines:
-        #         x1, y1, x2, y2 = line
-        #         cv.line(self.display, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
-        vornoi = np.zeros((self.height, self.width, 1), dtype="uint8")
-        vornoi += 255
+        for segment_index, segment in enumerate(segments):
+            p0, p1 = np.array([segment[0], segment[1]]), np.array([segment[2], segment[3]])
+            angle = utils.angle_x(p0,p1)
+            cl = bgrFromHue(math.degrees(angle))
+            cv2.line(img=base_image, pt1=(int(segment[0]*2), int(segment[1]*2)), pt2=(int(segment[2]*2), int(segment[3]*2)),
+                     color=cl, thickness=1, lineType=cv2.LINE_AA)
+            if render_indices:
+                cv2.putText(base_image, str(segment_index), (int(segment[0]*2), int(segment[1]*2)), cv2.FONT_HERSHEY_PLAIN, 0.8,
+                            cl, 1)
 
-        if not (self.lines is None):
-            for line in self.lines:
-                x1, y1, x2, y2 = line
-                radians = np.arctan2(y2 - y1, x2 - x1)
-                cl = bgrFromHue(math.degrees(radians))
-                cv.line(self.display, (x1+x1, y1+y1), (x2+x2, y2+y2), cl, 2)
-                cv.line(vornoi, (x1+x1, y1+y1), (x2+x2, y2+y2), (0,0,0), 2)
+        if not (mids is None):
+            for mid in mids:
+                cv2.line(img=base_image, pt1=(int(mid[0][0] * 2), int(mid[0][1] * 2)),
+                         pt2=(int(mid[1][0] * 2), int(mid[1][1] * 2)),
+                         color=(128,128,128), thickness=2, lineType=cv2.LINE_AA)
 
-        dist_transform = cv.distanceTransform(vornoi, cv.DIST_L2, 5, None, cv.CV_32F)
+    def draw_rectangles(self, rectangles: list, base_image: np.ndarray):
+        """Draws the rectangles contained in the first parameter onto the base image passed as second parameter.
 
-        ## Find all local maximas in the distance image
-        peaks = peak_local_max(img_as_float(dist_transform),min_distance=50, indices=False)
-        peaks_img = img_as_ubyte(peaks)
-        for y in range(0, self.height):
-            for x in range(0, self.width):
-                # threshold the pixel
-                if peaks_img[y,x]:
-                    cv.circle(self.display, (x,y), 30, (0,0,255), 5)
+        This function displays the image using the third parameter as title.
 
-        cv.imwrite('/Users/arman/vtmp/' + str(self.frame_idx) + '.png', dist_transform)
-        cv.imwrite('/Users/arman/vvtmp/' + str(self.frame_idx) + '.png', vornoi)
-        cv.imwrite('/Users/arman/vvvtmp/' + str(self.frame_idx) + '.png', peaks_img)
-
-        # dist2 = cv.normalize(dist_transform, None, 255, 0, cv.NORM_MINMAX, cv.CV_8UC1)
-        # cv.namedWindow('Display', cv.WINDOW_NORMAL)
-        # cv.imshow("Display", dist2)
-        # ch = cv.waitKey(10)
-
+        :param rectangles: List of rectangles.
+        :param base_image: Base image over which to render the rectangles.
+        :param windows_name: Title to give to the rendered image.
+        """
+        for rectangle in rectangles:
+            cv2.polylines(base_image, np.int32([rectangle]), True, (0,0,255), 3, cv2.LINE_AA)
+            #cv2.fillConvexPoly(mask, np.int32([rectangle]), (255, 0, 0), cv2.LINE_4)
+#        cv2.addWeighted(base_image, 1, mask, 0.3, 0, base_image)
 
     def detect_ga(self, frame):
         res = self.display
@@ -222,7 +269,7 @@ class gpad_odometry:
         if not (self.ga_results is None):
             score = str(self.ga_results[0])
             _draw_str(self.display, (200, 400), score, 2.0)
-            #  res = cv.drawContours(res, self.ga_results[4], -1, (255, 0, 0), 3)
+            #  res = cv2.drawContours(res, self.ga_results[4], -1, (255, 0, 0), 3)
             if self.show_pads:
                 res = np.vstack((res, self.ga_results[2]))
         return res
@@ -236,8 +283,8 @@ class gpad_odometry:
             img0, img1 = self.prev_gray_frame, frame_gray
 
             p0 = np.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
-            p1, _st, _err = cv.calcOpticalFlowPyrLK(img0, img1, p0, None, **self.settings['lk_params'])
-            p0r, _st, _err = cv.calcOpticalFlowPyrLK(img1, img0, p1, None, **self.settings['lk_params'])
+            p1, _st, _err = cv2.calcOpticalFlowPyrLK(img0, img1, p0, None, **self.settings['lk_params'])
+            p0r, _st, _err = cv2.calcOpticalFlowPyrLK(img1, img0, p1, None, **self.settings['lk_params'])
             d = abs(p0 - p0r).reshape(-1, 2).max(-1)
             good = d < 1
             new_tracks = []
@@ -249,7 +296,7 @@ class gpad_odometry:
                     del tr[0]
                 new_tracks.append(tr)
                 if self.show_vectors:
-                    cv.circle(self.display, (x, y), 2, (0, 255, 0), -1)
+                    cv2.circle(self.display, (x, y), 2, (0, 255, 0), -1)
             self.tracks = new_tracks
             angles = []
             mags = []
@@ -286,14 +333,14 @@ class gpad_odometry:
                 self.current_angle = self.prev_angle
 
             if self.show_vectors:
-                cv.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+                cv2.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
                 _draw_str(self.display, (20, self.height - 100), ' %d' % len(self.tracks), 2.0)
 
         if self.frame_idx % self.detect_interval == 0:
             mask = self.flow_mask.copy()
             for x, y in [np.int32(tr[-1]) for tr in self.tracks]:
-                cv.circle(mask, (x, y), 5, 0, -1)
-            p = cv.goodFeaturesToTrack(frame_gray, mask=mask, **self.settings['feature_params'])
+                cv2.circle(mask, (x, y), 5, 0, -1)
+            p = cv2.goodFeaturesToTrack(frame_gray, mask=mask, **self.settings['feature_params'])
             if p is not None:
                 for x, y in np.float32(p).reshape(-1, 2):
                     self.tracks.append([(x, y)])
@@ -326,8 +373,8 @@ class gpad_odometry:
             _draw_str(self.display, ((2*self.width) // 3, (15 * self.height) // 16), 'Mean Distance: %d' % self.current_distance, 2.0)
 
     def draw_frame_info(self):
-        cv.putText(self.display, str(self.frame_idx), (self.width // 16, (15 * self.height) // 16),
-                   cv.FONT_HERSHEY_SIMPLEX,
+        cv2.putText(self.display, str(self.frame_idx), (self.width // 16, (15 * self.height) // 16),
+                   cv2.FONT_HERSHEY_SIMPLEX,
                    1, (0, 255, 0), 2)
 
     def measure_tracks(self):
@@ -383,8 +430,8 @@ if __name__ == "__main__":
         exit(1)
     runner.run()
 
-    cv.destroyAllWindows()
+    cv2.destroyAllWindows()
 
 #  cap.release()
-#  cv.waitKey(0)
+#  cv2.waitKey(0)
 #

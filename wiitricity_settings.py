@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import os
 import math
-import cv2 as cv
+import cv2
 import datetime
 import logging
 from datetime import datetime
@@ -10,6 +10,9 @@ from pathlib import Path
 from sympy import simplify, Polygon, convex_hull, Point2D, Line2D, Line
 import itertools
 from simple_kdtree import make_kd_tree, add_point, get_knn, get_nearest, PointContainer
+import geometry as utils
+from scipy.spatial import distance
+
 
 '''
 Initialization of common settings for WiiTricity image & videos
@@ -46,8 +49,8 @@ def initialize_settings(frame_tl, capture_size):
     settings['ppMedianBlur'] = 7
     # Parameters for lucas kanade optical flow
     settings['lk_params'] = dict(winSize=(15, 15),
-                                 maxLevel=3,
-                                 criteria=(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
+                                 maxLevel=4,
+                                 criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
     # params for ShiTomasi corner detection
     settings['feature_params'] = dict(maxCorners=500,
@@ -84,7 +87,7 @@ def region_of_interest(img, diagonal_ratio=2.5):
     poly = np.array([[
         (left, 50), (right, 50), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv.fillConvexPoly(mask, poly, 255)
+    cv2.fillConvexPoly(mask, poly, 255)
     return mask
 
 
@@ -106,14 +109,14 @@ def vertical(img, top_portion=0.667):
     poly = np.array([[
         (0, top), (cols - 1, top), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv.fillConvexPoly(mask, poly, 255)
+    cv2.fillConvexPoly(mask, poly, 255)
     return mask
 
 
 def _draw_str(dst, target, s, scale=1.0):
     x, y = target
-    cv.putText(dst, s, (x + 1, y + 1), cv.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness=2, lineType=cv.LINE_AA)
-    cv.putText(dst, s, (x, y), cv.FONT_HERSHEY_PLAIN, scale, (128, 128, 128), lineType=cv.LINE_AA)
+    cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_PLAIN, scale, (128, 128, 128), lineType=cv2.LINE_AA)
 
 
 def create_logging_directory(output_path):
@@ -154,7 +157,7 @@ def bgrFromHue(degrees):
     hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
     hsv[0, 0, 1] = 255
     hsv[0, 0, 2] = 255
-    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
+    bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
     tp = tuple([int(x) for x in bgr[0, 0, :]])
     return tp
 
@@ -187,7 +190,7 @@ def compute_lines(image, mask_region, length_limit):
     '''
     cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
     '''
-    lsd = cv.createLineSegmentDetector(0) #cv.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
+    lsd = cv2.createLineSegmentDetector(0) #cv2.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
 
     # Detect lines in the image
     # Returns a NumPy array of type N x 1 x 4 of float32
@@ -203,6 +206,11 @@ def compute_lines(image, mask_region, length_limit):
     dy = lines[:, 3] - lines[:, 1]
     lengths = np.sqrt(dx * dx + dy * dy)
     mask = lengths > length_limit[0]
+    lines = lines[mask]
+    dx = lines[:, 2] - lines[:, 0]
+    dy = lines[:, 3] - lines[:, 1]
+    lengths = np.sqrt(dx * dx + dy * dy)
+    mask = lengths < length_limit[1]
     lines = lines[mask]
 
     locations = []
@@ -251,10 +259,11 @@ def angle_diff(angle1: float, angle2: float) -> float:
     return np.abs(d_angle)
 
 
-def midPoint(line):
-    p0, p1 = np.array([line[0], line[1]]), np.array([line[2], line[3]])
-    return np.array((p0 + p1) / 2)
+def get_mid_point(line):
+    return np.array([(line[0] + line[2]) / 2, (line[1] + line[3]) / 2])
 
+def get_distance(pt1,pt2):
+    diff = pt1 - pt2
 
 from collections.abc import Hashable
 
@@ -273,109 +282,54 @@ def uniques(iterable):
                 seen_unhashable.append(item)
 
 
-def quadrilateral_detection(lines, locations, directions, strengths, kdt, line_limits=(50, 100), parallel_thr=5.0):
-    cands = []
+def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho_thr=math.pi/4.5, dis_thr=200):
+    indexes = []
+    mids = []
     N = len(lines)
-    parallels = []
-    dim = 2
-
-    def dist_sq(a, b, dim):
-        return sum((a[i] - b[i]) ** 2 for i in range(dim))
-
-    def dist_sq_dim(a, b):
-        return dist_sq(a, b, dim)
+    quads = []
+    #order = utils.sort_segments(lines)
 
     iterator = itertools.combinations(range(N), 2)
     for i, j in iterator:
-        dD = angle_diff(directions[i], directions[j])
-        if math.degrees(dD) > parallel_thr: continue
-        mid_i = locations[i]
-        mid_j = locations[j]
-        midp = midPoint([mid_i[0], mid_i[1], mid_j[0], mid_j[1]])
-        nknn = get_knn(kdt, midp, 8, dim, dist_sq_dim)
-        distances = []
-        lids = []
-        for nn in nknn:
-            distances.append(nn[0])
-            lids.append(nn[1].name)
-        ulids = uniques(lids)
-        lulids = len(list(ulids))
-        if lulids == 8: continue
-        print(len(list(ulids)), ' Uniques')
-        #
-        # dis = np.linalg.norm(mid_i - mid_j)
-        # if dis < line_limits[0] and dis < line_limits[1]:
-        #     parallels.append([mid_i[0],mid_i[1],mid_j[0],mid_j[1]])
+        Li = lines[i]
+        Lj = lines[j]
+        p0, p1 = np.array([Li[0], Li[1]]), np.array([Li[2], Li[3]])
+        p2, p3 = np.array([Lj[0], Lj[1]]), np.array([Lj[2], Lj[3]])
+        Ai = utils.angle_x(p0,p1)
+        Aj = utils.angle_x(p2,p3)
+        dt = utils.angle_diff(Ai,Aj)
+        if dt > (angle_thr): continue
 
-    return parallels
+        pts = []
+        pts.append(p0)
+        pts.append(p1)
+        pts.append(p2)
+        pts.append(p3)
+        # check overlap
+        normal = np.array([0, 1])
 
+        # Project the segment centers along the normal defined by the mean angle.
+        projected_ends = np.array([np.dot(endp, normal) for endp in pts])
+        d1 = np.maximum(projected_ends[0], projected_ends[1]) - np.minimum(projected_ends[0], projected_ends[1])
+        d2 = np.maximum(projected_ends[2], projected_ends[3]) - np.minimum(projected_ends[2], projected_ends[3])
+        order = np.argsort(projected_ends)
+        em = order[0]
+        en = order[3]
+        pd = np.maximum(projected_ends[em], projected_ends[en]) - np.minimum(projected_ends[em], projected_ends[en])
+        overlap = pd / (d1 + d2)
+        if overlap > 1.1: continue
+        mLi = get_mid_point(Li)
+        mLj = get_mid_point(Lj)
+        dist = distance.euclidean(mLi,mLj)
+        check = dist < dis_thr
+        if not check: continue
+        qa = utils.area(np.array(pts))
+        print('qa-area:', qa)
 
-'''
- Lines are already been pruned to same angle 
- We are looking for quadrilaterals
+        indexes.append((i,j))
+        mids.append([mLi,mLj])
+        quads.append(np.array(pts))
 
- '''
-
-
-def line_yhist(lines, frame_size):
-    # create a y histogram of lines
-    #   la = np.array(lines, dtype='float').view(np.recarray)
-    # Remove singleton dimension
-    la = lines[:, 0]
-
-    radians = np.arctan2(la[:, 3] - la[:, 1], la[:, 2] - la[:, 0])
-    nags = radians < 0
-    radians[nags] += math.pi
-    radians = np.remainder(radians, math.pi)
-
-    for line in lines:
-        p1, p2 = map(Point2D, [(line[0], line[1]), (line[2], line[3])])
-        L1 = Line2D(p1, p2)
-        angle_raw = xaxis.angle_between(L1).evalf()
-        if angle_raw < 0:
-            angle_raw += math.pi
-        angle = angle_raw % math.pi
-        print(('angle ', math.degrees(angle)))
-        d = L1.length.evalf()
-        dd = d * d
-        y = int(line[1])
-        yhist[y][0] += 1
-        yhist[y][1] += d
-        yhist[y][2] += dd
-
-    return yhist
+    return indexes, mids, quads
 
 
-def lines2quadrilaterals(lines, image_size):
-    def get_mid_point(line):
-        return (line[0] + line[2]) / 2, (line[1] + line[3]) / 2
-
-        # create a y histogram of lines
-
-    yhist = np.zeros((image_size[1], 3), dtype=float)
-    for line in lines:
-        L1 = Line2D(line)
-        yhist[line[0]] += 1
-        yhist[line[3]] += 1
-
-    cands = []
-    for s1, s2 in combinations(lines, 2):
-        # L1 = Line2D(s1)
-        # L2 = Line2D(s2)
-        # m1 = get_mid_point(s1)
-        # m2 = get_mid_point(s2)
-
-        points = [(s1[0], s1[1]), (s1[2], s1[3]), (s2[0], s2[1]), (s2[2], s2[3])]
-        poly = convex_hull(*points)
-        #        print(('check ', poly, poly.is_convex()))
-        passit = True
-        for other in lines:
-            if same_line(s1, other) or same_line(s2, other): continue
-            #            print(('against ', p1, p2))
-            if poly.encloses_point((other[0], other[1])) or poly.encloses_point((other[2], other[3])):
-                passit = False
-                #                print(('bad ', poly))
-                break
-        # print(('good ', poly))
-        if passit: cands.append(poly)
-    return cands
