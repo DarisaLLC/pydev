@@ -8,11 +8,11 @@ import math
 from padChecker import padChecker
 from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
 from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
-from wiitricity_settings import circular_mean, compute_lines, quasi_quadrilateral_detection
+from wiitricity_settings import circular_mean, compute_lines, filter_lines, quasi_quadrilateral_detection
 import geometry as utils
 from skimage.feature import peak_local_max
 from skimage.util import img_as_float, img_as_ubyte
-
+from vp_detect import vp_detection
 
 import numpy as np
 
@@ -70,6 +70,10 @@ class gpad_odometry:
         self.settings = initialize_settings_from_video_roi(video_roi)
         self.width = video_roi['column_high'] - video_roi['column_low']
         self.height = video_roi['row_high'] - video_roi['row_low']
+        self.image_bounds = np.array([[video_roi['column_low'], video_roi['row_low']],
+                                      [video_roi['column_low'] + self.width, video_roi['row_low']],
+                                      [video_roi['column_low'] + self.width, video_roi['row_low'] + self.height],
+                                      [video_roi['column_low'], video_roi['row_low'] + self.height]])
 
         assert (self.width <= int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
         assert (self.height <= int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
@@ -97,6 +101,16 @@ class gpad_odometry:
         self.prev_lines = None
         self.lines = None
 
+        # A Vanshing Point Detector, params and results
+        self.vpd = None
+        self.vpd_line_length_threshold = 30
+        self.vps = None
+        self.inbound_vps = None
+        self.vertical_horizon = None
+        self.vp_lines = None
+        self.valid_vp_lines = None
+
+
     def distance_is_available(self):
         return not (self.current_distance is None)
 
@@ -106,12 +120,66 @@ class gpad_odometry:
     def is_valid(self):
         return self._is_valid
 
+    def update_vpd(self, gray_frame):
+        if self.vpd is None:
+            principal_point = np.array([self.width / 2.0, self.height / 2.0],
+                                       dtype=np.float32)
+            self.vpd = vp_detection(self.vpd_line_length_threshold, principal_point)
+        self.inbound_vps = []
+        self.vps = self.vpd.find_image_vps(gray_frame)
+        vp2D = self.vpd.vps_2D
+        self.vertical_horizon = 0
+        for i, vp in enumerate(vp2D):
+            if (self.image_bounds_contains(vp)):
+                self.inbound_vps.append(i)
+                self.vertical_horizon = np.maximum(self.vertical_horizon, vp[1])
+        self.vertical_horizon = np.minimum(self.vertical_horizon, self.height)
+        self.vertical_horizon /= 4
+
+        print((' Horizon ', self.vertical_horizon))
+
+        for i, vp in enumerate(vp2D):
+            print("Vanishing Point {:d}: {}".format(i + 1, vp))
+
+        # copy lines, clusters
+        self.vp_lines = np.copy(self.vpd.lines)
+        self.vp_clusters = np.copy(self.vpd.clusters)
+        print((' all lines ', len(self.vp_lines)))
+        #
+        # # unsigned to a vp = lines - all clusters
+        all_clusters = np.hstack(self.vp_clusters)
+        status = np.ones(self.vp_lines.shape[0], dtype=np.bool)
+        status[all_clusters] = False
+        ind = np.where(status)[0]
+        self.vp_valid_lines = []
+        for line in self.vp_lines[ind]:
+            (x1, y1, x2, y2) = line
+            if np.maximum(y2, y1) < self.vertical_horizon:
+                continue
+            self.vp_valid_lines.append(line)
+
+        print((' unassinged names ', len(self.vp_valid_lines)))
+
+        for inbound_vps in self.inbound_vps:
+            for line in self.vp_lines[self.vp_clusters[inbound_vps]]:
+                (x1, y1, x2, y2) = line
+                if np.maximum(y2, y1) < self.vertical_horizon:
+                    continue
+                self.vp_valid_lines.append(line)
+
+            print((' VP ' + str(inbound_vps)), len(self.vp_valid_lines))
+
+        self.vp_valid_lines = np.array(self.vp_valid_lines)
+        print((' removed lines ', (len(self.vp_lines) - len(self.vp_valid_lines))))
+
+
     def run(self):
         while True:
             ret, captured_frame = self.cap.read()
             if not ret: break
-
             gray_frame, frame = self.prepare_frame(captured_frame)
+            self.update_vpd(gray_frame)
+
             self.get_flow(gray_frame)
             self.line_processing(gray_frame)
             #     self.display = self.detect_ga(frame)
@@ -123,11 +191,12 @@ class gpad_odometry:
             self.draw_frame_info()
             cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
             cv2.imshow("Display", self.display)
-            ch = cv2.waitKey(0)
+            ch = cv2.waitKey(1)
             if ch == 27:
                 break
             elif ch == ord("v"):
                 self.show_vectors = not self.show_vectors
+
 
     def prepare_frame(self, frame):
         frame = self.get_roi(frame)
@@ -135,74 +204,48 @@ class gpad_odometry:
         self.flow_mask = vertical(frame)
         self.display = frame.copy()
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
-        # cv2.imwrite(filename, frame)
+        filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
+        cv2.imwrite(filename, frame)
         return gray_frame, frame
 
-    def line_processing(self, gray_frame):
-        half_width = self.width//2
-        half_height = self.height//2
 
-        topleft = (half_width//8, half_height//4)
+    def line_processing(self, gray_frame):
+        half_width = self.width
+        half_height = self.height
+
+        topleft = (half_width // 8, half_height // 4)
         botright = half_width - topleft[0], half_height - topleft[1]
         lines_valid_region = (topleft, botright)
-        lines_mask_region = [(0,0),(half_width-1, half_height//3)]
-        half_res = cv2.pyrDown(gray_frame, dstsize=(half_width,half_height))
-        half_res = cv2.medianBlur(half_res, 7)
-        (lines, locations, directions, strengths, kde) = compute_lines(half_res, lines_valid_region,(15, 100))
+
+        if self.vp_valid_lines is None:
+            (lines, locations, directions, strengths, kde) = compute_lines(gray_frame, lines_valid_region, (30, 300))
+        else:
+            print(('total lines to filter_iter ', len(self.vp_valid_lines)))
+            (lines, locations, directions, strengths, kde) = filter_lines(self.vp_valid_lines, lines_valid_region,
+                                                                          (30, 300))
+
         print((len(locations), ' Lines '))
         if self.prev_gray_frame is None:
-            self.prev_gray_frame = half_res
+            self.prev_gray_frame = gray_frame
             self.prev_lines = lines
         else:
             self.prev_lines = self.lines
             self.lines = lines
 
-        # if not (self.prev_lines is None):
-        #     for line in self.prev_lines:
-        #         x1, y1, x2, y2 = line
-        #         cv2.line(self.display, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        if self.vertical_horizon >= 0 and self.vertical_horizon < self.height:
+            cv2.line(img=self.display, pt1=(0, int(self.vertical_horizon)),pt2=(self.width-1,int(self.vertical_horizon)),
+                     color=(0,255,0,128), thickness=4, lineType=cv2.LINE_AA)
+        self.draw_segments(lines, self.display)
 
-        vornoi = np.zeros((self.height, self.width, 1), dtype="uint8")
-        vornoi += 255
-
-
-        cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
-        cv2.imshow("Display", self.display)
-        ch = cv2.waitKey(0)
         indexs, mids, quads = quasi_quadrilateral_detection(lines, directions)
-        self.draw_segments(lines, self.display, mids)
+        # cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+        # cv2.imshow("Display", self.display)
+        # ch = cv2.waitKey(0)
+
+
         self.draw_rectangles(quads, self.display)
 
-        # if not (self.lines is None):
-        #     for line in self.lines:
-        #         x1, y1, x2, y2 = line
-        #         radians = np.arctan2(y2 - y1, x2 - x1)
-        #         #                cl = bgrFromHue(math.degrees(radians))
-        #         #                cv2.line(self.display, (x1+x1, y1+y1), (x2+x2, y2+y2), cl, 2)
-        #         cv2.line(vornoi, (x1 + x1, y1 + y1), (x2 + x2, y2 + y2), (0, 0, 0), 2)
-        #
-        # dist_transform = cv2.distanceTransform(vornoi, cv2.DIST_L2, 5, None, cv2.CV_32F)
-        #
-        # ## Find all local maximas in the distance image
-        # peaks = peak_local_max(img_as_float(dist_transform), min_distance=50, indices=False)
-        # peaks_img = img_as_ubyte(peaks)
-        # for y in range(0, self.height):
-        #     for x in range(0, self.width):
-        #         # threshold the pixel
-        #         if peaks_img[y, x]:
-        #             cv2.circle(self.display, (x, y), 30, (0, 0, 255), 5)
-        #
-        # cv2.imwrite('/Users/arman/vtmp/' + str(self.frame_idx) + '.png', dist_transform)
-        # cv2.imwrite('/Users/arman/vvtmp/' + str(self.frame_idx) + '.png', vornoi)
-        # cv2.imwrite('/Users/arman/vvvtmp/' + str(self.frame_idx) + '.png', peaks_img)
-        #
-        # # dist2 = cv2.normalize(dist_transform, None, 255, 0, cv2.NORM_MINMAX, cv2.CV_8UC1)
-        # # cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
-        # # cv2.imshow("Display", dist2)
-        # # ch = cv2.waitKey(10)
-
-    def draw_segments(self, segments: list, base_image: np.ndarray,  mids: list = None, render_indices: bool = True,
+    def draw_segments(self, segments: list, base_image: np.ndarray, mids: list = None, render_indices: bool = True,
                       up_res: int = 2):
         """Draws the segments contained in the first parameter onto the base image passed as second parameter.
 
@@ -224,22 +267,24 @@ class gpad_odometry:
             tp = tuple([int(x) for x in bgr[0, 0, :]])
             return tp
 
-
         for segment_index, segment in enumerate(segments):
             p0, p1 = np.array([segment[0], segment[1]]), np.array([segment[2], segment[3]])
-            angle = utils.angle_x(p0,p1)
+            angle = utils.angle_x(p0, p1)
             cl = bgrFromHue(math.degrees(angle))
-            cv2.line(img=base_image, pt1=(int(segment[0]*2), int(segment[1]*2)), pt2=(int(segment[2]*2), int(segment[3]*2)),
+            cv2.line(img=base_image, pt1=(int(segment[0]), int(segment[1])),
+                     pt2=(int(segment[2]), int(segment[3])),
                      color=cl, thickness=1, lineType=cv2.LINE_AA)
             if render_indices:
-                cv2.putText(base_image, str(segment_index), (int(segment[0]*2), int(segment[1]*2)), cv2.FONT_HERSHEY_PLAIN, 0.8,
+                cv2.putText(base_image, str(segment_index), (int(segment[0]), int(segment[1])),
+                            cv2.FONT_HERSHEY_PLAIN, 0.8,
                             cl, 1)
 
         if not (mids is None):
             for mid in mids:
                 cv2.line(img=base_image, pt1=(int(mid[0][0] * 2), int(mid[0][1] * 2)),
                          pt2=(int(mid[1][0] * 2), int(mid[1][1] * 2)),
-                         color=(128,128,128), thickness=2, lineType=cv2.LINE_AA)
+                         color=(128, 128, 128), thickness=2, lineType=cv2.LINE_AA)
+
 
     def draw_rectangles(self, rectangles: list, base_image: np.ndarray):
         """Draws the rectangles contained in the first parameter onto the base image passed as second parameter.
@@ -251,9 +296,11 @@ class gpad_odometry:
         :param windows_name: Title to give to the rendered image.
         """
         for rectangle in rectangles:
-            cv2.polylines(base_image, np.int32([rectangle]), True, (0,0,255), 3, cv2.LINE_AA)
-            #cv2.fillConvexPoly(mask, np.int32([rectangle]), (255, 0, 0), cv2.LINE_4)
-#        cv2.addWeighted(base_image, 1, mask, 0.3, 0, base_image)
+            cv2.polylines(base_image, np.int32([rectangle]), True, (0, 0, 255), 3, cv2.LINE_AA)
+            # cv2.fillConvexPoly(mask, np.int32([rectangle]), (255, 0, 0), cv2.LINE_4)
+
+
+    #        cv2.addWeighted(base_image, 1, mask, 0.3, 0, base_image)
 
     def detect_ga(self, frame):
         res = self.display
@@ -274,9 +321,11 @@ class gpad_odometry:
                 res = np.vstack((res, self.ga_results[2]))
         return res
 
+
     def get_roi(self, frame):
         assert (self._is_valid)
         return frame[self.row_range[0]:self.row_range[1], self.column_range[0]:self.column_range[1]]
+
 
     def get_flow(self, frame_gray):
         if len(self.tracks) > 0:
@@ -345,6 +394,7 @@ class gpad_odometry:
                 for x, y in np.float32(p).reshape(-1, 2):
                     self.tracks.append([(x, y)])
 
+
     def get_mean_distance_2d(self, features1, features2):
         num_features = min((len(features1), len(features2)))
         features1 = np.reshape(features1, (num_features, 2))
@@ -366,16 +416,21 @@ class gpad_odometry:
         dist /= n
         return dist
 
+
     def draw_direction(self):
         if not (self.current_angle is None):
-            _draw_str(self.display, (self.width // 8, (15 * self.height) // 16), 'Mean Direction: %d' % math.degrees(self.current_angle), 2.0)
+            _draw_str(self.display, (self.width // 8, (15 * self.height) // 16),
+                      'Mean Direction: %d' % math.degrees(self.current_angle), 2.0)
         if not (self.current_distance is None):
-            _draw_str(self.display, ((2*self.width) // 3, (15 * self.height) // 16), 'Mean Distance: %d' % self.current_distance, 2.0)
+            _draw_str(self.display, ((2 * self.width) // 3, (15 * self.height) // 16),
+                      'Mean Distance: %d' % self.current_distance, 2.0)
+
 
     def draw_frame_info(self):
         cv2.putText(self.display, str(self.frame_idx), (self.width // 16, (15 * self.height) // 16),
-                   cv2.FONT_HERSHEY_SIMPLEX,
-                   1, (0, 255, 0), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 255, 0), 2)
+
 
     def measure_tracks(self):
         angles = []
@@ -401,6 +456,11 @@ class gpad_odometry:
         return mean_angle % (2 * math.pi)
 
 
+    def image_bounds_contains(self, point: np.ndarray) -> bool:
+        point = (int(point[0]), int(point[1]))
+        return cv2.pointPolygonTest(self.image_bounds, point, False) >= 0
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 1:
@@ -419,7 +479,8 @@ if __name__ == "__main__":
         data_path = default_data_path
         print(('User Supplied is Invalid: Default Data Directory is used ', default_data_path))
     else:
-        print(('User Supplied Data Directory does not exist or is Invalid ', ' Default Data Directory does not exist '))
+        print(('User Supplied Data Directory does not exist or is Invalid ',
+               ' Default Data Directory does not exist '))
         sys.exit(1)
 
     # use video_roi['hd'] for newer video

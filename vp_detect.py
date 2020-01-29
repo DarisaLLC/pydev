@@ -692,8 +692,8 @@ class vp_detection(object):
 
 
     def create_debug_VP_image(self, show_image=False, save_image=None):
-        if self.__clusters is None:
-            self.__cluster_lines(self.__vps_hypos)
+
+        assert not (self.__clusters is None)
 
         if save_image is not None and not isinstance(save_image, str):
             raise ValueError('The save_image path should be a string')
