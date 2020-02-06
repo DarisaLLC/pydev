@@ -12,8 +12,6 @@ from wiitricity_settings import circular_mean, compute_lines, filter_lines, quas
 import geometry as utils
 from skimage.feature import peak_local_max
 from skimage.util import img_as_float, img_as_ubyte
-from vp_detect import vp_detection
-
 import numpy as np
 
 import logging
@@ -41,7 +39,7 @@ class gpad_odometry:
         self.detect_interval = 5
         self.tracks = []
         self.frame_idx = 0
-        self.prev_gray_frame = None
+        self.prev_channel = None
         self.prev_frame = None
         self.abs_diff = None
         self.prev_time = None
@@ -101,14 +99,7 @@ class gpad_odometry:
         self.prev_lines = None
         self.lines = None
 
-        # A Vanshing Point Detector, params and results
-        self.vpd = None
-        self.vpd_line_length_threshold = 30
-        self.vps = None
-        self.inbound_vps = None
-        self.vertical_horizon = None
-        self.vp_lines = None
-        self.valid_vp_lines = None
+        self.vertical_horizon = self.height * self.settings['vertical_horizon_norm']
 
 
     def distance_is_available(self):
@@ -120,71 +111,20 @@ class gpad_odometry:
     def is_valid(self):
         return self._is_valid
 
-    def update_vpd(self, gray_frame):
-        if self.vpd is None:
-            principal_point = np.array([self.width / 2.0, self.height / 2.0],
-                                       dtype=np.float32)
-            self.vpd = vp_detection(self.vpd_line_length_threshold, principal_point)
-        self.inbound_vps = []
-        self.vps = self.vpd.find_image_vps(gray_frame)
-        vp2D = self.vpd.vps_2D
-        self.vertical_horizon = 0
-        for i, vp in enumerate(vp2D):
-            if (self.image_bounds_contains(vp)):
-                self.inbound_vps.append(i)
-                self.vertical_horizon = np.maximum(self.vertical_horizon, vp[1])
-        self.vertical_horizon = np.minimum(self.vertical_horizon, self.height)
-        self.vertical_horizon /= 4
-
-        print((' Horizon ', self.vertical_horizon))
-
-        for i, vp in enumerate(vp2D):
-            print("Vanishing Point {:d}: {}".format(i + 1, vp))
-
-        # copy lines, clusters
-        self.vp_lines = np.copy(self.vpd.lines)
-        self.vp_clusters = np.copy(self.vpd.clusters)
-        print((' all lines ', len(self.vp_lines)))
-        #
-        # # unsigned to a vp = lines - all clusters
-        all_clusters = np.hstack(self.vp_clusters)
-        status = np.ones(self.vp_lines.shape[0], dtype=np.bool)
-        status[all_clusters] = False
-        ind = np.where(status)[0]
-        self.vp_valid_lines = []
-        for line in self.vp_lines[ind]:
-            (x1, y1, x2, y2) = line
-            if np.maximum(y2, y1) < self.vertical_horizon:
-                continue
-            self.vp_valid_lines.append(line)
-
-        print((' unassinged names ', len(self.vp_valid_lines)))
-
-        for inbound_vps in self.inbound_vps:
-            for line in self.vp_lines[self.vp_clusters[inbound_vps]]:
-                (x1, y1, x2, y2) = line
-                if np.maximum(y2, y1) < self.vertical_horizon:
-                    continue
-                self.vp_valid_lines.append(line)
-
-            print((' VP ' + str(inbound_vps)), len(self.vp_valid_lines))
-
-        self.vp_valid_lines = np.array(self.vp_valid_lines)
-        print((' removed lines ', (len(self.vp_lines) - len(self.vp_valid_lines))))
-
-
+  
+    
     def run(self):
+        run_vpd = True
         while True:
             ret, captured_frame = self.cap.read()
             if not ret: break
-            gray_frame, frame = self.prepare_frame(captured_frame)
-            self.update_vpd(gray_frame)
+            channel_in, frame = self.prepare_frame(captured_frame)
 
-            self.get_flow(gray_frame)
-            self.line_processing(gray_frame)
+            self.get_flow(channel_in)
+            self.line_processing(channel_in)
             #     self.display = self.detect_ga(frame)
             self.prev_frame = frame.copy()
-            self.prev_gray_frame = gray_frame.copy()
+            self.prev_channel = channel_in.copy()
             self.frame_idx = self.frame_idx + 1
 
             self.draw_direction()
@@ -196,20 +136,50 @@ class gpad_odometry:
                 break
             elif ch == ord("v"):
                 self.show_vectors = not self.show_vectors
+            elif ch == ord("h"):
+                self.settings['display_source'] = 'hue'
+            elif ch == ord("g"):
+                self.settings['display_source'] = 'gray'
+            elif ch == ord("c"):
+                self.settings['display_source'] = 'native_color'
+
+
+        
 
 
     def prepare_frame(self, frame):
         frame = self.get_roi(frame)
         self.mask = region_of_interest(frame)
         self.flow_mask = vertical(frame)
-        self.display = frame.copy()
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
-        cv2.imwrite(filename, frame)
-        return gray_frame, frame
+        # Choose display source
+        if self.settings['display_source'] == 'gray':
+            g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            self.display = cv2.merge([g,g,g])
+        elif self.settings['display_source'] == 'hue':
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
+            h, s, v = cv2.split(frame)
+            self.display = cv2.merge([h,h,h])
+        else:
+            self.display = frame.copy()
+            
+        
+        ## Choose the channel_in to use
+        channel_in = None
+        if self.settings['use_channel'] == 'gray':
+            channel_in = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        elif self.settings['use_channel'] == 'hsv':
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
+            channel_in, s, v = cv2.split(frame)
+        else: assert(False)
+
+        if not (self.settings['write_frames_path'] is None):
+            filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
+            cv2.imwrite(filename, frame)
+            
+        return channel_in, frame
 
 
-    def line_processing(self, gray_frame):
+    def line_processing(self, channel_in):
         half_width = self.width
         half_height = self.height
 
@@ -217,16 +187,11 @@ class gpad_odometry:
         botright = half_width - topleft[0], half_height - topleft[1]
         lines_valid_region = (topleft, botright)
 
-        if self.vp_valid_lines is None:
-            (lines, locations, directions, strengths, kde) = compute_lines(gray_frame, lines_valid_region, (30, 300))
-        else:
-            print(('total lines to filter_iter ', len(self.vp_valid_lines)))
-            (lines, locations, directions, strengths, kde) = filter_lines(self.vp_valid_lines, lines_valid_region,
-                                                                          (30, 300))
-
-        print((len(locations), ' Lines '))
-        if self.prev_gray_frame is None:
-            self.prev_gray_frame = gray_frame
+        (lines, directions, xc, yc, cands) = compute_lines(channel_in, lines_valid_region, (30, 300))
+        
+        print((len(lines), ' Lines '))
+        if self.prev_channel is None:
+            self.prev_channel = channel_in
             self.prev_lines = lines
         else:
             self.prev_lines = self.lines
@@ -235,18 +200,12 @@ class gpad_odometry:
         if self.vertical_horizon >= 0 and self.vertical_horizon < self.height:
             cv2.line(img=self.display, pt1=(0, int(self.vertical_horizon)),pt2=(self.width-1,int(self.vertical_horizon)),
                      color=(0,255,0,128), thickness=4, lineType=cv2.LINE_AA)
-        self.draw_segments(lines, self.display)
 
-        indexs, mids, quads = quasi_quadrilateral_detection(lines, directions)
-        # cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
-        # cv2.imshow("Display", self.display)
-        # ch = cv2.waitKey(0)
+        self.draw_segments(lines, directions, xc, yc, cands)
 
+   
 
-        self.draw_rectangles(quads, self.display)
-
-    def draw_segments(self, segments: list, base_image: np.ndarray, mids: list = None, render_indices: bool = True,
-                      up_res: int = 2):
+    def draw_segments(self, segments: list, directions: list = None, xc: list = None, yc: list = None, cands: list= None):
         """Draws the segments contained in the first parameter onto the base image passed as second parameter.
 
         This function displays the image using the third parameter as title.
@@ -257,7 +216,7 @@ class gpad_odometry:
         :param base_image: Base image over which to render the segments.
         :param render_indices: Boolean flag indicating whether to render the segment indices or not.
         """
-
+        base_image = self.display
         def bgrFromHue(degrees):
             hsv = np.zeros((1, 1, 3), np.uint8)
             hsv[0, 0, 0] = ((degrees % 360) * 255) / 360.0
@@ -269,21 +228,23 @@ class gpad_odometry:
 
         for segment_index, segment in enumerate(segments):
             p0, p1 = np.array([segment[0], segment[1]]), np.array([segment[2], segment[3]])
-            angle = utils.angle_x(p0, p1)
-            cl = bgrFromHue(math.degrees(angle))
+            angle = directions[segment_index]
+            label = int(math.degrees(angle))
+            cl = bgrFromHue(label)
             cv2.line(img=base_image, pt1=(int(segment[0]), int(segment[1])),
                      pt2=(int(segment[2]), int(segment[3])),
                      color=cl, thickness=1, lineType=cv2.LINE_AA)
-            if render_indices:
-                cv2.putText(base_image, str(segment_index), (int(segment[0]), int(segment[1])),
-                            cv2.FONT_HERSHEY_PLAIN, 0.8,
-                            cl, 1)
+            cv2.putText(base_image, str(label), (int(segment[0]), int(segment[1])),
+                        cv2.FONT_HERSHEY_PLAIN, 0.8,
+                        cl, 1)
 
-        if not (mids is None):
-            for mid in mids:
-                cv2.line(img=base_image, pt1=(int(mid[0][0] * 2), int(mid[0][1] * 2)),
-                         pt2=(int(mid[1][0] * 2), int(mid[1][1] * 2)),
-                         color=(128, 128, 128), thickness=2, lineType=cv2.LINE_AA)
+        if not (cands is None):
+            for (index,cand) in enumerate(cands):
+                i = cand[0]
+                j = cand[1]
+                cv2.line(img=base_image, pt1=(int(xc[i]), int(yc[i])),
+                         pt2=(int(xc[j]), int(yc[j])), color=(255,255,255), thickness=2, lineType=cv2.LINE_AA)
+                
 
 
     def draw_rectangles(self, rectangles: list, base_image: np.ndarray):
@@ -329,7 +290,7 @@ class gpad_odometry:
 
     def get_flow(self, frame_gray):
         if len(self.tracks) > 0:
-            img0, img1 = self.prev_gray_frame, frame_gray
+            img0, img1 = self.prev_channel, frame_gray
 
             p0 = np.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
             p1, _st, _err = cv2.calcOpticalFlowPyrLK(img0, img1, p0, None, **self.settings['lk_params'])

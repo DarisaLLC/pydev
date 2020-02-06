@@ -12,6 +12,8 @@ import itertools
 from simple_kdtree import make_kd_tree, add_point, get_knn, get_nearest, PointContainer
 import geometry as utils
 from scipy.spatial import distance
+from itertools import combinations
+from scipy.spatial import distance
 
 
 '''
@@ -36,7 +38,7 @@ def initialize_settings_from_video_roi(video_roi):
 def initialize_settings(frame_tl, capture_size):
     settings = {'frameTopLeft': frame_tl, 'active_center_norm': (0.5, 0.5), 'active_radius_norm': 0.4,
                 'capture_size': capture_size, 'cache': '.'}
-
+    settings['use_channel'] = 'hsv' # supports hsv as well
     width = int(settings['capture_size'][0] + 0.5) - settings['frameTopLeft'][0] * 2
     height = int(settings['capture_size'][1] + 0.5) - settings['frameTopLeft'][1] * 2
     settings['frame_size'] = (width, height)
@@ -62,7 +64,10 @@ def initialize_settings(frame_tl, capture_size):
     settings['max_distance'] = 5
     settings['min_features'] = 300
     settings['mask_diagonal_ratio'] = 2.5
-
+    settings['vertical_horizon_norm'] = 0.5
+    settings['write_frames_path'] = None
+    # Other Choices 'hue' or 'gray'
+    settings['display_source'] = 'native_color'
     return settings
 
 
@@ -179,27 +184,12 @@ def circular_mean(weights, angles):
 
 
 '''
+Line Filtering 
 mask region is a rectangle in tl image system
 represented by tl and br coords
 
 '''
-
-
-def compute_lines(image, mask_region, length_limit):
-    # Create LSD detector with default parameters
-    '''
-    cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
-    '''
-    lsd = cv2.createLineSegmentDetector(0) #cv2.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
-
-    # Detect lines in the image
-    # Returns a NumPy array of type N x 1 x 4 of float32
-    # such that the 4 numbers in the last dimension are (x1, y1, x2, y2)
-    # These denote the start and end positions of a line
-    lines = lsd.detect(image)[0]
-
-    # Remove singleton dimension
-    lines = lines[:, 0]
+def filter_lines(lines, mask_region, length_limit):
 
     # Filter out the lines whose length is lower than the threshold
     dx = lines[:, 2] - lines[:, 0]
@@ -212,35 +202,62 @@ def compute_lines(image, mask_region, length_limit):
     lengths = np.sqrt(dx * dx + dy * dy)
     mask = lengths < length_limit[1]
     lines = lines[mask]
+    dx = lines[:, 2] - lines[:, 0]
+    dy = lines[:, 3] - lines[:, 1]
+    lengths = lengths[mask]
 
-    locations = []
-    strengths = []
-    tl, br = mask_region
-    new_lines = []
-    new_directions = []
-    points = []
+    # Extract out line coordinates
+    x1 = lines[:, 0]
+    y1 = lines[:, 1]
+    x2 = lines[:, 2]
+    y2 = lines[:, 3]
+    
+    # find max enclsing rect of all the lines
 
-    for line in lines:
-        p0, p1 = np.array([line[0], line[1]]), np.array([line[2], line[3]])
-        midp = (p0 + p1) / 2
-        within = midp[0] >= tl[0] and midp[0] < br[0] and midp[1] >= tl[1] and midp[1] < br[1]
-        if not within: continue
-        locations.append((p0 + p1) / 2)
-        strengths.append(np.linalg.norm(p1 - p0))
-        new_lines.append(line)
-        points.append(PointContainer(p0, name=len(points)))
-        points.append(PointContainer(p1, name=len(points)))
-
-    kdt = make_kd_tree(points, 2)
-    # convert to numpy arrays and normalize
-    locations = np.array(locations)
-    strengths = np.array(strengths)
-    new_lines = np.array(new_lines)
-    directions = np.arctan2(new_lines[:, 3] - new_lines[:, 1], new_lines[:, 2] - new_lines[:, 0])
+    # Get midpoint of each line
+    xc = (lines[:,0]+lines[:,2]) / 2.0
+    yc = (lines[:,1]+lines[:,3]) / 2.0
+    
+    # Get distance to the center
 
 
+    # cands = []
+    # iterator = itertools.combinations(range(len(lines)), 2)
+    # for i, j in iterator:
+    #     r = 1.0 - distance.cosine([dx[i],dy[i]], [dx[j], dy[j]])
+    #     if math.fabs(r) < 0.8: continue
+    #     l = math.sqrt((xc[i]-xc[j])**2 + (yc[i]+yc[j])**2)
+    #     if l > 200: continue
+    #     dxc = xc[i] - xc[j]
+    #     dyc = yc[i] - yc[j]
+    #     p = 1.0 - distance.cosine([dx[i],dy[i]], [dxc,dyc])
+    #     if math.fabs(p) > 0.2: continue
+    #     cands.append((i,j))
+    #     print((lengths[i],lengths[j], r, l, p))
+    
 
-    return (new_lines, locations, directions, strengths, kdt)
+    directions = np.arctan2(lines[:, 3] - lines[:, 1], lines[:, 2] - lines[:, 0]) + np.pi
+    return (lines, directions, xc, yc, None)
+
+'''
+If we are doing our own line detection
+'''
+def compute_lines(image, mask_region, length_limit):
+    # Create LSD detector with default parameters
+    '''
+    cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
+    '''
+    lsd = cv2.createLineSegmentDetector(0) #cv2.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
+
+    # Detect lines in the image
+    # Returns a NumPy array of type N x 1 x 4 of float32
+    # such that the 4 numbers in the last dimension are (x1, y1, x2, y2)
+    # These denote the start and end positions of a line
+    lines = lsd.detect(image)[0]
+    # Remove singleton dimension
+    lines = lines[:, 0]
+
+    return filter_lines(lines, mask_region, length_limit)
 
 
 def angle_diff(angle1: float, angle2: float) -> float:
@@ -282,7 +299,7 @@ def uniques(iterable):
                 seen_unhashable.append(item)
 
 
-def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho_thr=math.pi/4.5, dis_thr=200):
+def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho_thr=math.pi/4.5, dis_thr=300):
     indexes = []
     mids = []
     N = len(lines)
@@ -298,6 +315,8 @@ def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho
         Ai = utils.angle_x(p0,p1)
         Aj = utils.angle_x(p2,p3)
         dt = utils.angle_diff(Ai,Aj)
+        if dt > (angle_thr*2): continue
+        dt = utils.angle_diff(Ai, np.pi/2)
         if dt > (angle_thr): continue
 
         pts = []
@@ -307,9 +326,12 @@ def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho
         pts.append(p3)
         # check overlap
         normal = np.array([0, 1])
+        poly = utils.sort_rectangle(np.array(pts))
+        aspect = utils.aspect_ratio(pts)
+        if aspect > 1.0: continue
 
         # Project the segment centers along the normal defined by the mean angle.
-        projected_ends = np.array([np.dot(endp, normal) for endp in pts])
+        projected_ends = np.array([np.dot(endp, normal) for endp in poly])
         d1 = np.maximum(projected_ends[0], projected_ends[1]) - np.minimum(projected_ends[0], projected_ends[1])
         d2 = np.maximum(projected_ends[2], projected_ends[3]) - np.minimum(projected_ends[2], projected_ends[3])
         order = np.argsort(projected_ends)
@@ -317,18 +339,18 @@ def quasi_quadrilateral_detection(lines, directions, angle_thr=math.pi/10, ortho
         en = order[3]
         pd = np.maximum(projected_ends[em], projected_ends[en]) - np.minimum(projected_ends[em], projected_ends[en])
         overlap = pd / (d1 + d2)
-        if overlap > 1.1: continue
+        if overlap > 1.0: continue
         mLi = get_mid_point(Li)
         mLj = get_mid_point(Lj)
         dist = distance.euclidean(mLi,mLj)
-        check = dist < dis_thr
+        check = dist < dis_thr and dis_thr > 30
         if not check: continue
-        qa = utils.area(np.array(pts))
-        print('qa-area:', qa)
+        qa = utils.area(np.array(poly))
+        print(('qa-area:', qa, ' overlaps ', overlap, ' length ', dist, ' Angle ', math.degrees(Ai) ))
 
         indexes.append((i,j))
         mids.append([mLi,mLj])
-        quads.append(np.array(pts))
+        quads.append(np.array(poly))
 
     return indexes, mids, quads
 
