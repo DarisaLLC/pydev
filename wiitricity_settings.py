@@ -68,6 +68,7 @@ def initialize_settings(frame_tl, capture_size):
     settings['write_frames_path'] = None
     # Other Choices 'hue' or 'gray'
     settings['display_source'] = 'native_color'
+    settings['expected_minimum_size'] = [18,90]
     return settings
 
 
@@ -189,60 +190,74 @@ mask region is a rectangle in tl image system
 represented by tl and br coords
 
 '''
-def filter_lines(lines, mask_region, length_limit):
-
-    # Filter out the lines whose length is lower than the threshold
-    dx = lines[:, 2] - lines[:, 0]
-    dy = lines[:, 3] - lines[:, 1]
+def filter_lines(lines, mask_region, center, expected_orientation, expected_size):
+    N = len(lines)
+    p1 = np.column_stack((lines[:, :2],
+                          np.ones(N, dtype = np.float32)))
+    p2 = np.column_stack((lines[:, 2:],
+                          np.ones(N, dtype = np.float32)))
+    dx = p1[:, 0] - p2[:, 0]
+    dy = p1[:, 1] - p2[:, 1]
+    orientations = (np.arctan2(dy, dx) + np.pi) / 2
     lengths = np.sqrt(dx * dx + dy * dy)
-    mask = lengths > length_limit[0]
+    length_limit = expected_size[0] / 4
+    mask = np.mod(orientations, expected_orientation) < 0.1
     lines = lines[mask]
-    dx = lines[:, 2] - lines[:, 0]
-    dy = lines[:, 3] - lines[:, 1]
-    lengths = np.sqrt(dx * dx + dy * dy)
-    mask = lengths < length_limit[1]
-    lines = lines[mask]
-    dx = lines[:, 2] - lines[:, 0]
-    dy = lines[:, 3] - lines[:, 1]
     lengths = lengths[mask]
+    dx = dx[mask]
+    dy = dy[mask]
+    mask = lengths > length_limit
+    lines = lines[mask]
+    lengths = lengths[mask]
+    dx = dx[mask]
+    dy = dy[mask]
+    mask = lengths < expected_size[0] * 4
+    lines = lines[mask]
+    dx = dx[mask]
+    dy = dy[mask]
 
-    # Extract out line coordinates
-    x1 = lines[:, 0]
-    y1 = lines[:, 1]
-    x2 = lines[:, 2]
-    y2 = lines[:, 3]
     
-    # find max enclsing rect of all the lines
-
     # Get midpoint of each line
     xc = (lines[:,0]+lines[:,2]) / 2.0
     yc = (lines[:,1]+lines[:,3]) / 2.0
-    
+    xc2c = center[0] - xc
+    yc2c = center[1] - yc
     # Get distance to the center
-
-
-    # cands = []
-    # iterator = itertools.combinations(range(len(lines)), 2)
-    # for i, j in iterator:
-    #     r = 1.0 - distance.cosine([dx[i],dy[i]], [dx[j], dy[j]])
-    #     if math.fabs(r) < 0.8: continue
-    #     l = math.sqrt((xc[i]-xc[j])**2 + (yc[i]+yc[j])**2)
-    #     if l > 200: continue
-    #     dxc = xc[i] - xc[j]
-    #     dyc = yc[i] - yc[j]
-    #     p = 1.0 - distance.cosine([dx[i],dy[i]], [dxc,dyc])
-    #     if math.fabs(p) > 0.2: continue
-    #     cands.append((i,j))
-    #     print((lengths[i],lengths[j], r, l, p))
+    dist2ctr = np.sqrt(xc2c * xc2c + yc2c * yc2c)
+    sorted_dist2ctr = np.argsort(dist2ctr)
     
+    lines = lines[sorted_dist2ctr]
+    N = len(lines)
 
+    def parallel(k1, k2):
+        return np.isclose(1 - distance.cosine(k1, k2), 0)
+    def check_cr(k1,k2,expected):
+   
+        return l / expected
+    counter = 0
+    N = len(lines)
+    pars = []
+    while counter < 300: #self.__ransac_iter:
+        # Get two random indices
+        (i,j) = np.random.permutation(N)[:2]
+        is_parallel = parallel([dx[i],dy[i]],[dx[j],dy[j]])
+        if is_parallel: pars.append((i,j))
+#        if not is_parallel: continue
+        ddx = xc[i] - xc[j]
+        ddy = yc[i] - yc[j]
+        l = math.sqrt(ddx * ddx + ddy * ddy)
+        print(('parallel', l))
+        counter = counter +1
+        
+        
+    
     directions = np.arctan2(lines[:, 3] - lines[:, 1], lines[:, 2] - lines[:, 0]) + np.pi
     return (lines, directions, xc, yc, None)
 
 '''
 If we are doing our own line detection
 '''
-def compute_lines(image, mask_region, length_limit):
+def compute_lines(image, mask_region, center, expected_orientation, length_limit):
     # Create LSD detector with default parameters
     '''
     cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
@@ -257,7 +272,7 @@ def compute_lines(image, mask_region, length_limit):
     # Remove singleton dimension
     lines = lines[:, 0]
 
-    return filter_lines(lines, mask_region, length_limit)
+    return filter_lines(lines, mask_region, center, expected_orientation, length_limit)
 
 
 def angle_diff(angle1: float, angle2: float) -> float:

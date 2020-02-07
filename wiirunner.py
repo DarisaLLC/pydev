@@ -186,8 +186,10 @@ class gpad_odometry:
         topleft = (half_width // 8, half_height // 4)
         botright = half_width - topleft[0], half_height - topleft[1]
         lines_valid_region = (topleft, botright)
-
-        (lines, directions, xc, yc, cands) = compute_lines(channel_in, lines_valid_region, (30, 300))
+        expected_minimum_size = self.settings['expected_minimum_size']
+        (lines, directions, xc, yc, cands) = compute_lines(channel_in, lines_valid_region,
+                                                           (half_width/2, half_height/2), np.pi/2.0,
+                                                           expected_minimum_size)
         
         print((len(lines), ' Lines '))
         if self.prev_channel is None:
