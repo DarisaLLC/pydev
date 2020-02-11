@@ -7,13 +7,12 @@ import datetime
 import logging
 from datetime import datetime
 from pathlib import Path
-from sympy import simplify, Polygon, convex_hull, Point2D, Line2D, Line
 import itertools
-from simple_kdtree import make_kd_tree, add_point, get_knn, get_nearest, PointContainer
 import geometry as utils
-from scipy.spatial import distance
 from itertools import combinations
-from scipy.spatial import distance
+from scipy.spatial.distance import cosine as cosine_scipy
+import skimage.filters as sk_filters
+from math import sqrt
 
 
 '''
@@ -68,7 +67,9 @@ def initialize_settings(frame_tl, capture_size):
     settings['write_frames_path'] = None
     # Other Choices 'hue' or 'gray'
     settings['display_source'] = 'native_color'
-    settings['expected_minimum_size'] = [18,90]
+    settings['expected_minimum_size'] = [18,30]
+    settings['display_frame_delay_seconds'] = -1 # -1 means dont delay
+    settings['display_click_after_frame'] = False
     return settings
 
 
@@ -119,10 +120,45 @@ def vertical(img, top_portion=0.667):
     return mask
 
 
+class Time:
+  """
+  Class for displaying elapsed time.
+  """
+
+  def __init__(self):
+    self.start = datetime.now()
+
+  def elapsed_display(self):
+    time_elapsed = self.elapsed()
+    print("Time elapsed: " + str(time_elapsed))
+
+  def elapsed(self):
+    self.end = datetime.now()
+    time_elapsed = self.end - self.start
+    return time_elapsed
+  
+  
+
+def processing_info(np_arr, name=None, elapsed=None):
+  """
+  Display information (shape, type, max, min, etc) about a NumPy array.
+  Args:
+    np_arr: The NumPy array.
+    name: The (optional) name of the array.
+    elapsed: The (optional) time elapsed to perform a filtering operation.
+  """
+
+  if name is None:
+    name = "NumPy Array"
+  if elapsed is None:
+    elapsed = "---"
+
+  print("%-20s | Time: %-14s  Type: %-7s Shape: %s" % (name, str(elapsed), np_arr.dtype, np_arr.shape))
+
 def _draw_str(dst, target, s, scale=1.0):
     x, y = target
-    cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_PLAIN, scale, (0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_PLAIN, scale, (128, 128, 128), lineType=cv2.LINE_AA)
+    cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (255,255,255), thickness=2, lineType=cv2.LINE_AA)
+    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (128, 128, 128), lineType=cv2.LINE_AA)
 
 
 def create_logging_directory(output_path):
@@ -158,6 +194,101 @@ def get_logger():
     return logger
 
 
+def dot(v,w):
+    x,y,z = v
+    X,Y,Z = w
+    return x*X + y*Y + z*Z
+
+def length(v):
+    x,y,z = v
+    return math.sqrt(x*x + y*y + z*z)
+
+def vector(b,e):
+    x,y,z = b
+    X,Y,Z = e
+    return (X-x, Y-y, Z-z)
+
+def unit(v):
+    x,y,z = v
+    mag = length(v)
+    return (x/mag, y/mag, z/mag)
+
+def distance(p0,p1):
+    return length(vector(p0,p1))
+
+def scale(v,sc):
+    x,y,z = v
+    return (x * sc, y * sc, z * sc)
+
+def add(v,w):
+    x,y,z = v
+    X,Y,Z = w
+    return (x+X, y+Y, z+Z)
+
+
+# 1  Convert the line segment to a vector ('line_vec').
+# 2  Create a vector connecting start to pnt ('pnt_vec').
+# 3  Find the length of the line vector ('line_len').
+# 4  Convert line_vec to a unit vector ('line_unitvec').
+# 5  Scale pnt_vec by line_len ('pnt_vec_scaled').
+# 6  Get the dot product of line_unitvec and pnt_vec_scaled ('t').
+# 7  Ensure t is in the range 0 to 1.
+# 8  Use t to get the nearest location on the line to the end
+#    of vector pnt_vec_scaled ('nearest').
+# 9  Calculate the distance from nearest to pnt_vec_scaled.
+# 10 Translate nearest back to the start/end line.
+
+
+def euclidean(x, y):
+    """Returns the Euclidean distance between the vectors ``x`` and ``y``.
+
+    Each of ``x`` and ``y`` can be any iterable of numbers. The
+    iterables must be of the same length.
+
+    """
+    return sqrt(sum((a - b) ** 2 for a, b in zip(x, y)))
+
+def projection_point_on_a_line(point, line):
+    (x1, y1, x2, y2) = line
+    x, y = point
+
+    # 1. Find parametric equation of general point on the line
+    x_p = [x1, (x2 - x1)]
+    y_p = [y1, (y2 - y1)]
+
+    # 2. Find vector of point to line
+    A = [
+        [x - x_p[0], -x_p[1]],
+        [y - y_p[0], -y_p[1]]
+    ]
+    # 3. Find vector parallel to line
+    B = [
+        x2 - x1,
+        y2 - y1
+    ]
+
+    # 4. Find t
+    t = (A[0][0] * B[0] + A[1][0] * B[1]) / (-A[0][1] * B[0] - A[1][1] * B[1])
+
+    # 5. Find point on line
+    final_point = (x_p[0] + x_p[1] * t, y_p[0] + y_p[1] * t)
+
+    d = euclidean(point, final_point)
+    return d, final_point
+
+
+def point_GT (p,q):
+    if p[0] > q[0]: return True
+    elif p[0] == q[0] and p[1] > q[1]: return True
+    return False
+def point_EQ (p,q):
+    return p[0] == q[0] and p[1] == q[1]
+
+def point_GE (p,q):
+    return point_GT(p,q) or point_EQ(p,q)
+
+
+   
 def bgrFromHue(degrees):
     hsv = np.zeros((1, 1, 3), np.uint8)
     hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
@@ -183,84 +314,14 @@ def circular_mean(weights, angles):
     mean = math.degrees(math.atan2(y, x))
     return mean
 
-
-'''
-Line Filtering 
-mask region is a rectangle in tl image system
-represented by tl and br coords
-
-'''
-def filter_lines(lines, mask_region, center, expected_orientation, expected_size):
-    N = len(lines)
-    p1 = np.column_stack((lines[:, :2],
-                          np.ones(N, dtype = np.float32)))
-    p2 = np.column_stack((lines[:, 2:],
-                          np.ones(N, dtype = np.float32)))
-    dx = p1[:, 0] - p2[:, 0]
-    dy = p1[:, 1] - p2[:, 1]
-    orientations = (np.arctan2(dy, dx) + np.pi) / 2
-    lengths = np.sqrt(dx * dx + dy * dy)
-    length_limit = expected_size[0] / 4
-    mask = np.mod(orientations, expected_orientation) < 0.1
-    lines = lines[mask]
-    lengths = lengths[mask]
-    dx = dx[mask]
-    dy = dy[mask]
-    mask = lengths > length_limit
-    lines = lines[mask]
-    lengths = lengths[mask]
-    dx = dx[mask]
-    dy = dy[mask]
-    mask = lengths < expected_size[0] * 4
-    lines = lines[mask]
-    dx = dx[mask]
-    dy = dy[mask]
-
-    
-    # Get midpoint of each line
-    xc = (lines[:,0]+lines[:,2]) / 2.0
-    yc = (lines[:,1]+lines[:,3]) / 2.0
-    xc2c = center[0] - xc
-    yc2c = center[1] - yc
-    # Get distance to the center
-    dist2ctr = np.sqrt(xc2c * xc2c + yc2c * yc2c)
-    sorted_dist2ctr = np.argsort(dist2ctr)
-    
-    lines = lines[sorted_dist2ctr]
-    N = len(lines)
-
-    def parallel(k1, k2):
-        return np.isclose(1 - distance.cosine(k1, k2), 0)
-    def check_cr(k1,k2,expected):
-   
-        return l / expected
-    counter = 0
-    N = len(lines)
-    pars = []
-    while counter < 300: #self.__ransac_iter:
-        # Get two random indices
-        (i,j) = np.random.permutation(N)[:2]
-        is_parallel = parallel([dx[i],dy[i]],[dx[j],dy[j]])
-        if is_parallel: pars.append((i,j))
-#        if not is_parallel: continue
-        ddx = xc[i] - xc[j]
-        ddy = yc[i] - yc[j]
-        l = math.sqrt(ddx * ddx + ddy * ddy)
-        print(('parallel', l))
-        counter = counter +1
-        
-        
-    
-    directions = np.arctan2(lines[:, 3] - lines[:, 1], lines[:, 2] - lines[:, 0]) + np.pi
-    return (lines, directions, xc, yc, None)
-
 '''
 If we are doing our own line detection
 '''
-def compute_lines(image, mask_region, center, expected_orientation, length_limit):
+def compute_lines(image, mask_region, center, expected_orientation, length_limit, vertical_horizon):
     # Create LSD detector with default parameters
     '''
     cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
+    @todo Only run on below Horizon
     '''
     lsd = cv2.createLineSegmentDetector(0) #cv2.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
 
@@ -272,7 +333,77 @@ def compute_lines(image, mask_region, center, expected_orientation, length_limit
     # Remove singleton dimension
     lines = lines[:, 0]
 
-    return filter_lines(lines, mask_region, center, expected_orientation, length_limit)
+    return filter_lines(lines, mask_region, center, expected_orientation, length_limit, vertical_horizon)
+
+
+'''
+Line Filtering 
+mask region is a rectangle in tl image system
+represented by tl and br coords
+
+'''
+def filter_lines(lines, mask_region, center, expected_orientation, expected_size, vertical_horizon):
+    N = len(lines)
+    p1 = np.column_stack((lines[:, :2],
+                          np.ones(N, dtype = np.float32)))
+    p2 = np.column_stack((lines[:, 2:],
+                          np.ones(N, dtype = np.float32)))
+    dx = p1[:, 0] - p2[:, 0]
+    dy = p1[:, 1] - p2[:, 1]
+    xc = (p1[:, 0] + p2[:, 0]) / 2.0
+    yc = (p1[:, 1] + p2[:, 1]) / 2.0
+    
+    # setup region for line processing
+    high = vertical_horizon
+    high = high / 2
+    low = vertical_horizon + expected_size[1]
+    mask = (yc > high) & (yc < low)
+ 
+#    mask = yc > vertical_horizon
+    lines = lines[mask]
+    dx = dx[mask]
+    dy = dy[mask]
+    xc = xc[mask]
+    yc = yc[mask]
+    directions = (np.arctan2(dy, dx) + np.pi)
+    lengths = np.sqrt(dx * dx + dy * dy)
+    mask = np.mod(directions, expected_orientation) < 0.2
+    lines = lines[mask]
+    dx = dx[mask]
+    dy = dy[mask]
+    xc = xc[mask]
+    yc = yc[mask]
+    directions = directions[mask]
+    
+    N = len(lines)
+    out = np.zeros((N,N), dtype='float')
+    iterator = itertools.combinations(range(N), 2)
+    rects = []
+    for i, j in iterator:
+        dd = cosine_scipy(lines[i], lines[j])
+        if dd > 0.0091: continue
+        # findout which one is wider
+        wide, short = i, j
+        if lengths[wide] < lengths[short]:
+            wide, short = j, i
+        aspect = lengths[wide] / lengths[short]
+        if aspect > 3.0 : continue
+        
+        (x1,y1,x2,y2) = lines[wide]
+        p3 = np.array((x1,y1))
+        p4 = np.array((x2,y2))
+        d1,p1 = projection_point_on_a_line(p3,lines[short])
+        d2,p2 = projection_point_on_a_line(p4,lines[short])
+        if math.fabs(d1-d2) > 3: continue
+        aspect = lengths[wide] / d1
+        if aspect > 3.0 or aspect < 0.333 : continue
+        
+        points = [p1,p2,p3,p4]
+        points = np.asarray(points, dtype=np.float32)
+        rr = cv2.minAreaRect(points)
+        rects.append(rr)
+
+    return (rects, lines, directions, xc, yc, None)
 
 
 def angle_diff(angle1: float, angle2: float) -> float:
@@ -296,6 +427,82 @@ def get_mid_point(line):
 
 def get_distance(pt1,pt2):
     diff = pt1 - pt2
+
+
+def filter_hysteresis_threshold(np_img, low=50, high=100, output_type="uint8"):
+  """
+  Apply two-level (hysteresis) threshold to an image as a NumPy array, returning a binary image.
+  Args:
+    np_img: Image as a NumPy array.
+    low: Low threshold.
+    high: High threshold.
+    output_type: Type of array to return (bool, float, or uint8).
+  Returns:
+    NumPy array (bool, float, or uint8) where True, 1.0, and 255 represent a pixel above hysteresis threshold.
+  """
+  
+  hyst = sk_filters.apply_hysteresis_threshold(np_img, low, high)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    hyst = hyst.astype(float)
+  else:
+    hyst = (255 * hyst).astype("uint8")
+
+  return hyst
+
+
+def filter_threshold(np_img, threshold, output_type="uint8"):
+  """
+  Return mask where a pixel has a value if it exceeds the threshold value.
+  Args:
+    np_img: Binary image as a NumPy array.
+    threshold: The threshold value to exceed.
+    output_type: Type of array to return (bool, float, or uint8).
+  Returns:
+    NumPy array representing a mask where a pixel has a value (T, 1.0, or 255) if the corresponding input array
+    pixel exceeds the threshold value.
+  """
+  t = Time()
+  result = (np_img > threshold)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+  processing_info(result, "Threshold", t.elapsed())
+  return result
+
+def filter_grays(rgb, tolerance=15, output_type="uint8"):
+  """
+  Create a mask to filter out pixels where the red, green, and blue channel values are similar.
+  Args:
+    np_img: RGB image as a NumPy array.
+    tolerance: Tolerance value to determine how similar the values must be in order to be filtered out
+    output_type: Type of array to return (bool, float, or uint8).
+  Returns:
+    NumPy array representing a mask where pixels with similar red, green, and blue values have been masked out.
+  """
+  t = Time()
+  (h, w, c) = rgb.shape
+
+  rgb = rgb.astype(np.int)
+  rg_diff = abs(rgb[:, :, 0] - rgb[:, :, 1]) <= tolerance
+  rb_diff = abs(rgb[:, :, 0] - rgb[:, :, 2]) <= tolerance
+  gb_diff = abs(rgb[:, :, 1] - rgb[:, :, 2]) <= tolerance
+  result = ~(rg_diff & rb_diff & gb_diff)
+
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+  processing_info(result, "Filter Grays", t.elapsed())
+  return result
+
+
 
 from collections.abc import Hashable
 
