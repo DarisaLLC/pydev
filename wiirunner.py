@@ -129,7 +129,7 @@ class gpad_odometry:
 
             self.get_flow(channel_in)
             self.line_processing(channel_in)
-            #     self.display = self.detect_ga(frame)
+            self.display = self.detect_ga(frame)
             self.prev_frame = frame.copy()
             self.prev_channel = channel_in.copy()
             self.frame_idx = self.frame_idx + 1
@@ -175,7 +175,10 @@ class gpad_odometry:
     def prepare_frame(self, input_frame):
         reduction = self.settings['reduction']
         new_size = (self.width,self.height)
-        frame = cv2.resize(input_frame, new_size)
+        #mframe = cv2.medianBlur(input_frame, 7)
+        mframe = cv2.bilateralFilter(input_frame, 17, 9,  200)
+        
+        frame = cv2.resize(mframe, new_size, cv2.INTER_AREA)
         if self.settings['synthesize_test']:
             frame = self.synthesize_frame ()
         frame = self.get_roi(frame)
@@ -206,7 +209,6 @@ class gpad_odometry:
             
         else: assert(False)
 
-    #    channel_in = cv2.GaussianBlur(src = channel_in, ksize = (11,11), sigmaX = 3)
 
         if not (self.settings['write_frames_path'] is None):
             filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
@@ -286,7 +288,7 @@ class gpad_odometry:
                 i = cand[0]
                 j = cand[1]
                 cv2.line(img=base_image, pt1=(int(xc[i]), int(yc[i])),
-                         pt2=(int(xc[j]), int(yc[j])), color=(255,255,255), thickness=2, lineType=cv2.LINE_AA)
+                         pt2=(int(xc[j]), int(yc[j])), color=(255,255,255), thickness=1, lineType=cv2.LINE_AA)
                 
 
 
@@ -308,8 +310,6 @@ class gpad_odometry:
 
     def detect_ga(self, frame):
         res = self.display
-        #    if self.distance_is_available() and int(self.current_distance) < 5:
-        # readout,thresh, seethrough, cnts, hulls
         checkout = self.checker.check(frame, self.mask)
         if self.ga_results is None:
             self.ga_results = checkout

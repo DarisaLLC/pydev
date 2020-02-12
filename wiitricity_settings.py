@@ -71,7 +71,7 @@ def initialize_settings(frame_tl, capture_size):
     settings['expected_minimum_size'] = [18,30]
     settings['display_frame_delay_seconds'] = 100 # -1 means dont delay
     settings['display_click_after_frame'] = False
-    settings['restrict_to_view_angle'] = False
+    settings['restrict_to_view_angle'] = True
     
     
     ## Synthesize, runs input video but instead of captured frames it synthesizes a moving / rotating rectangle
@@ -278,7 +278,8 @@ def line_embedding(unit, line_start, line_end):
     else:
         return None
 
-   
+
+
 def bgrFromHue(degrees):
     hsv = np.zeros((1, 1, 3), np.uint8)
     hsv[0, 0, 0] = ((degrees % 180) * 256) / 180.0
@@ -326,7 +327,7 @@ def compute_lines(image, expected_orientation, length_limit, vertical_horizon, d
     return filter_lines(lines, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings)
 
 
-def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distance = 10):
+def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distance = 1):
     merged = []
     merged_segments = []
     for i, segment_i in enumerate(lines):
@@ -343,7 +344,11 @@ def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distan
         merged_segment = [int(m) for m in merged_segment]
         merged_segments.append(merged_segment)
         
-    return collinears, np.array(merged_segments)
+        for index in collinears:
+            if index not in merged:
+                merged.append(index)
+
+    return merged, np.array(merged_segments)
     
 
 
@@ -353,11 +358,9 @@ mask region is a rectangle in tl image system
 represented by tl and br coords
 
 '''
-def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, dlogger, dsettings):
+def filter_lines(lines, expected_orientation, expected_size, vertical_horizon, dlogger, dsettings):
     
-    merged, msegments = merge_lines(mlines)
-    
-    N = len(mlines)
+    N = len(lines)
     dlogger.info('Initial Line Count: ' + str(N))
     dx = lines[:, 2] - lines[:, 0]
     dy = lines[:, 3] - lines[:, 1]
@@ -365,23 +368,19 @@ def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, 
     yc = (lines[:, 3] + lines[:, 1]) / 2.0
     
     # setup region for line processing
-    high = vertical_horizon
-    mask = yc > high
- 
-#    mask = yc > vertical_horizon
+    mask = yc > vertical_horizon
     lines = lines[mask]
     dlogger.info('Post Horizon filter Line Count: ' + str(len(lines)))
-    dx = dx[mask]
-    dy = dy[mask]
-    xc = xc[mask]
-    yc = yc[mask]
+    
+    dx = lines[:, 2] - lines[:, 0]
+    dy = lines[:, 3] - lines[:, 1]
+    xc = (lines[:, 2] + lines[:, 0]) / 2.0
+    yc = (lines[:, 3] + lines[:, 1]) / 2.0
+    
     directions = np.mod((np.arctan2(dy, dx) + np.pi), np.pi)
     lengths = np.sqrt(dx * dx + dy * dy)
-    
-    
-    
     if dsettings['restrict_to_view_angle']:
-        mask = np.mod(directions, expected_orientation) < 0.1
+        mask = np.mod(directions, expected_orientation) < 0.01
         lines = lines[mask]
         dx = dx[mask]
         dy = dy[mask]
@@ -404,15 +403,28 @@ def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, 
     # Check on whether mid to mid is prependicular to either line
     rng = np.random.RandomState(0)
     X = rng.random_sample((2,2))
+    angle_thr = np.pi * 180 / 5
+    
     for i, j in iterator:
+
+        ## 3 lines: i, j and mid_i to mid_j
+        ## first check if i and j are close to parallel
+        # form mid_i_2_mid_j
+        # check if mid_i_2_mid_j and either i or j are prependicular to each other
+        ia = get_line_angle(lines[i])
+        ja = get_line_angle(lines[j])
+        if math.fabs(ia - ja) > angle_thr: continue
+        m2m = (xc[i],yc[i],xc[j],yc[j])
+        ma = get_line_angle(m2m)
+        pp = ma - ia
+        if pp < 0 : pp = pp + np.pi
+        if math.fabs(pp - np.pi/2) > angle_thr: continue
         
-        are_collinear = utils.segments_collinear(lines[i], lines[j],  5.0 / 180 * np.pi, 5.0)
-        
-        if are_collinear: continue
         wide, short = i, j
         if lengths[wide] < lengths[short]:
             wide, short = j, i
-
+        cands.append((wide,short))
+        
         (xx1, yy1, xx2, yy2) = lines[wide]
         p1 = np.array((xx1, yy1))
         p2 = np.array((xx2, yy2))
@@ -421,22 +433,27 @@ def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, 
         p4 = np.array((x2, y2))
         d1,p13 = point_line_distance_and_projection(p3, p1, p2)
         d2,p14 = point_line_distance_and_projection(p4, p1, p2)
-        not_overlaps_in_x = np.maximum(p13[0], p14[0]) > np.minimum(p1[0],p2[0]) or np.maximum(p1[0], p2[0]) > np.minimum(p13[0],p14[0])
-        not_overlaps_in_y = np.maximum(p13[1], p14[1]) > np.minimum(p1[1],p2[1]) or np.maximum(p1[1], p2[1]) > np.minimum(p13[1],p14[1])
-        print(('line ', str(wide), ' & ', str(short), not_overlaps_in_y, not_overlaps_in_y))
-        if not_overlaps_in_x or not_overlaps_in_y: continue
         
-        points = [p1,p2,p13,p14]
+#        not_overlaps_in_x = np.maximum(p13[0], p14[0]) > np.minimum(p1[0],p2[0]) or np.maximum(p1[0], p2[0]) > np.minimum(p13[0],p14[0])
+#        not_overlaps_in_y = np.maximum(p13[1], p14[1]) > np.minimum(p1[1],p2[1]) or np.maximum(p1[1], p2[1]) > np.minimum(p13[1],p14[1])
+#        if not_overlaps_in_x or not_overlaps_in_y: continue
+        
+        points = [p1,p2,p3,p4]
         points = np.asarray(points, dtype=np.float32)
         rr = cv2.minAreaRect(points)
         (x, y), (width, height), angle = rr
         aspect_ratio = min(width, height) / max(width, height)
-      #  if aspect_ratio < 0.33 : continue
+        if aspect_ratio < 0.33 : continue
+        if angle < 0: angle = angle + 360.0
+        slant = angle % (expected_orientation * 180 / np.pi)
+        if slant > 5: continue
+        
+
         
         rects.append(rr)
-        cands.append((wide,short))
+
         
-    return (rects, lines, directions, xc, yc, cands)
+    return (rects, lines, directions, xc, yc, None)
 
 
 def angle_diff(angle1: float, angle2: float) -> float:
