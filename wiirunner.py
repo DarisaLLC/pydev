@@ -8,7 +8,8 @@ import math
 from padChecker import padChecker
 from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
 from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
-from wiitricity_settings import circular_mean, compute_lines, filter_lines, filter_threshold
+from wiitricity_settings import circular_mean, compute_lines, filter_lines
+from wiitricity_utils import filter_rag_threshold, filter_threshold,  filter_kmeans_segmentation
 import geometry as utils
 from skimage.feature import peak_local_max
 from skimage.util import img_as_float, img_as_ubyte
@@ -66,15 +67,17 @@ class gpad_odometry:
 
         self.logger.info(video_roi)
 
-        self.row_range = (video_roi['row_low'], video_roi['row_high'])
-        self.column_range = (video_roi['column_low'], video_roi['column_high'])
+   
         self.settings = initialize_settings_from_video_roi(video_roi)
-        self.width = video_roi['column_high'] - video_roi['column_low']
-        self.height = video_roi['row_high'] - video_roi['row_low']
-        self.image_bounds = np.array([[video_roi['column_low'], video_roi['row_low']],
-                                      [video_roi['column_low'] + self.width, video_roi['row_low']],
-                                      [video_roi['column_low'] + self.width, video_roi['row_low'] + self.height],
-                                      [video_roi['column_low'], video_roi['row_low'] + self.height]])
+        reduction = self.settings['reduction']
+        self.row_range = (video_roi['row_low']//reduction, video_roi['row_high']//reduction)
+        self.column_range = (video_roi['column_low']//reduction, video_roi['column_high']//reduction)
+        self.width = self.column_range[1] - self.column_range[0]
+        self.height = self.row_range[1] - self.row_range[0]
+        self.image_bounds = np.array([[self.column_range[0], self.row_range[0]],
+                                      [self.column_range[0] + self.width, self.row_range[0]],
+                                      [self.column_range[0] + self.width, self.row_range[0] + self.height],
+                                      [self.column_range[0], self.row_range[0] + self.height]])
 
         assert (self.width <= int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
         assert (self.height <= int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
@@ -102,9 +105,10 @@ class gpad_odometry:
         self.prev_ga_results = None
         self.prev_lines = None
         self.lines = None
-
+        self.kdtree = None
+        
         self.vertical_horizon = self.height * self.settings['vertical_horizon_norm']
-
+        self.reduction = self.settings['reduction']
 
     def distance_is_available(self):
         return not (self.current_distance is None)
@@ -115,10 +119,9 @@ class gpad_odometry:
     def is_valid(self):
         return self._is_valid
 
-  
-    
     def run(self):
         run_vpd = True
+        
         while True:
             ret, captured_frame = self.cap.read()
             if not ret: break
@@ -136,9 +139,7 @@ class gpad_odometry:
             cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
             cv2.imshow("Display", self.display)
 
-            if self.settings['display_frame_delay_seconds'] > 0 and self.settings['display_click_after_frame'] == False:
-                time.sleep(self.settings['display_frame_delay_seconds'])
-            wait = 0 if self.settings['display_click_after_frame'] == True else 1
+            wait = 0 if self.settings['display_click_after_frame'] == True else self.settings['display_frame_delay_seconds']
             ch = cv2.waitKey(wait)
             if ch == 27:
                 break
@@ -150,13 +151,33 @@ class gpad_odometry:
                 self.settings['display_source'] = 'gray'
             elif ch == ord("c"):
                 self.settings['display_source'] = 'native_color'
+            elif ch == ord("l"):
+                self.settings['display_source'] = 'label'
 
-                
-                
+    def synthesize_frame(self):
+        cols = self.width
+        rows = self.height
+        frame = np.zeros((rows,cols, 3), dtype=np.uint8)
+        left = 100
+        right = 300
+        rect = np.array([[
+            (left, 50), (right, 50), (223,63), (200, 63)]], np.int32)
+        rect2 = rect + [300,0]
         
 
-
-    def prepare_frame(self, frame):
+        cv2.fillConvexPoly(frame, rect, (128,128,128))
+        cv2.fillConvexPoly(frame, rect2, (192,192,192))
+        
+        
+        return frame
+    
+        
+    def prepare_frame(self, input_frame):
+        reduction = self.settings['reduction']
+        new_size = (self.width,self.height)
+        frame = cv2.resize(input_frame, new_size)
+        if self.settings['synthesize_test']:
+            frame = self.synthesize_frame ()
         frame = self.get_roi(frame)
         self.mask = region_of_interest(frame)
         self.flow_mask = vertical(frame)
@@ -168,6 +189,8 @@ class gpad_odometry:
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
             h, s, v = cv2.split(frame)
             self.display = cv2.merge([h,h,h])
+        elif self.settings['display_source'] == 'label':
+            self.display = filter_kmeans_segmentation(frame)
         else:
             self.display = frame.copy()
             
@@ -183,6 +206,8 @@ class gpad_odometry:
             
         else: assert(False)
 
+    #    channel_in = cv2.GaussianBlur(src = channel_in, ksize = (11,11), sigmaX = 3)
+
         if not (self.settings['write_frames_path'] is None):
             filename = '/Users/arman/tmpin/' + str(self.frame_idx) + '.png'
             cv2.imwrite(filename, frame)
@@ -193,18 +218,18 @@ class gpad_odometry:
     def line_processing(self, channel_in):
     
   
-        half_width = self.width
-        half_height = self.height
-
-        topleft = (half_width // 8, half_height // 4)
-        botright = half_width - topleft[0], half_height - topleft[1]
+        topleft = (self.width // 8, self.height // 4)
+        botright = self.width - topleft[0], self.height - topleft[1]
         lines_valid_region = (topleft, botright)
         expected_minimum_size = self.settings['expected_minimum_size']
         view_angle = np.pi if self.current_angle is None else self.current_angle
-        view_size = expected_minimum_size if self.current_distance is None else expected_minimum_size + self.current_distance / 4
-        (rects, lines, directions, xc, yc, cands) = compute_lines(channel_in, lines_valid_region,
-                                                           (half_width/2, half_height/2), view_angle,
-                                                           view_size, self.vertical_horizon)
+        view_size = expected_minimum_size #if self.current_distance is None else expected_minimum_size + self.current_distance / 4
+        (rects, lines, directions, xc, yc, cands) = compute_lines(channel_in,
+                                                                  view_angle,
+                                                                  view_size,
+                                                                  self.vertical_horizon,
+                                                                  self.logger,
+                                                                  self.settings)
         
         print((len(lines), ' Lines '))
         if self.prev_channel is None:
@@ -218,9 +243,8 @@ class gpad_odometry:
             cv2.line(img=self.display, pt1=(0, int(self.vertical_horizon)),pt2=(self.width-1,int(self.vertical_horizon)),
                      color=(0,255,0,80), thickness=4, lineType=cv2.LINE_AA)
 
-
-        self.draw_segments(lines, directions, xc, yc, cands)
         self.draw_rectangles(rects)
+        self.draw_segments(lines, directions, xc, yc, cands)
 
    
 
@@ -238,7 +262,7 @@ class gpad_odometry:
         base_image = self.display
         def bgrFromHue(degrees):
             hsv = np.zeros((1, 1, 3), np.uint8)
-            hsv[0, 0, 0] = ((degrees % 360) * 255) / 360.0
+            hsv[0, 0, 0] = ((degrees % 90) * 255) / 90.0
             hsv[0, 0, 1] = 255
             hsv[0, 0, 2] = 255
             bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
@@ -278,8 +302,8 @@ class gpad_odometry:
         mask = np.zeros_like(self.display)
         for rectangle in rectangles:
             points = cv2.boxPoints(rectangle)
-            cv2.polylines(self.display, np.int32([points]), True, (0, 0, 255), 3, cv2.LINE_AA)
-            cv2.fillConvexPoly(mask, np.int32([points]), (255, 0, 0), cv2.LINE_4)
+            cv2.polylines(self.display, np.int32([points]), True, (0, 0, 255), 1, cv2.LINE_AA)
+            cv2.fillConvexPoly(mask, np.int32([points]), (255, 0, 0), cv2.LINE_AA)
             cv2.addWeighted(self.display, 1, mask, 0.3, 0, self.display)
 
     def detect_ga(self, frame):
@@ -308,6 +332,9 @@ class gpad_odometry:
 
 
     def get_flow(self, frame_gray):
+        mean_angle = np.pi
+        mean_mags = 0
+        
         if len(self.tracks) > 0:
             img0, img1 = self.prev_channel, frame_gray
 
@@ -347,27 +374,27 @@ class gpad_odometry:
             mean_angle = mean_angle % (2 * math.pi)
             mean_mags = np.mean(mags)
 
-            if self.prev_angle is None:
-                self.prev_angle = mean_angle
-            if self.prev_distance is None:
-                self.prev_distance = 0
+        if self.prev_angle is None:
+            self.prev_angle = mean_angle
+        if self.prev_distance is None:
+            self.prev_distance = 0
 
-            current_dist = self.prev_distance + mean_mags
-            self.prev_distance = self.current_distance
-            self.current_distance = current_dist
+        current_dist = self.prev_distance + mean_mags
+        self.prev_distance = self.current_distance
+        self.current_distance = current_dist
 
-            self.prev_speed = self.current_speed
-            self.current_speed = mean_mags
-            
-            if int(self.current_speed) > 0:
-                self.prev_angle = self.current_angle
-                self.current_angle = mean_angle
-            else:
-                self.current_angle = self.prev_angle
+        self.prev_speed = self.current_speed
+        self.current_speed = mean_mags
+        
+        if int(self.current_speed) > 0:
+            self.prev_angle = self.current_angle
+            self.current_angle = mean_angle
+        else:
+            self.current_angle = self.prev_angle
 
-            if self.show_vectors:
-                cv2.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
-                _draw_str(self.display, (20, self.height - 100), ' %d' % len(self.tracks), 2.0)
+        if self.show_vectors and  len(self.tracks) > 0:
+            cv2.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+            #_draw_str(self.display, (20, self.height - 100), ' %d' % len(self.tracks), 2.0)
 
         if self.frame_idx % self.detect_interval == 0:
             mask = self.flow_mask.copy()
@@ -402,25 +429,27 @@ class gpad_odometry:
 
 
     def draw_direction(self):
+        scale = 1.0 / self.reduction
         if not (self.gray_out_mask is None):
             self.display = cv2.bitwise_and(self.display, self.gray_out_mask)
         
         if not (self.current_angle is None):
             _draw_str(self.display, (self.width // 12, (15 * self.height) // 16),
-                      'Direction: %d' % math.degrees(self.current_angle), 1.0)
+                      'Direction: %d' % math.degrees(self.current_angle), scale)
 
         if not (self.current_distance is None):
             _draw_str(self.display, ((self.width) // 4, (15 * self.height) // 16),
-                      'Traveled (pixels): %d' % self.current_distance, 1.0)
+                      'Traveled (pixels): %d' % self.current_distance, scale)
     
         if not (self.current_speed is None):
             _draw_str(self.display, ((2 * self.width) // 3, (15 * self.height) // 16),
-                      'Current Speed (px / fr ): %d' % self.current_speed, 1.0)
+                      'Current Speed (px / fr ): %d' % self.current_speed, scale)
 
     def draw_frame_info(self):
+        scale = 1.0 / self.reduction
         cv2.putText(self.display, str(self.frame_idx), (self.width // 32, (15 * self.height) // 16),
                     cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    1, (192, 192, 192), 2)
+                    scale, (192, 192, 192), 2)
 
 
     def measure_tracks(self):

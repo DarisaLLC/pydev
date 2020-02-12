@@ -11,7 +11,7 @@ import itertools
 import geometry as utils
 from itertools import combinations
 from scipy.spatial.distance import cosine as cosine_scipy
-import skimage.filters as sk_filters
+from sklearn.neighbors import KDTree
 from math import sqrt
 
 
@@ -47,6 +47,7 @@ def initialize_settings(frame_tl, capture_size):
 
     settings['active_radius'] = int(height * settings['active_radius_norm'])
     settings['frame_count'] = 0
+    settings['reduction'] = 2
     settings['ppMedianBlur'] = 7
     # Parameters for lucas kanade optical flow
     settings['lk_params'] = dict(winSize=(15, 15),
@@ -63,13 +64,19 @@ def initialize_settings(frame_tl, capture_size):
     settings['max_distance'] = 5
     settings['min_features'] = 300
     settings['mask_diagonal_ratio'] = 2.5
-    settings['vertical_horizon_norm'] = 0.5
+    settings['vertical_horizon_norm'] = 0.15
     settings['write_frames_path'] = None
     # Other Choices 'hue' or 'gray'
     settings['display_source'] = 'native_color'
     settings['expected_minimum_size'] = [18,30]
-    settings['display_frame_delay_seconds'] = -1 # -1 means dont delay
+    settings['display_frame_delay_seconds'] = 1000 # -1 means dont delay
     settings['display_click_after_frame'] = False
+    settings['restrict_to_view_angle'] = False
+    
+    
+    ## Synthesize, runs input video but instead of captured frames it synthesizes a moving / rotating rectangle
+    
+    settings['synthesize_test'] = True
     return settings
 
 
@@ -120,45 +127,12 @@ def vertical(img, top_portion=0.667):
     return mask
 
 
-class Time:
-  """
-  Class for displaying elapsed time.
-  """
 
-  def __init__(self):
-    self.start = datetime.now()
 
-  def elapsed_display(self):
-    time_elapsed = self.elapsed()
-    print("Time elapsed: " + str(time_elapsed))
-
-  def elapsed(self):
-    self.end = datetime.now()
-    time_elapsed = self.end - self.start
-    return time_elapsed
-  
-  
-
-def processing_info(np_arr, name=None, elapsed=None):
-  """
-  Display information (shape, type, max, min, etc) about a NumPy array.
-  Args:
-    np_arr: The NumPy array.
-    name: The (optional) name of the array.
-    elapsed: The (optional) time elapsed to perform a filtering operation.
-  """
-
-  if name is None:
-    name = "NumPy Array"
-  if elapsed is None:
-    elapsed = "---"
-
-  print("%-20s | Time: %-14s  Type: %-7s Shape: %s" % (name, str(elapsed), np_arr.dtype, np_arr.shape))
-
-def _draw_str(dst, target, s, scale=1.0):
+def _draw_str(dst, target, s, scale):
     x, y = target
     cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (255,255,255), thickness=2, lineType=cv2.LINE_AA)
-    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (128, 128, 128), lineType=cv2.LINE_AA)
+    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (64,64,64), lineType=cv2.LINE_AA)
 
 
 def create_logging_directory(output_path):
@@ -194,99 +168,115 @@ def get_logger():
     return logger
 
 
-def dot(v,w):
-    x,y,z = v
-    X,Y,Z = w
-    return x*X + y*Y + z*Z
-
-def length(v):
-    x,y,z = v
-    return math.sqrt(x*x + y*y + z*z)
-
-def vector(b,e):
-    x,y,z = b
-    X,Y,Z = e
-    return (X-x, Y-y, Z-z)
-
-def unit(v):
-    x,y,z = v
-    mag = length(v)
-    return (x/mag, y/mag, z/mag)
-
-def distance(p0,p1):
-    return length(vector(p0,p1))
-
-def scale(v,sc):
-    x,y,z = v
-    return (x * sc, y * sc, z * sc)
-
-def add(v,w):
-    x,y,z = v
-    X,Y,Z = w
-    return (x+X, y+Y, z+Z)
-
-
-# 1  Convert the line segment to a vector ('line_vec').
-# 2  Create a vector connecting start to pnt ('pnt_vec').
-# 3  Find the length of the line vector ('line_len').
-# 4  Convert line_vec to a unit vector ('line_unitvec').
-# 5  Scale pnt_vec by line_len ('pnt_vec_scaled').
-# 6  Get the dot product of line_unitvec and pnt_vec_scaled ('t').
-# 7  Ensure t is in the range 0 to 1.
-# 8  Use t to get the nearest location on the line to the end
-#    of vector pnt_vec_scaled ('nearest').
-# 9  Calculate the distance from nearest to pnt_vec_scaled.
-# 10 Translate nearest back to the start/end line.
-
-
-def euclidean(x, y):
-    """Returns the Euclidean distance between the vectors ``x`` and ``y``.
-
-    Each of ``x`` and ``y`` can be any iterable of numbers. The
-    iterables must be of the same length.
-
+def point_2d_norm(point_0):
+    """Returns the norm of a 2d point.
+    :param point_0:
+    :return:
     """
-    return sqrt(sum((a - b) ** 2 for a, b in zip(x, y)))
-
-def projection_point_on_a_line(point, line):
-    (x1, y1, x2, y2) = line
-    x, y = point
-
-    # 1. Find parametric equation of general point on the line
-    x_p = [x1, (x2 - x1)]
-    y_p = [y1, (y2 - y1)]
-
-    # 2. Find vector of point to line
-    A = [
-        [x - x_p[0], -x_p[1]],
-        [y - y_p[0], -y_p[1]]
-    ]
-    # 3. Find vector parallel to line
-    B = [
-        x2 - x1,
-        y2 - y1
-    ]
-
-    # 4. Find t
-    t = (A[0][0] * B[0] + A[1][0] * B[1]) / (-A[0][1] * B[0] - A[1][1] * B[1])
-
-    # 5. Find point on line
-    final_point = (x_p[0] + x_p[1] * t, y_p[0] + y_p[1] * t)
-
-    d = euclidean(point, final_point)
-    return d, final_point
+    return (point_0[0] ** 2 + point_0[1] ** 2) ** 0.5
 
 
-def point_GT (p,q):
-    if p[0] > q[0]: return True
-    elif p[0] == q[0] and p[1] > q[1]: return True
-    return False
-def point_EQ (p,q):
-    return p[0] == q[0] and p[1] == q[1]
+def point_is_near_point(point_0, point_1, error=0.001):
+    """Return true iff the two points are near each other.
+    :param point_0:
+    :param point_1:
+    :param error:
+    :return:
+    """
+    return point_2d_norm(point_0 - point_1) < error
 
-def point_GE (p,q):
-    return point_GT(p,q) or point_EQ(p,q)
 
+def point_line_projection(point, line_start, line_end):
+    """Return the projection of the point on the line.
+    :param point:
+    :param line_start:
+    :param line_end:
+    :return:
+    """
+    # Determine the projection of the point to the line
+    v = line_end - line_start
+    w = point - line_start
+    return line_start + np.dot(v, w) * v / (point_2d_norm(v) ** 2)
+
+
+def point_line_distance_and_projection(point, line_start, line_end):
+    """Return the distance from the point to the projection of the point on the line.
+    :param point:
+    :param line_start:
+    :param line_end:
+    :return:
+    """
+    # Get the projection of the point
+    projection = point_line_projection(point, line_start, line_end)
+    # Return the distance between the projection and the point
+    return point_2d_norm(projection - point), projection
+
+
+def point_is_on_line(point, line_start, line_end, error=0.001):
+    """Return true iff the point intersects the line.
+    :param point:
+    :param line_start:
+    :param line_end:
+    :param error:
+    :return:
+    """
+    # We take the wedge- and dot product to determine if the point intersects the line
+    v = line_end - point
+    w = point - line_start
+    return abs(np.linalg.det(np.column_stack((v, w)))) < error and np.dot(v, w) >= 0
+
+
+def point_projection_is_on_line(point, line_start, line_end, error=0.001):
+    """Return true iff the point projection intersects the line.
+    :param point:
+    :param line_start:
+    :param line_end:
+    :param error:
+    :return:
+    """
+    # Determine the projection of the point to the line
+    return point_is_on_line(point_line_projection(point, line_start, line_end), line_start, line_end, error)
+
+
+def is_collinear(point_0, point_1, point_2, error=0.001):
+    """Return true iff the three points are collinear.
+    :param point_0:
+    :param point_1:
+    :param point_2:
+    :param error:
+    :return:
+    """
+    # We take the wedge product to determine if the three points are collinear
+    v = point_2 - point_1
+    w = point_0 - point_1
+    return np.linalg.det(np.column_stack((v, w))) < error
+
+
+def line_to_unit_interval(point, line_start, line_end, error=0.001):
+    """Put a point on the unit interval of a line.
+    :param point:
+    :param line_start:
+    :param line_end:
+    :param error:
+    :return:
+    """
+    if point_is_on_line(point, line_start, line_end, error):
+        return point_2d_norm(point - line_start) / point_2d_norm(line_end - line_start)
+    else:
+        return None
+
+
+def line_embedding(unit, line_start, line_end):
+    """Embed a unit on to the line.
+    :param unit:
+    :param line_start:
+    :param line_end:
+    :return:
+    """
+    if 0.0 <= unit <= 1:
+        return (1 - unit) * line_start + unit * line_end
+    else:
+        return None
 
    
 def bgrFromHue(degrees):
@@ -317,7 +307,7 @@ def circular_mean(weights, angles):
 '''
 If we are doing our own line detection
 '''
-def compute_lines(image, mask_region, center, expected_orientation, length_limit, vertical_horizon):
+def compute_lines(image, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings):
     # Create LSD detector with default parameters
     '''
     cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
@@ -333,7 +323,32 @@ def compute_lines(image, mask_region, center, expected_orientation, length_limit
     # Remove singleton dimension
     lines = lines[:, 0]
 
-    return filter_lines(lines, mask_region, center, expected_orientation, length_limit, vertical_horizon)
+    return filter_lines(lines, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings)
+
+
+def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distance = 100):
+    merged = []
+    merged_segments = []
+    for i, segment_i in enumerate(lines):
+        if i in merged:
+            continue
+        collinears = [i]
+        for j in range(i + 1, len(lines)):
+            segment_j = lines[j]
+            if utils.segments_collinear(segment_i, segment_j, max_angle = max_merging_angle,
+                                        max_endpoint_distance = max_endpoint_distance):
+                collinears.append(j)
+        
+        merged_segment = utils.merge_segments(lines[collinears])
+        merged_segment = [int(m) for m in merged_segment]
+        merged_segments.append(merged_segment)
+        
+        for index in collinears:
+            if index not in merged:
+                merged.append(index)
+
+        return np.array(merged_segments)
+    
 
 
 '''
@@ -342,68 +357,90 @@ mask region is a rectangle in tl image system
 represented by tl and br coords
 
 '''
-def filter_lines(lines, mask_region, center, expected_orientation, expected_size, vertical_horizon):
+def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, dlogger, dsettings):
+    
+    lines = merge_lines(mlines)
+    
     N = len(lines)
-    p1 = np.column_stack((lines[:, :2],
-                          np.ones(N, dtype = np.float32)))
-    p2 = np.column_stack((lines[:, 2:],
-                          np.ones(N, dtype = np.float32)))
-    dx = p1[:, 0] - p2[:, 0]
-    dy = p1[:, 1] - p2[:, 1]
-    xc = (p1[:, 0] + p2[:, 0]) / 2.0
-    yc = (p1[:, 1] + p2[:, 1]) / 2.0
+    dlogger.info('Initial Line Count: ' + str(N))
+    dx = lines[:, 2] - lines[:, 0]
+    dy = lines[:, 3] - lines[:, 1]
+    xc = (lines[:, 2] + lines[:, 0]) / 2.0
+    yc = (lines[:, 3] + lines[:, 1]) / 2.0
     
     # setup region for line processing
     high = vertical_horizon
-    high = high / 2
-    low = vertical_horizon + expected_size[1]
-    mask = (yc > high) & (yc < low)
+    mask = yc > high
  
 #    mask = yc > vertical_horizon
     lines = lines[mask]
+    dlogger.info('Post Horizon filter Line Count: ' + str(len(lines)))
     dx = dx[mask]
     dy = dy[mask]
     xc = xc[mask]
     yc = yc[mask]
-    directions = (np.arctan2(dy, dx) + np.pi)
+    directions = np.mod((np.arctan2(dy, dx) + np.pi), np.pi)
     lengths = np.sqrt(dx * dx + dy * dy)
-    mask = np.mod(directions, expected_orientation) < 0.2
-    lines = lines[mask]
-    dx = dx[mask]
-    dy = dy[mask]
-    xc = xc[mask]
-    yc = yc[mask]
-    directions = directions[mask]
+    
+    
+    
+    if dsettings['restrict_to_view_angle']:
+        mask = np.mod(directions, expected_orientation) < 0.1
+        lines = lines[mask]
+        dx = dx[mask]
+        dy = dy[mask]
+        xc = xc[mask]
+        yc = yc[mask]
+        directions = directions[mask]
+        lengths = lengths[mask]
+        dlogger.info('Post Movement Direction filter Line Count: ' + str(len(lines)))
     
     N = len(lines)
-    out = np.zeros((N,N), dtype='float')
+#    out = np.zeros((N,N), dtype='float')
     iterator = itertools.combinations(range(N), 2)
     rects = []
+    cands = []
+    
+    # Check on size
+    # Check on parallelism cosine distance -> 1
+    # Check on overlapness
+    # Check on distance between centers
+    # Check on whether mid to mid is prependicular to either line
+    rng = np.random.RandomState(0)
+    X = rng.random_sample((2,2))
     for i, j in iterator:
-        dd = cosine_scipy(lines[i], lines[j])
-        if dd > 0.0091: continue
-        # findout which one is wider
+        
+        are_collinear = utils.segments_collinear(lines[i], lines[j],  5.0 / 180 * np.pi, 5.0)
+        
+        if are_collinear: continue
         wide, short = i, j
         if lengths[wide] < lengths[short]:
             wide, short = j, i
-        aspect = lengths[wide] / lengths[short]
-        if aspect > 3.0 : continue
+
+        (xx1, yy1, xx2, yy2) = lines[wide]
+        p1 = np.array((xx1, yy1))
+        p2 = np.array((xx2, yy2))
+        (x1, y1, x2, y2) = lines[short]
+        p3 = np.array((x1, y1))
+        p4 = np.array((x2, y2))
+        d1,p13 = point_line_distance_and_projection(p3, p1, p2)
+        d2,p14 = point_line_distance_and_projection(p4, p1, p2)
+        not_overlaps_in_x = np.maximum(p13[0], p14[0]) > np.minimum(p1[0],p2[0]) or np.maximum(p1[0], p2[0]) > np.minimum(p13[0],p14[0])
+        not_overlaps_in_y = np.maximum(p13[1], p14[1]) > np.minimum(p1[1],p2[1]) or np.maximum(p1[1], p2[1]) > np.minimum(p13[1],p14[1])
+        print(('line ', str(wide), ' & ', str(short), not_overlaps_in_y, not_overlaps_in_y))
+        if not_overlaps_in_x or not_overlaps_in_y: continue
         
-        (x1,y1,x2,y2) = lines[wide]
-        p3 = np.array((x1,y1))
-        p4 = np.array((x2,y2))
-        d1,p1 = projection_point_on_a_line(p3,lines[short])
-        d2,p2 = projection_point_on_a_line(p4,lines[short])
-        if math.fabs(d1-d2) > 3: continue
-        aspect = lengths[wide] / d1
-        if aspect > 3.0 or aspect < 0.333 : continue
-        
-        points = [p1,p2,p3,p4]
+        points = [p1,p2,p13,p14]
         points = np.asarray(points, dtype=np.float32)
         rr = cv2.minAreaRect(points)
+        (x, y), (width, height), angle = rr
+        aspect_ratio = min(width, height) / max(width, height)
+      #  if aspect_ratio < 0.33 : continue
+        
         rects.append(rr)
-
-    return (rects, lines, directions, xc, yc, None)
+        cands.append((wide,short))
+        
+    return (rects, lines, directions, xc, yc, cands)
 
 
 def angle_diff(angle1: float, angle2: float) -> float:
@@ -427,80 +464,6 @@ def get_mid_point(line):
 
 def get_distance(pt1,pt2):
     diff = pt1 - pt2
-
-
-def filter_hysteresis_threshold(np_img, low=50, high=100, output_type="uint8"):
-  """
-  Apply two-level (hysteresis) threshold to an image as a NumPy array, returning a binary image.
-  Args:
-    np_img: Image as a NumPy array.
-    low: Low threshold.
-    high: High threshold.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8) where True, 1.0, and 255 represent a pixel above hysteresis threshold.
-  """
-  
-  hyst = sk_filters.apply_hysteresis_threshold(np_img, low, high)
-  if output_type == "bool":
-    pass
-  elif output_type == "float":
-    hyst = hyst.astype(float)
-  else:
-    hyst = (255 * hyst).astype("uint8")
-
-  return hyst
-
-
-def filter_threshold(np_img, threshold, output_type="uint8"):
-  """
-  Return mask where a pixel has a value if it exceeds the threshold value.
-  Args:
-    np_img: Binary image as a NumPy array.
-    threshold: The threshold value to exceed.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array representing a mask where a pixel has a value (T, 1.0, or 255) if the corresponding input array
-    pixel exceeds the threshold value.
-  """
-  t = Time()
-  result = (np_img > threshold)
-  if output_type == "bool":
-    pass
-  elif output_type == "float":
-    result = result.astype(float)
-  else:
-    result = result.astype("uint8") * 255
-  processing_info(result, "Threshold", t.elapsed())
-  return result
-
-def filter_grays(rgb, tolerance=15, output_type="uint8"):
-  """
-  Create a mask to filter out pixels where the red, green, and blue channel values are similar.
-  Args:
-    np_img: RGB image as a NumPy array.
-    tolerance: Tolerance value to determine how similar the values must be in order to be filtered out
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array representing a mask where pixels with similar red, green, and blue values have been masked out.
-  """
-  t = Time()
-  (h, w, c) = rgb.shape
-
-  rgb = rgb.astype(np.int)
-  rg_diff = abs(rgb[:, :, 0] - rgb[:, :, 1]) <= tolerance
-  rb_diff = abs(rgb[:, :, 0] - rgb[:, :, 2]) <= tolerance
-  gb_diff = abs(rgb[:, :, 1] - rgb[:, :, 2]) <= tolerance
-  result = ~(rg_diff & rb_diff & gb_diff)
-
-  if output_type == "bool":
-    pass
-  elif output_type == "float":
-    result = result.astype(float)
-  else:
-    result = result.astype("uint8") * 255
-  processing_info(result, "Filter Grays", t.elapsed())
-  return result
 
 
 
