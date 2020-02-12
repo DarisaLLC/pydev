@@ -69,14 +69,14 @@ def initialize_settings(frame_tl, capture_size):
     # Other Choices 'hue' or 'gray'
     settings['display_source'] = 'native_color'
     settings['expected_minimum_size'] = [18,30]
-    settings['display_frame_delay_seconds'] = 1000 # -1 means dont delay
+    settings['display_frame_delay_seconds'] = 100 # -1 means dont delay
     settings['display_click_after_frame'] = False
     settings['restrict_to_view_angle'] = False
     
     
     ## Synthesize, runs input video but instead of captured frames it synthesizes a moving / rotating rectangle
     
-    settings['synthesize_test'] = True
+    settings['synthesize_test'] = False
     return settings
 
 
@@ -326,7 +326,7 @@ def compute_lines(image, expected_orientation, length_limit, vertical_horizon, d
     return filter_lines(lines, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings)
 
 
-def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distance = 100):
+def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distance = 10):
     merged = []
     merged_segments = []
     for i, segment_i in enumerate(lines):
@@ -343,11 +343,7 @@ def merge_lines (lines, max_merging_angle = np.pi * 180 / 5, max_endpoint_distan
         merged_segment = [int(m) for m in merged_segment]
         merged_segments.append(merged_segment)
         
-        for index in collinears:
-            if index not in merged:
-                merged.append(index)
-
-        return np.array(merged_segments)
+    return collinears, np.array(merged_segments)
     
 
 
@@ -359,9 +355,9 @@ represented by tl and br coords
 '''
 def filter_lines(mlines, expected_orientation, expected_size, vertical_horizon, dlogger, dsettings):
     
-    lines = merge_lines(mlines)
+    merged, msegments = merge_lines(mlines)
     
-    N = len(lines)
+    N = len(mlines)
     dlogger.info('Initial Line Count: ' + str(N))
     dx = lines[:, 2] - lines[:, 0]
     dy = lines[:, 3] - lines[:, 1]
