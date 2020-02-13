@@ -25,8 +25,8 @@ capture_size is the image size
 '''
 video_rois = {'one': dict(row_low=53, row_high=350, column_low=6, column_high=708),
               'hd2': dict(row_low=0, row_high=759, column_low=0, column_high=1919),
-              'hd': dict(row_low=0, row_high=519, column_low=0, column_high=1279)}
-
+              'hd': dict(row_low = 0, row_high = 519, column_low = 0, column_high = 1279)}
+              
 
 def initialize_settings_from_video_roi(video_roi):
     frame_tl = (video_roi['column_low'], video_roi['row_low'])
@@ -69,15 +69,15 @@ def initialize_settings(frame_tl, capture_size):
     # Other Choices 'hue' or 'gray'
     settings['display_source'] = 'native_color'
     settings['expected_minimum_size'] = [18,30]
-    settings['display_frame_delay_seconds'] = 100 # -1 means dont delay
+    settings['display_frame_delay_seconds'] = 1 # -1 means dont delay
     settings['display_click_after_frame'] = False
     settings['restrict_to_view_angle'] = True
-    
-    
+    settings['rects_too_small_area'] = 300
     ## Synthesize, runs input video but instead of captured frames it synthesizes a moving / rotating rectangle
-    
     settings['synthesize_test'] = False
     return settings
+
+
 
 
 '''
@@ -309,18 +309,34 @@ def circular_mean(weights, angles):
 If we are doing our own line detection
 '''
 def compute_lines(image, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings):
-    # Create LSD detector with default parameters
-    '''
-    cv2.LSD_REFINE_STD ,0.97, 0.6, 0.8, 40, 0, 0.90, 1024
-    @todo Only run on below Horizon
-    '''
-    lsd = cv2.createLineSegmentDetector(0) #cv2.LSD_REFINE_STD, 0.8, 0.6, 2.0, 22.5, 0, 0.9, 1024)
+    """
 
-    # Detect lines in the image
-    # Returns a NumPy array of type N x 1 x 4 of float32
-    # such that the 4 numbers in the last dimension are (x1, y1, x2, y2)
-    # These denote the start and end positions of a line
-    lines = lsd.detect(image)[0]
+    sigmaX = Gaussian Kernel Standard Deviation
+    kernel_size = Gaussian Kernel size (for Gaussian blur)
+    low_threshold = first threshold for the hysteresis procedure (for Canny detector)
+    high_threshold = second threshold for the hysteresis procedure (for Canny detector)
+    rho = distance resolution in pixels of the Hough grid
+    num_of_votes (= threshold) = minimum number of votes (intersections in Hough grid cell)
+    """
+    sigmaX = 1.0
+    kernel_size = 3
+    low_threshold = 30
+    high_threshold = 150
+    rho = 1
+    min_votes = 15
+    min_line_length = 10
+    max_line_gap = 15
+    theta = np.pi / 360  # angular resolution in radians of the Hough grid
+    
+    blur_gray = cv2.GaussianBlur(image, (kernel_size, kernel_size), sigmaX)
+    edges = cv2.Canny(blur_gray, low_threshold, high_threshold)
+    
+    # Run Hough on edge detected image
+    # Output "lines" is an array containing endpoints of detected line segments
+    lines = cv2.HoughLinesP(edges, rho, theta, min_votes, np.array([]),
+                            min_line_length, max_line_gap)
+        
+  
     # Remove singleton dimension
     lines = lines[:, 0]
 

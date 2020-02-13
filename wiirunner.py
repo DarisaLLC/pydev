@@ -9,7 +9,9 @@ from padChecker import padChecker
 from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
 from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
 from wiitricity_settings import circular_mean, compute_lines, filter_lines
-from wiitricity_utils import filter_rag_threshold, filter_threshold,  filter_kmeans_segmentation
+from wiitricity_utils import roiPts
+import dlib
+
 import geometry as utils
 from skimage.feature import peak_local_max
 from skimage.util import img_as_float, img_as_ubyte
@@ -69,18 +71,26 @@ class gpad_odometry:
 
    
         self.settings = initialize_settings_from_video_roi(video_roi)
-        reduction = self.settings['reduction']
+        self.reduction = self.settings['reduction']
+        reduction = self.reduction
         self.row_range = (video_roi['row_low']//reduction, video_roi['row_high']//reduction)
         self.column_range = (video_roi['column_low']//reduction, video_roi['column_high']//reduction)
-        self.width = self.column_range[1] - self.column_range[0]
-        self.height = self.row_range[1] - self.row_range[0]
+        self.width = self.column_range[1] - self.column_range[0] + 1
+        self.height = self.row_range[1] - self.row_range[0] + 1
         self.image_bounds = np.array([[self.column_range[0], self.row_range[0]],
                                       [self.column_range[0] + self.width, self.row_range[0]],
                                       [self.column_range[0] + self.width, self.row_range[0] + self.height],
                                       [self.column_range[0], self.row_range[0] + self.height]])
 
-        assert (self.width <= int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
-        assert (self.height <= int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        cap_size = (self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)/self.reduction, self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)/self.reduction)
+        if cap_size[0] < self.width or cap_size[1] < self.height:
+            print((' Error \n Mismatch of Video Source and Region Specification \n Check Region Information '
+                   + str(self.height) + ' <= ' + str(cap_size[1])
+                   + ' or '  + str(self.width) + ' <= ' + str(cap_size[0])))
+            sys.exit(1)
+            
+        assert (self.width <= int(cap_size[0]))
+        assert (self.height <= int(cap_size[1]))
         self.feature_params = self.settings['feature_params']
         self.lk_params = self.settings['lk_params']
         self.max_dist = self.settings['max_distance']
@@ -97,8 +107,11 @@ class gpad_odometry:
         self.show_vectors = False
         self.show_pads = False
         self.show_ga_score = True
+        self.show_lineout_lines = False
+        self.show_lineout_rects = False
         self.gray_out_mask = None
-
+        self.line_processing_enabled = False
+        
         # Get a GA pad checker object
         self.checker = padChecker(self.data_cache)
         self.ga_results = None
@@ -107,8 +120,13 @@ class gpad_odometry:
         self.lines = None
         self.kdtree = None
         
+        # Tracker
+        # construct a dlib tracker
+        self.tracker = dlib.correlation_tracker()
+        self.tracker_started = False
+        self.tracker_running = False
+        
         self.vertical_horizon = self.height * self.settings['vertical_horizon_norm']
-        self.reduction = self.settings['reduction']
 
     def distance_is_available(self):
         return not (self.current_distance is None)
@@ -128,8 +146,10 @@ class gpad_odometry:
             channel_in, frame = self.prepare_frame(captured_frame)
 
             self.get_flow(channel_in)
-            self.line_processing(channel_in)
             self.display = self.detect_ga(frame)
+            self.track_ga(frame)
+            self.line_processing(channel_in)
+
             self.prev_frame = frame.copy()
             self.prev_channel = channel_in.copy()
             self.frame_idx = self.frame_idx + 1
@@ -151,8 +171,6 @@ class gpad_odometry:
                 self.settings['display_source'] = 'gray'
             elif ch == ord("c"):
                 self.settings['display_source'] = 'native_color'
-            elif ch == ord("l"):
-                self.settings['display_source'] = 'label'
 
     def synthesize_frame(self):
         cols = self.width
@@ -163,8 +181,6 @@ class gpad_odometry:
         rect = np.array([[
             (left, 50), (right, 50), (223,63), (200, 63)]], np.int32)
         rect2 = rect + [300,0]
-        
-
         cv2.fillConvexPoly(frame, rect, (128,128,128))
         cv2.fillConvexPoly(frame, rect2, (192,192,192))
         
@@ -174,10 +190,9 @@ class gpad_odometry:
         
     def prepare_frame(self, input_frame):
         reduction = self.settings['reduction']
-        new_size = (self.width,self.height)
-        #mframe = cv2.medianBlur(input_frame, 7)
-        mframe = cv2.bilateralFilter(input_frame, 17, 9,  200)
-        
+        h,w,c = input_frame.shape
+        new_size = (w//self.reduction,h//self.reduction)
+        mframe = cv2.medianBlur(input_frame, self.settings['ppMedianBlur'])
         frame = cv2.resize(mframe, new_size, cv2.INTER_AREA)
         if self.settings['synthesize_test']:
             frame = self.synthesize_frame ()
@@ -192,12 +207,9 @@ class gpad_odometry:
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
             h, s, v = cv2.split(frame)
             self.display = cv2.merge([h,h,h])
-        elif self.settings['display_source'] == 'label':
-            self.display = filter_kmeans_segmentation(frame)
         else:
             self.display = frame.copy()
             
-        
         ## Choose the channel_in to use
         channel_in = None
         
@@ -216,39 +228,103 @@ class gpad_odometry:
 
         return channel_in, frame
 
-
-    def line_processing(self, channel_in):
-    
-  
-        topleft = (self.width // 8, self.height // 4)
-        botright = self.width - topleft[0], self.height - topleft[1]
-        lines_valid_region = (topleft, botright)
-        expected_minimum_size = self.settings['expected_minimum_size']
-        view_angle = np.pi if self.current_angle is None else self.current_angle
-        view_size = expected_minimum_size #if self.current_distance is None else expected_minimum_size + self.current_distance / 4
-        (rects, lines, directions, xc, yc, cands) = compute_lines(channel_in,
-                                                                  view_angle,
-                                                                  view_size,
-                                                                  self.vertical_horizon,
-                                                                  self.logger,
-                                                                  self.settings)
+    def detect_ga(self, frame):
+        res = self.display
+        '''
+        h_score,thresh, res, scores, hulls, rects, order
+		'''
         
-        print((len(lines), ' Lines '))
-        if self.prev_channel is None:
-            self.prev_channel = channel_in
-            self.prev_lines = lines
+        checkout = self.checker.check(frame, self.mask)
+        rects = checkout[5]
+        scores = checkout[3]
+        order = checkout[6]
+        if self.ga_results is None:
+            self.ga_results = checkout
         else:
-            self.prev_lines = self.lines
-            self.lines = lines
+            self.prev_ga_result = self.ga_results
+            self.ga_results = checkout
+    
+        if len(order) > 0:
+            score = str(scores[order[0]])
+            self.draw_rectangle(rects[order[0]], line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.3)
 
-        if self.vertical_horizon >= 0 and self.vertical_horizon < self.height:
-            cv2.line(img=self.display, pt1=(0, int(self.vertical_horizon)),pt2=(self.width-1,int(self.vertical_horizon)),
-                     color=(0,255,0,80), thickness=4, lineType=cv2.LINE_AA)
+            self.logger.info('GA Detection: ' + str(score))
+            
+            if not self.tracker_started:
+                # @todo put first, 2nd and third line in roiPts
+                points = cv2.boxPoints(rects[0])
+                tl, br = roiPts(points)
+                (x, y, w, h) = (tl[0], tl[1], br[0] - tl[0], br[1] - tl[1])
+                roi_pts = [x, y, x + w, y + h]
+                self.tracker.start_track(frame, dlib.rectangle(*roi_pts))
+                self.tracker_started = True
+                self.logger.info('Tracker Initiated @: ' + str(x) + ',' + str(y) + ' width ' + str(w) +','+ str(h))
+            
+            if self.show_pads:
+                res = np.vstack((res, self.ga_results[2]))
+        return res
 
-        self.draw_rectangles(rects)
-        self.draw_segments(lines, directions, xc, yc, cands)
+    def track_ga(self, frame):
+        # @todo if newly segmented and tracked from the past overlap, restart tracker with the union of the two tracker
+        if self.tracker_started:
+            #grab the position of the tracked
+            # object
+            self.tracker.update(frame)
+            pos = self.tracker.get_position()
+            # unpack the position object
+            startX = int(pos.left())
+            startY = int(pos.top())
+            endX = int(pos.right())
+            endY = int(pos.bottom())
+            ctr = ((startX + endX) / 2, (startY + endY) / 2)
+            size = (endX - startX, endY - startY)
+            rect = (ctr, size, 0.0)
+            # draw the bounding box from the correlation object tracker
+            self.draw_rectangle(rect, line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.0)
+            cv2.putText(self.display, ' t ', (startX, startY - 15),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+            self.tracker_running = True
+            self.logger.info('Tracker Updated @: ' + str(startX) + ',' + str(startY) + ' width ' + str(size[0]) + ',' + str(size[1]))
+            
+            
+    def line_processing(self, channel_in):
+        if self.line_processing_enabled:
+            topleft = (self.width // 8, self.height // 4)
+            botright = self.width - topleft[0], self.height - topleft[1]
+            lines_valid_region = (topleft, botright)
+            expected_minimum_size = self.settings['expected_minimum_size']
+            view_angle = np.pi if self.current_angle is None else self.current_angle
+            view_size = expected_minimum_size #if self.current_distance is None else expected_minimum_size + self.current_distance / 4
+            # (rects, lines, directions, xc, yc, cands)
+            lineouts  = compute_lines(channel_in, view_angle,  view_size, self.vertical_horizon,self.logger, self.settings)
+            rects = lineouts[0]
+            lines = lineouts[1]
+            directions = lineouts[2]
+            xc = lineouts[3]
+            yc = lineouts[4]
+            cands = lineouts[5]
+            
+            print((len(lines), ' Lines '))
+            if self.prev_channel is None:
+                self.prev_channel = channel_in
+                self.prev_lines = lineouts
+            else:
+                self.prev_lines = self.lines
+                self.lines = lineouts
+    
+            if self.vertical_horizon >= 0 and self.vertical_horizon < self.height:
+                cv2.line(img=self.display, pt1=(0, int(self.vertical_horizon)),pt2=(self.width-1,int(self.vertical_horizon)),
+                         color=(0,255,0,80), thickness=4, lineType=cv2.LINE_AA)
+    
+            if self.show_lineout_rects:
+                self.draw_rectangles(rects)
+            if self.show_lineout_lines:
+                self.draw_segments(lines, directions, xc, yc, cands)
 
-   
+    #def reconcile():
+       
+       ## find intersections between ga rects and line processing rects
+       
 
     def draw_segments(self, segments: list, directions: list = None, xc: list = None, yc: list = None, cands: list= None):
         """Draws the segments contained in the first parameter onto the base image passed as second parameter.
@@ -289,42 +365,39 @@ class gpad_odometry:
                 j = cand[1]
                 cv2.line(img=base_image, pt1=(int(xc[i]), int(yc[i])),
                          pt2=(int(xc[j]), int(yc[j])), color=(255,255,255), thickness=1, lineType=cv2.LINE_AA)
-                
 
-
-    def draw_rectangles(self, rectangles: list):
+    def draw_rectangles(self, rectangles: list, line_color = (0, 0, 255), fill_color = (255, 0, 0), opacity = 0.3):
         """Draws the rectangles contained in the first parameter onto the base image passed as second parameter.
 
-        This function displays the image using the third parameter as title.
+		This function displays the image using the third parameter as title.
 
-        :param rectangles: List of rectangles.
-        :param base_image: Base image over which to render the rectangles.
-        :param windows_name: Title to give to the rendered image.
-        """
+		:param rectangles: List of rectangles.
+		:param base_image: Base image over which to render the rectangles.
+		:param windows_name: Title to give to the rendered image.
+		"""
         mask = np.zeros_like(self.display)
         for rectangle in rectangles:
             points = cv2.boxPoints(rectangle)
-            cv2.polylines(self.display, np.int32([points]), True, (0, 0, 255), 1, cv2.LINE_AA)
-            cv2.fillConvexPoly(mask, np.int32([points]), (255, 0, 0), cv2.LINE_AA)
-            cv2.addWeighted(self.display, 1, mask, 0.3, 0, self.display)
+            cv2.polylines(self.display, np.int32([points]), True, line_color, 1, cv2.LINE_AA)
+            cv2.fillConvexPoly(mask, np.int32([points]), fill_color, cv2.LINE_AA)
+            cv2.addWeighted(self.display, 1, mask, opacity, 0, self.display)
 
-    def detect_ga(self, frame):
-        res = self.display
-        checkout = self.checker.check(frame, self.mask)
-        if self.ga_results is None:
-            self.ga_results = checkout
-        else:
-            self.prev_ga_result = self.ga_results
-            self.ga_results = checkout
+    def draw_rectangle(self, rectangle: list, line_color = (0, 0, 255), fill_color = (255, 0, 0), opacity = 0.3):
+        """Draws the rectangles contained in the first parameter onto the base image passed as second parameter.
 
-        if not (self.ga_results is None):
-            score = str(self.ga_results[0])
-            _draw_str(self.display, (200, 400), score, 2.0)
-            #  res = cv2.drawContours(res, self.ga_results[4], -1, (255, 0, 0), 3)
-            if self.show_pads:
-                res = np.vstack((res, self.ga_results[2]))
-        return res
+		This function displays the image using the third parameter as title.
 
+		:param rectangles: List of rectangles.
+		:param base_image: Base image over which to render the rectangles.
+		:param windows_name: Title to give to the rendered image.
+		"""
+        mask = np.zeros_like(self.display)
+        points = cv2.boxPoints(rectangle)
+        cv2.polylines(self.display, np.int32([points]), True, line_color, 1, cv2.LINE_AA)
+        cv2.fillConvexPoly(mask, np.int32([points]), fill_color, cv2.LINE_AA)
+        cv2.addWeighted(self.display, 1, mask, opacity, 0, self.display)
+
+  
 
     def get_roi(self, frame):
         assert (self._is_valid)
