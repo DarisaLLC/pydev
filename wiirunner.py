@@ -6,9 +6,9 @@ import numpy as np
 import cv2
 import math
 from padChecker import padChecker
-from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings
-from wiitricity_settings import region_of_interest, vertical, _draw_str, get_logger, get_line_angle
-from wiitricity_settings import circular_mean, compute_lines, filter_lines
+from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings,get_logger
+from wiitricity_utils import region_of_interest, vertical, _draw_str,  get_line_angle
+from wiitricity_utils import circular_mean, compute_lines, filter_lines, get_rotatedRect_angle
 from wiitricity_utils import roiPts
 import dlib
 
@@ -119,6 +119,8 @@ class gpad_odometry:
         self.prev_lines = None
         self.lines = None
         self.kdtree = None
+        self.mean_angle_ok = False
+        self.target_rr = None
         
         # Tracker
         # construct a dlib tracker
@@ -171,6 +173,9 @@ class gpad_odometry:
                 self.settings['display_source'] = 'gray'
             elif ch == ord("c"):
                 self.settings['display_source'] = 'native_color'
+                
+        return
+    
 
     def synthesize_frame(self):
         cols = self.width
@@ -189,16 +194,26 @@ class gpad_odometry:
     
         
     def prepare_frame(self, input_frame):
+        
+        ## reduce, i.e full or half res
         reduction = self.settings['reduction']
         h,w,c = input_frame.shape
         new_size = (w//self.reduction,h//self.reduction)
         mframe = cv2.medianBlur(input_frame, self.settings['ppMedianBlur'])
         frame = cv2.resize(mframe, new_size, cv2.INTER_AREA)
+        
+        ## still take video input but create synthetic images for testing
         if self.settings['synthesize_test']:
             frame = self.synthesize_frame ()
+
+        ## create region of interest from the specification of invalid areas
         frame = self.get_roi(frame)
+        
+        ## create mask for pad checker
         self.mask = region_of_interest(frame)
+        # create mask for optical flow
         self.flow_mask = vertical(frame)
+        
         # Choose display source
         if self.settings['display_source'] == 'gray':
             g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -231,13 +246,17 @@ class gpad_odometry:
     def detect_ga(self, frame):
         res = self.display
         '''
-        h_score,thresh, res, scores, hulls, rects, order
+        h_score,thresh, res, scores, bounds, rects, order
 		'''
         
-        checkout = self.checker.check(frame, self.mask)
+        if not self.mean_angle_ok: return res
+        
+        checkout = self.checker.check(frame, self.mask, min_area = 3000, h_score_thr = 0.8, vertical_thr = 0.5)
         rects = checkout[5]
         scores = checkout[3]
         order = checkout[6]
+        bounds = checkout[4]
+        
         if self.ga_results is None:
             self.ga_results = checkout
         else:
@@ -246,19 +265,35 @@ class gpad_odometry:
     
         if len(order) > 0:
             score = str(scores[order[0]])
-            self.draw_rectangle(rects[order[0]], line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.3)
+            rr = rects[order[0]]
+            bb = bounds[order[0]]
+            roi_size = rr[1]
+            roi_orientation_rads = get_rotatedRect_angle(rr)
+            self.draw_rectangle(rr, line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.3)
 
             self.logger.info('GA Detection: ' + str(score))
+            ## Find if the found GA is in the diretion of our movement
+            roi_orientation = math.degrees(roi_orientation_rads) % 180
+            #  expected_orientation = math.degrees(self.current_angle + np.pi / 2)
+            # diff = math.fabs(expected_orientation - roi_orientation) % 360
+            if roi_orientation < 0 or roi_orientation > 5.0:
+                self.logger.info(
+                    ' Candidate Rejected because of orientation' + str(roi_orientation) + ',' + str(roi_size))
+                return self.display
             
+
             if not self.tracker_started:
                 # @todo put first, 2nd and third line in roiPts
-                points = cv2.boxPoints(rects[0])
-                tl, br = roiPts(points)
-                (x, y, w, h) = (tl[0], tl[1], br[0] - tl[0], br[1] - tl[1])
+                x,y,w,h = bb
                 roi_pts = [x, y, x + w, y + h]
-                self.tracker.start_track(frame, dlib.rectangle(*roi_pts))
-                self.tracker_started = True
-                self.logger.info('Tracker Initiated @: ' + str(x) + ',' + str(y) + ' width ' + str(w) +','+ str(h))
+                self.target_rr = rr
+                
+                if w > 0 and h > 0:
+                    self.tracker.start_track(frame, dlib.rectangle(*roi_pts))
+                    self.tracker_started = True
+                    info = str(x) + ',' + str(y) + ' width ' + str(w) +','+ str(h) +',' + str(roi_orientation)
+                    self.logger.info('Tracker Initiated @:'+info)
+                    self.draw_rectangle(rr, line_color = (255, 0, 128), fill_color = (0, 255, 0), opacity = 0.0)
             
             if self.show_pads:
                 res = np.vstack((res, self.ga_results[2]))
@@ -277,14 +312,20 @@ class gpad_odometry:
             endX = int(pos.right())
             endY = int(pos.bottom())
             ctr = ((startX + endX) / 2, (startY + endY) / 2)
-            size = (endX - startX, endY - startY)
-            rect = (ctr, size, 0.0)
+            size = list(self.target_rr[1])
+            direction = self.target_rr[2]
+            rect = (ctr, size, direction)
+            self.target_rr = rect
+            
             # draw the bounding box from the correlation object tracker
-            self.draw_rectangle(rect, line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.0)
+            self.draw_rectangle(rect, line_color = (255, 0, 128), fill_color = (0, 255, 0), opacity = 0.0)
             cv2.putText(self.display, ' t ', (startX, startY - 15),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
             self.tracker_running = True
             self.logger.info('Tracker Updated @: ' + str(startX) + ',' + str(startY) + ' width ' + str(size[0]) + ',' + str(size[1]))
+            
+            ## Abondon This Track
+            
             
             
     def line_processing(self, channel_in):
@@ -393,9 +434,13 @@ class gpad_odometry:
 		"""
         mask = np.zeros_like(self.display)
         points = cv2.boxPoints(rectangle)
+        roi_orientation_rads = get_rotatedRect_angle(rectangle)
+        angle = int(math.degrees(roi_orientation_rads))
         cv2.polylines(self.display, np.int32([points]), True, line_color, 1, cv2.LINE_AA)
         cv2.fillConvexPoly(mask, np.int32([points]), fill_color, cv2.LINE_AA)
         cv2.addWeighted(self.display, 1, mask, opacity, 0, self.display)
+        cv2.putText(self.display, str(angle), (int(points[0][0]), int(points[0][1])),  cv2.FONT_HERSHEY_PLAIN, 0.8,
+                line_color, 1)
 
   
 
@@ -465,6 +510,9 @@ class gpad_odometry:
         else:
             self.current_angle = self.prev_angle
 
+        self.mean_angle_ok = self.current_speed and self.current_distance > 30
+        
+
         if self.show_vectors and  len(self.tracks) > 0:
             cv2.polylines(self.display, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
             #_draw_str(self.display, (20, self.height - 100), ' %d' % len(self.tracks), 2.0)
@@ -507,8 +555,10 @@ class gpad_odometry:
             self.display = cv2.bitwise_and(self.display, self.gray_out_mask)
         
         if not (self.current_angle is None):
-            _draw_str(self.display, (self.width // 12, (15 * self.height) // 16),
-                      'Direction: %d' % math.degrees(self.current_angle), scale)
+            label = 'Direction: NA'
+            if  self.mean_angle_ok:
+                label = 'Direction: %d' % math.degrees(self.current_angle)
+            _draw_str(self.display, (self.width // 12, (15 * self.height) // 16),label, scale)
 
         if not (self.current_distance is None):
             _draw_str(self.display, ((self.width) // 4, (15 * self.height) // 16),
@@ -521,8 +571,8 @@ class gpad_odometry:
     def draw_frame_info(self):
         scale = 1.0 / self.reduction
         cv2.putText(self.display, str(self.frame_idx), (self.width // 32, (15 * self.height) // 16),
-                    cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                    scale, (192, 192, 192), 2)
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    scale, (0, 192, 0), 2)
 
 
     def measure_tracks(self):
