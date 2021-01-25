@@ -5,7 +5,7 @@ import cv2
 
 class LucasKanade(MyVideo):
     def __init__(self, videocolor=cv2.COLOR_BGR2HSV):
-        super().__init__(videocolor=videocolor, videolabel='robin')
+        super().__init__(videocolor=videocolor, videolabel='+++')
         self.feature_params = self.ShiTomasi_corner_detection()
         self.lk_params = self.parameters_for_lucas_kanade_optical_flow()
         self.old_frame = None

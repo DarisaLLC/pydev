@@ -1,19 +1,19 @@
 {
     "path_to_file": "/Users/arman/Pictures/tile.png",
 	"mandatory_parameters": {
-        "Sigma": 3.39,
-        "Lower_Threshold": 0.34,
-        "Upper_Threshold": 1.02,
+        "Sigma": 6.00,
+        "Lower_Threshold": 0.0,
+        "Upper_Threshold": 0.34,
         "Maximum_Line_Length": 0,
         "Minimum_Line_Length": 0,
-        "Darkline": "LIGHT",
+        "Darkline": "DARK",
         "Overlap_resolution": "NONE"
     },
 
   	"optional_parameters": {
-		"Line_width": 10.0,
-        "High_contrast": 200,
-        "Low_contrast": 80
+		"Line_width": 20.0,
+        "High_contrast": 255,
+        "Low_contrast": 50
 	},
 
 	"further_options": {
@@ -25,6 +25,6 @@
 		"Display_results": true,
         "Preview": true,
         "Make_Binary": false,
-        "save_on_disk": true
+        "save_on_disk": false
 	}
 }

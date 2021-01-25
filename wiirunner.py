@@ -9,7 +9,8 @@ from padChecker import padChecker
 from wiitricity_settings import video_rois, initialize_settings_from_video_roi, initialize_settings,get_logger
 from wiitricity_utils import region_of_interest, vertical, _draw_str,  get_line_angle
 from wiitricity_utils import circular_mean, compute_lines, filter_lines, get_rotatedRect_angle
-from wiitricity_utils import roiPts
+from wiitricity_utils import roiPts, find, draw_outline
+
 import dlib
 
 import geometry as utils
@@ -37,6 +38,7 @@ class gpad_odometry:
             self.source = self.source_info
         self._is_valid = not (self.source is None)
 
+      
         if self.source == 'Camera':
             self.cap = cv2.VideoCapture(int(self.source_info))
         else:
@@ -129,6 +131,22 @@ class gpad_odometry:
         self.tracker_running = False
         
         self.vertical_horizon = self.height * self.settings['vertical_horizon_norm']
+        self.fiducial_filename = 'fiducial.png'
+        self.fiducial_path = None
+        self.load_fiducial = True
+        self.fiducial_is_loaded = False
+        if self.settings['fiducial_load'] or self.settings['fiducial_run']:
+            self.fiducial_path = self.data_cache + "/images/fiducial.png"
+            if Path(self.fiducial_path).exists():
+                self.fiducial_image = cv2.imread(self.fiducial_path, cv2.IMREAD_GRAYSCALE)
+                h,w = self.fiducial_image.shape
+                self.fiducial_is_loaded = True
+                self.logger.info(' Fiducial Image Loaded w/h/c ' + str(w)+','+str(h)+',1')
+            else:
+                self.logger.info(' Fiducial Image Not Loaded: File Not Found ' )
+
+            
+            
 
     def distance_is_available(self):
         return not (self.current_distance is None)
@@ -142,16 +160,19 @@ class gpad_odometry:
     def run(self):
         run_vpd = True
         
-        while True:
-            ret, captured_frame = self.cap.read()
-            if not ret: break
+        while run_vpd:
+            run_vpd, captured_frame = self.cap.read()
+            if not run_vpd: break
             channel_in, frame = self.prepare_frame(captured_frame)
 
             self.get_flow(channel_in)
-            self.display = self.detect_ga(frame)
-            self.track_ga(frame)
-            self.line_processing(channel_in)
-
+            
+            if self.settings['fiducial_run'] and self.fiducial_is_loaded:
+                self.find_fiducial(channel_in)
+            else:
+                self.display = self.detect_ga(frame)
+                self.track_ga(frame)
+    
             self.prev_frame = frame.copy()
             self.prev_channel = channel_in.copy()
             self.frame_idx = self.frame_idx + 1
@@ -200,7 +221,8 @@ class gpad_odometry:
         h,w,c = input_frame.shape
         new_size = (w//self.reduction,h//self.reduction)
         mframe = cv2.medianBlur(input_frame, self.settings['ppMedianBlur'])
-        frame = cv2.resize(mframe, new_size, cv2.INTER_AREA)
+        frame = cv2.resize(input_frame, new_size, cv2.INTER_AREA)
+        
         
         ## still take video input but create synthetic images for testing
         if self.settings['synthesize_test']:
@@ -228,7 +250,7 @@ class gpad_odometry:
         ## Choose the channel_in to use
         channel_in = None
         
-        if self.settings['use_channel'] == 'gray':
+        if self.settings['use_channel'] == 'gray' or self.settings['fiducial_run']:
             channel_in = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         elif self.settings['use_channel'] == 'hsv':
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
@@ -243,6 +265,37 @@ class gpad_odometry:
 
         return channel_in, frame
 
+    def find_fiducial(self,frame):
+
+        # Initiate ORB detector
+        orb = cv2.ORB_create(edgeThreshold=24,
+                             patchSize=31,
+                             nlevels=8,
+                             fastThreshold=14,
+                             scaleFactor=1.2,
+                             WTA_K=2,
+                             scoreType=cv2.ORB_HARRIS_SCORE,
+                             firstLevel=0, nfeatures=6000)
+        
+        h, w = self.fiducial_image.shape
+        fiducial_kp = orb.detect(self.fiducial_image, None)
+        fiducial_kp, fiducial_des = orb.compute(self.fiducial_image, fiducial_kp)
+        img_kp = orb.detect(frame, None)
+        img_kp, img_des = orb.compute(frame, img_kp)
+        
+        M, matchesMask = find(fiducial_des, fiducial_kp, img_des, img_kp)
+        draw_params = dict(matchColor = (0, 255, 0),  # draw matches in green color
+                           singlePointColor = None,
+                           matchesMask = matchesMask,  # draw only inliers
+                           flags = 2)
+        if not ( M is None):
+            img3 = cv2.drawMatches(frame, img_kp, self.fiducial_image, fiducial_kp, good, None, **draw_params)
+            self.display = img3
+        
+        #if not ( M is None):
+        #    draw_outline(self.display, M, w, h)
+        
+    
     def detect_ga(self, frame):
         res = self.display
         '''
@@ -250,7 +303,7 @@ class gpad_odometry:
 		'''
         
         if not self.mean_angle_ok: return res
-        
+        # @note for rear, 0.8 works better. Why ??
         checkout = self.checker.check(frame, self.mask, min_area = 3000, h_score_thr = 0.8, vertical_thr = 0.5)
         rects = checkout[5]
         scores = checkout[3]
@@ -269,10 +322,7 @@ class gpad_odometry:
             bb = bounds[order[0]]
             roi_size = rr[1]
             roi_orientation_rads = get_rotatedRect_angle(rr)
-            self.draw_rectangle(rr, line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.3)
-
-            self.logger.info('GA Detection: ' + str(score))
-            ## Find if the found GA is in the diretion of our movement
+       
             roi_orientation = math.degrees(roi_orientation_rads) % 180
             #  expected_orientation = math.degrees(self.current_angle + np.pi / 2)
             # diff = math.fabs(expected_orientation - roi_orientation) % 360
@@ -280,8 +330,12 @@ class gpad_odometry:
                 self.logger.info(
                     ' Candidate Rejected because of orientation' + str(roi_orientation) + ',' + str(roi_size))
                 return self.display
-            
 
+            self.draw_rectangle(rr, line_color = (0, 255, 128), fill_color = (0, 255, 0), opacity = 0.3)
+
+            self.logger.info('GA Detection: ' + str(score))
+            ## Find if the found GA is in the diretion of our movement
+            
             if not self.tracker_started:
                 # @todo put first, 2nd and third line in roiPts
                 x,y,w,h = bb
@@ -611,6 +665,7 @@ if __name__ == "__main__":
 
     default_data_path = os.path.dirname(os.path.realpath(__file__)) + '/projects/wiic/'
     default_is_good = Path(default_data_path).exists() and Path(default_data_path).is_dir()
+    print((len(sys.argv),default_is_good))
     msg = ''
     if len(sys.argv) == 2 and default_is_good:
         data_path = default_data_path
@@ -636,6 +691,3 @@ if __name__ == "__main__":
 
     cv2.destroyAllWindows()
 
-#  cap.release()
-#  cv2.waitKey(0)
-#

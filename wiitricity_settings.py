@@ -75,6 +75,10 @@ def initialize_settings(frame_tl, capture_size):
     settings['rects_too_small_area'] = 300
     ## Synthesize, runs input video but instead of captured frames it synthesizes a moving / rotating rectangle
     settings['synthesize_test'] = False
+    settings['fiducial_load'] = True
+    # If set to true, that is the only operation performed
+    settings['fiducial_run'] = False
+    
     return settings
 
 

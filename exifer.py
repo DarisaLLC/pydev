@@ -7,14 +7,20 @@ import cameratransform
 import cv2
 import numpy as np
 
-def get_exif(fn):
-    ret = {}
-    i = Image.open(fn)
-    info = i._getexif()
-    for tag, value in info.items():
-        decoded = TAGS.get(tag, tag)
-        ret[decoded] = value
-    return ret
+from PIL import Image
+
+def get_exif(filename):
+    image = Image.open(filename)
+    image.verify()
+    return image._getexif()
+
+def get_labeled_exif(exif):
+    labeled = {}
+    for (key, val) in exif.items():
+        labeled[TAGS.get(key)] = val
+
+    return labeled
+
 
 def main(fqfn):
 
@@ -59,5 +65,10 @@ if __name__ == '__main__':
     if argcnt < 2 or (not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists()):
         print(' File Does not exist or found ')
         sys.exit(1)
+
+    exif = get_exif(sys.argv[1])
+    labeled = get_labeled_exif(exif)
+    print(labeled)
+    
 
     main(sys.argv[1])

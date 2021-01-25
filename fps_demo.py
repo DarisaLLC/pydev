@@ -16,6 +16,8 @@ ap.add_argument("-n", "--num-frames", type=int, default=100,
 	help="# of frames to loop over for FPS test")
 ap.add_argument("-d", "--display", type=int, default=-1,
 	help="Whether or not frames should be displayed")
+ap.add_argument("-w", "--write", type=int, default=0,
+	help="Whether or not frames should be saved")
 args = vars(ap.parse_args())
 
 #
@@ -52,24 +54,30 @@ args = vars(ap.parse_args())
 # created a *threaded *video stream, allow the camera senor to warmup,
 # and start the FPS counter
 print("[INFO] sampling THREADED frames from webcam...")
-vs = WebcamVideoStream(src=0).start()
+vs = WebcamVideoStream(src="/Users/arman/PycharmProjects/pydev/projects/wiic/video/GA_night2.mp4").start()
 fps = FPS().start()
 
 # loop over some frames...this time using the threaded stream
 while fps._numFrames < args["num_frames"]:
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
+
 	frame = vs.read()
-	# if you need to write out the frames
-	#cv2.imwrite('/Users/arman/tmp/wiic/' + str(fps._numFrames) + '.png', frame)
+	if frame is None: continue
 
 	# note the resize size
-	frame = imutils.resize(frame, width=400)
+	#frame = imutils.resize(frame, width=400)
 
 	# check to see if the frame should be displayed to our screen
 	if args["display"] > 0:
 		cv2.imshow("Frame", frame)
-		key = cv2.waitKey(1) & 0xFF
+		key = cv2.waitKey(10) & 0xFF
+	# if you need to write out the frames
+	if args["write"] > 0:
+		filename = '/Users/arman/PycharmProjects/pydev/projects/wiic/video/GA-night2/' + str(fps._numFrames) + '.png'
+		cv2.imwrite(filename, frame)
+		print((filename, True))
+
 
 	# update the FPS counter
 	fps.update()

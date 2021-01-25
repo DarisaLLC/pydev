@@ -1,192 +1,190 @@
+import alignment_utils
+
+import numpy as np
+import cv2 as cv
+
+
+# built-in modules
+import itertools as it
+from multiprocessing.pool import ThreadPool
+from contextlib import contextmanager
+from alignment_utils import init_feature, filter_matches, explore_match
+
+feature_name = 'orb'
+def clock():
+    return cv.getTickCount() / cv.getTickFrequency()
+
+@contextmanager
+def Timer(msg):
+    print(msg, '...',)
+    start = clock()
+    try:
+        yield
+    finally:
+        print("%.2f ms" % ((clock()-start)*1000))
+
+def affine_skew(tilt, phi, img, mask=None):
+    '''
+    affine_skew(tilt, phi, img, mask=None) -> skew_img, skew_mask, Ai
+
+    Ai - is an affine transform matrix from skew_img to img
+    '''
+    h, w = img.shape[:2]
+    if mask is None:
+        mask = np.zeros((h, w), np.uint8)
+        mask[:] = 255
+    A = np.float32([[1, 0, 0], [0, 1, 0]])
+    if phi != 0.0:
+        phi = np.deg2rad(phi)
+        s, c = np.sin(phi), np.cos(phi)
+        A = np.float32([[c, -s], [s, c]])
+        corners = [[0, 0], [w, 0], [w, h], [0, h]]
+        tcorners = np.int32(np.dot(corners, A.T))
+        x, y, w, h = cv.boundingRect(tcorners.reshape(1, -1, 2))
+        A = np.hstack([A, [[-x], [-y]]])
+        img = cv.warpAffine(img, A, (w, h), flags=cv.INTER_LINEAR, borderMode=cv.BORDER_REPLICATE)
+    if tilt != 1.0:
+        s = 0.8 * np.sqrt(tilt * tilt - 1)
+        img = cv.GaussianBlur(img, (0, 0), sigmaX=s, sigmaY=0.01)
+        img = cv.resize(img, (0, 0), fx=1.0 / tilt, fy=1.0, interpolation=cv.INTER_NEAREST)
+        A[0] /= tilt
+    if phi != 0.0 or tilt != 1.0:
+        h, w = img.shape[:2]
+        mask = cv.warpAffine(mask, A, (w, h), flags=cv.INTER_NEAREST)
+    Ai = cv.invertAffineTransform(A)
+    return img, mask, Ai
+
+
+def affine_detect(detector, img, mask=None, pool=None):
+    '''
+    affine_detect(detector, img, mask=None, pool=None) -> keypoints, descrs
+
+    Apply a set of affine transformations to the image, detect keypoints and
+    reproject them into initial image coordinates.
+    See http://www.ipol.im/pub/algo/my_affine_sift/ for the details.
+
+    ThreadPool object may be passed to speedup the computation.
+    '''
+    params = [(1.0, 0.0)]
+    for t in 2 ** (0.5 * np.arange(1, 6)):
+        for phi in np.arange(0, 180, 72.0 / t):
+            params.append((t, phi))
+
+    def f(p):
+        t, phi = p
+        timg, tmask, Ai = affine_skew(t, phi, img)
+        keypoints, descrs = detector.detectAndCompute(timg, tmask)
+        for kp in keypoints:
+            x, y = kp.pt
+            kp.pt = tuple(np.dot(Ai, (x, y, 1)))
+        if descrs is None:
+            descrs = []
+        return keypoints, descrs
+
+    keypoints, descrs = [], []
+    if pool is None:
+        ires = it.imap(f, params)
+    else:
+        ires = pool.imap(f, params)
+
+    for i, (k, d) in enumerate(ires):
+        print('affine sampling: %d / %d\r' % (i + 1, len(params)), end='')
+        keypoints.extend(k)
+        descrs.extend(d)
+
+    print()
+    return keypoints, np.array(descrs)
+
+
+def image_change(img1, img2, output=False):
+    rows_1, cols_1 = map(int, img1.shape)
+    rows_2, cols_2 = map(int, img2.shape)
+    img1 = cv.pyrDown(img1, dstsize=(cols_1 // 2, rows_1 // 2))
+    img2 = cv.pyrDown(img2, dstsize=(cols_2 // 2, rows_2 // 2))
+    cols_1 = cols_1 // 2
+    rows_1 = rows_1 // 2
+
+    # img1 = cv.pyrDown(img1, dstsize=(cols_1 // 2, rows_1 // 2))
+    # img2 = cv.pyrDown(img2, dstsize=(cols_2 // 2, rows_2 // 2))
+    # cols_1 = cols_1 // 2
+    # rows_1 = rows_1 // 2
+
+    detector, matcher = init_feature(feature_name)
+
+    if img1 is None:
+        print('Failed to load fn1:', fn1)
+        sys.exit(1)
+
+    if img2 is None:
+        print('Failed to load fn2:', fn2)
+        sys.exit(1)
+
+    if detector is None:
+        print('unknown feature:', feature_name)
+        sys.exit(1)
+
+    print('using', feature_name)
+
+    #pool = ThreadPool(processes=cv.getNumberOfCPUs())
+    kp1, desc1 = affine_detect(detector, img1)
+    kp2, desc2 = affine_detect(detector, img2)
+    print('img1 - %d features, img2 - %d features' % (len(kp1), len(kp2)))
+
+    img_matches = np.empty((max(img1.shape[0], img1.shape[0]), img1.shape[1] + img2.shape[1], 3), dtype=np.uint8)
+
+    def match_and_draw(win):
+        with Timer('matching'):
+            raw_matches = matcher.knnMatch(desc1, trainDescriptors=desc2, k=2)  # 2
+        p1, p2, kp_pairs = filter_matches(kp1, kp2, raw_matches)
+
+        cv.drawMatches(img1, kp1, img2, kp2, [], img_matches, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+        H = None
+        if len(p1) >= 4:
+            H, status = cv.findHomography(p1, p2, cv.RANSAC, 5.0)
+            print('%d / %d  inliers/matched' % (np.sum(status), len(status)))
+
+            return H
+
+    HH = match_and_draw('affine find_obj')
+    if HH is None:
+        return None
+    
+    sums = np.sum(HH, axis=1)
+    if output:
+        print(HH)
+        print(sums)
+        print(sums[0] / sums[2])
+        print(sums[1] / sums[2])
+
+    img1_aligned = cv.warpPerspective(img1, HH, (cols_1, rows_1), flags=cv.INTER_LINEAR + cv.WARP_INVERSE_MAP)
+    img2_aligned = cv.warpPerspective(img2, HH, (cols_2, rows_2), flags=cv.INTER_LINEAR + cv.WARP_INVERSE_MAP)
+
+    motion = None
+    motion = cv.absdiff(img1_aligned, img1)
+    return {'image_1_aligned': img1_aligned, 'image_2_aligned': img2_aligned, 'change': motion}
+
+
+from pathlib import Path
+
+
+def image_change_from_path(image_path1, image_path2):
+    img1 = cv.imread(image_path1, 0)
+    img2 = cv.imread(image_path2, 0)
+    result = image_change(img1, img2)
+    return result
+
+def image_change_store(image_path1, image_path2):
+    result = image_change_from_path(image_path1, image_path2)
+    cv.namedWindow('Display', cv.WINDOW_NORMAL)
+    cv.imshow("Display", result['change'])
+    cv.imwrite('/Users/arman/tmp/change.png', result['change'])
+    cv.waitKey(0)
+    return result
+
+
+
 import sys
 
-import cv2
-import numpy as np
-from skimage import color
-from skimage.util import img_as_float
-from skimage.util import img_as_ubyte
-from matplotlib import pyplot as plt
-
-def mutual_information(hgram):
-    """ Mutual information for joint histogram
-    """
-    # Convert bins counts to probability values
-    pxy = hgram / float ( np.sum ( hgram ) )
-    px = np.sum ( pxy, axis=1 )  # marginal for x over y
-    py = np.sum ( pxy, axis=0 )  # marginal for y over x
-    px_py = px[:, None] * py[None, :]  # Broadcast to multiply marginals
-    # Now we can do the calculation using the pxy, px_py 2D arrays
-    nzs = pxy > 0  # Only non-zero pxy values contribute to the sum
-    return np.sum ( pxy[nzs] * np.log ( pxy[nzs] / px_py[nzs] ) )
-
-
-# Use the keypoints to stitch the images
-def get_stitched_image(img1, img2, M):
-    # Get width and height of input images
-    w1, h1 = img1.shape[:2]
-    w2, h2 = img2.shape[:2]
-
-    # Get the canvas dimesions
-    img1_dims = np.float32 ( [[0, 0], [0, w1], [h1, w1], [h1, 0]] ).reshape ( -1, 1, 2 )
-    img2_dims_temp = np.float32 ( [[0, 0], [0, w2], [h2, w2], [h2, 0]] ).reshape ( -1, 1, 2 )
-
-    # Get relative perspective of second image
-    img2_dims = cv2.perspectiveTransform ( img2_dims_temp, M )
-
-    # Resulting dimensions
-    result_dims = np.concatenate ( (img1_dims, img2_dims), axis=0 )
-
-    # Getting images together
-    # Calculate dimensions of match points
-    [x_min, y_min] = np.int32 ( result_dims.min ( axis=0 ).ravel () - 0.5 )
-    [x_max, y_max] = np.int32 ( result_dims.max ( axis=0 ).ravel () + 0.5 )
-
-    # Create output array after affine transformation
-    transform_dist = [-x_min, -y_min]
-    transform_array = np.array ( [[1, 0, transform_dist[0]],
-                                  [0, 1, transform_dist[1]],
-                                  [0, 0, 1]] )
-
-    # Warp images to get the resulting image
-    result_img = cv2.warpPerspective ( img2, transform_array.dot ( M ),
-                                       (x_max - x_min, y_max - y_min) )
-    result_img[transform_dist[1]:w1 + transform_dist[1],
-    transform_dist[0]:h1 + transform_dist[0]] = img1
-
-    # Return the result
-    return result_img
-
-
-# Find SIFT and return Homography Matrix
-def get_sift_homography(img1, img2):
-    # Initialize SIFT
-    sift = cv2.xfeatures2d.SIFT_create ()
-
-    # Extract keypoints and descriptors
-    k1, d1 = sift.detectAndCompute ( img1, None )
-    k2, d2 = sift.detectAndCompute ( img2, None )
-
-    # Bruteforce matcher on the descriptors
-    bf = cv2.BFMatcher ()
-    matches = bf.knnMatch ( d1, d2, k=2 )
-
-    # Make sure that the matches are good
-    verify_ratio = 0.8  # Source: stackoverflow
-    verified_matches = []
-    for m1, m2 in matches:
-        # Add to array only if it's a good match
-        if m1.distance < 0.8 * m2.distance:
-            verified_matches.append ( m1 )
-
-    # Mimnum number of matches
-    min_matches = 8
-    if len ( verified_matches ) > min_matches:
-
-        # Array to store matching points
-        img1_pts = []
-        img2_pts = []
-
-        # Add matching points to array
-        for match in verified_matches:
-            img1_pts.append ( k1[match.queryIdx].pt )
-            img2_pts.append ( k2[match.trainIdx].pt )
-        img1_pts = np.float32 ( img1_pts ).reshape ( -1, 1, 2 )
-        img2_pts = np.float32 ( img2_pts ).reshape ( -1, 1, 2 )
-
-        # Compute homography matrix
-        M, mask = cv2.findHomography ( img1_pts, img2_pts, cv2.RANSAC, 5.0 )
-        return M
-    else:
-        print ( 'Error: Not enough matches' )
-        exit ()
-
-
-# Equalize Histogram of Color Images
-def equalize_histogram_color(img):
-    img_yuv = cv2.cvtColor ( img, cv2.COLOR_BGR2YUV )
-    img_yuv[:, :, 0] = cv2.equalizeHist ( img_yuv[:, :, 0] )
-    img = cv2.cvtColor ( img_yuv, cv2.COLOR_YUV2BGR )
-    return img
-
-
-def MutualInformation(a, b, plotter=None):
-    hist_2d, x_edges, y_edges = np.histogram2d ( a.ravel (), b.ravel (), bins=20 )
-    mu = mutual_information ( hist_2d )
-    if plotter != None:
-        hist_2d_log = np.zeros ( hist_2d.shape )
-        non_zeros = hist_2d != 0
-        hist_2d_log[non_zeros] = np.log ( hist_2d[non_zeros] )
-        plotter.imshow ( hist_2d_log.T, origin='lower', cmap=plt.cm.gray )
-    return mu
-
-
-def skiimage_display(img):
-    return cv2.cvtColor ( img, cv2.COLOR_BGR2RGB )
-
-
-def main_mu ():
-    # Get input set of images
-    img1 = cv2.imread ( sys.argv[1] )
-    img2 = cv2.imread ( sys.argv[2] )
-    w1, h1 = img1.shape[:2]
-    w2, h2 = img2.shape[:2]
-
-    img1 = cv2.resize ( img1, (int ( w1 / 3 ), int ( h1 / 3 )), interpolation=cv2.INTER_AREA )
-    img2 = cv2.resize ( img2, (int ( w2 / 3 ), int ( h2 / 3 )), interpolation=cv2.INTER_AREA )
-    lab1 = cv2.cvtColor ( img1, cv2.COLOR_BGR2LAB )
-    lab2 = cv2.cvtColor ( img2, cv2.COLOR_BGR2LAB )
-    # Split LAB channels
-    L1, a1, b1 = cv2.split ( lab1 )
-    L2, a2, b2 = cv2.split ( lab2 )
-
-
-    f, axs = plt.subplots ( 2, 3, figsize=(20, 10), frameon=False,
-                            subplot_kw={'xticks': [], 'yticks': []} )
-    axs[0, 0].imshow ( skiimage_display(img1) )
-    axs[0, 1].imshow ( skiimage_display(img2) )
-
-    MutualInformation ( img_as_ubyte ( a1 ), img_as_ubyte ( a2 ), axs[1, 0] )
-    MutualInformation ( img_as_ubyte ( b1 ), img_as_ubyte ( b2 ), axs[1, 1] )
-    MutualInformation ( img_as_ubyte ( L1 ), img_as_ubyte ( L2 ), axs[1, 2] )
-
-    plt.show()
-
-# Main function definition
-def main():
-    # Get input set of images
-    img1 = cv2.imread ( sys.argv[1] )
-    img2 = cv2.imread ( sys.argv[2] )
-    w1, h1 = img1.shape[:2]
-    w2, h2 = img2.shape[:2]
-
-    img1 = cv2.resize ( img1, (int ( w1 / 3 ), int ( h1 / 3 )), interpolation=cv2.INTER_AREA )
-    img2 = cv2.resize ( img2, (int ( w2 / 3 ), int ( h2 / 3 )), interpolation=cv2.INTER_AREA )
-
-    # Equalize histogram
-    img1 = equalize_histogram_color ( img1 )
-    img2 = equalize_histogram_color ( img2 )
-
-    # Show input images
-    input_images = np.hstack( (img1, img2) )
-    cv2.imshow ('Input Images', input_images)
-    input_image_name = '/Volumes/medvedev/_SP/results/inputs.png'
-    cv2.imwrite(input_image_name, input_images)
-
-    # Use SIFT to find keypoints and return homography matrix
-    M = get_sift_homography ( img1, img2 )
-
-    # Stitch the images together using homography matrix
-    result_image = get_stitched_image ( img2, img1, M )
-
-    # Write the result to the same directory
-    result_image_name = '/Volumes/medvedev/_SP/results/homography.png'
-    cv2.imwrite(result_image_name, result_image)
-
-    # Show the resulting image
-    cv2.imshow ( 'Result', result_image )
-    cv2.waitKey ()
-
-
-# Call main function
 if __name__ == '__main__':
-    main ()
+   image_change_store(sys.argv[1], sys.argv[2])

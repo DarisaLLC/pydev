@@ -11,9 +11,11 @@ import utils
 import opencv_utils
 from ransac_vanishing_point import ransac_vanishing_point_detection
 from circles import find_circle
-from skimage.feature import corner_harris, corner_subpix, corner_peaks
-from skimage.transform import warp, AffineTransform
-from skimage.draw import ellipse
+
+
+
+
+
 
 def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_precision=0):
     """LSD algorithm for line detection.
@@ -51,6 +53,7 @@ def lsd_lines(source_image, min_line_length=0.0175, max_line_length=0.1, min_pre
     detector = cv2.createLineSegmentDetector(cv2.LSD_REFINE_ADV)
 
     lines, rect_widths, precisions, false_alarms = detector.detect(source_image)
+
     line_lengths = [utils.get_line_length(l[0]) for l in lines]
     line_angles = [utils.get_line_angle(l[0]) for l in lines]
 
@@ -101,16 +104,7 @@ if __name__ == '__main__':
     dshape = display.shape
     print(dshape)
 
-    coords = corner_peaks(corner_harris(lab_tuple[0]), min_distance=16)
-    coords_subpix = corner_subpix(lab_tuple[0], coords, window_size=16)
 
-    fig, ax = plt.subplots()
-    ax.imshow(display)
-    ax.plot(coords[:, 1], coords[:, 0], color='r', marker='+',
-            linestyle='None', markersize=6)
-    #ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=7)
-    ax.axis((0, dshape[1], dshape[0], 0))
-    plt.show()
 
     lines = lsd_lines(lab_tuple[0])
 

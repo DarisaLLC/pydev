@@ -13,7 +13,6 @@ from pathlib import Path
 from rectangle import contains
 import scipy
 from scipy import linalg
-from utils import get_line_angle
 
 class vp_detection(object):
     """
@@ -51,65 +50,7 @@ class vp_detection(object):
         conf = 0.9999
         self.__ransac_iter = int(np.log(1 - conf) / np.log(1.0 - p))
 
-    @property
-    def length_thresh(self):
-        """
-        Length threshold for line segment detector
-        Returns:
-            The minimum length required for a line
-        """
-        return self._length_thresh
-
-    @length_thresh.setter
-    def length_thresh(self, value):
-        """
-        Length threshold for line segment detector
-        Args:
-            value: The minimum length required for a line
-        Raises:
-            ValueError: If the threshold is 0 or negative
-        """
-        if value <= 0:
-            raise ValueError('Invalid threshold: {}'.format(value))
-
-        self._length_thresh = value
-
-    @property
-    def principal_point(self):
-        """
-        Principal point for VP Detection algorithm
-        Returns:
-            The minimum length required for a line
-        """
-        return self._principal_point
-
-    @principal_point.setter
-    def principal_point(self, value):
-        """
-        Principal point for VP Detection algorithm
-        Args:
-            value: A list or tuple of two elements denoting the x and y coordinates
-
-        Raises:
-            ValueError: If the input is not a list or tuple and there aren't two elements
-        """
-        try:
-            assert isinstance(value, (list, tuple)) and not isinstance(value, str)
-            assert len(value) == 2
-        except AssertionError:
-            raise ValueError('Invalid principal point: {}'.format(value))
-
-        self._length_thresh = value
-
-    @property
-    def focal_length(self):
-        """
-        Focal length for VP detection algorithm
-        Returns:
-            The focal length in pixels
-        """
-        return self._focal_length
-
+ 
     @property
     def vps(self):
         """
@@ -226,12 +167,11 @@ class vp_detection(object):
         vp_hypos = np.zeros((self.__ransac_iter * num_bins_vp2, 3, 3),
                             dtype=np.float32)
 
-        i = 0
-
         if self.__seed is not None:
             gen = np.random.RandomState(self.__seed)
 
         # For each iteration...
+        i = 0
         while i < self.__ransac_iter:
             # Get two random indices
             if self.__seed is not None:
@@ -702,7 +642,7 @@ class vp_detection(object):
         img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         hue, satu, vol = cv2.split(img_hsv)
-        img = np.dstack([gray, gray, gray])
+        img = np.dstack([hue,hue,hue])
         if len(img.shape) == 2:  # If grayscale, artificially make into RGB
             img = np.dstack([img, img, img])
 
@@ -752,7 +692,8 @@ def main(input_path, roi):
 
     vps = vpd.find_image_vps(img)
     vpd.calculate_focal_length()
-    vpd.solve_world_to_cam()
+    r,t = vpd.solve_world_to_cam()
+    print((r,t))
     K = vpd.get_intrinsic_camera_transformation()
     kp1 = K * np.transpose(K)
     w = np.linalg.inv(kp1)

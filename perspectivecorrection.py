@@ -8,10 +8,10 @@ from opencv_utils import get_four_points
 if __name__ == '__main__' :
 
     # Read in the image.
-    im_src = cv2.imread("/Volumes/medvedev/_SP/car_reference_position/car_2m0/image00001.png")
+    im_src = cv2.imread("/Users/arman/Pictures/tile.png")
 
     # Destination image
-    size = (720, 576,3)
+    size = (260,384)
 
     im_dst = np.zeros(size, np.uint8)
 
@@ -39,7 +39,7 @@ if __name__ == '__main__' :
     # Warp source image to destination
     im_dst = cv2.warpPerspective(im_src, h, size[0:2])
 
-    result_image_name = '/Volumes/medvedev/_SP/results/perespevtive.png'
+    result_image_name = '/Users/arman/Pictures/change.png'
     cv2.imwrite(result_image_name, im_dst)
     # Show output
     cv2.imshow("Image", im_dst)

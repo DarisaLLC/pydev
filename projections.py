@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     name = sys.argv[1]
     img_color = cv2.imread(name)
-    img_color = img_color[255:1223,511:1223]
+  #  img_color = img_color[255:1223,511:1223]
 
     rows, cols, cns = img_color.shape
     f, axs = plt.subplots(3, 2, figsize=(20, 10), frameon=False,

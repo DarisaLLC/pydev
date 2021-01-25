@@ -17,17 +17,19 @@ diagonal ratio is  ration of ... to ...-----...
   ----------
 
 '''
-def region_of_interest(img, diagonal_ratio=2.5):
-    rows, cols, channels = img.shape
-    mask = np.zeros((rows, cols), dtype=np.uint8)
-    left = int(cols / diagonal_ratio)
-    right = int(cols - left)
 
-    poly = np.array([[
-        (left, 50), (right, 50), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv2.fillConvexPoly(mask, poly, 255)
-    return mask
+def region_of_interest(img, diagonal_ratio = 2.5):
+	rows, cols, channels = img.shape
+	mask = np.zeros((rows, cols), dtype = np.uint8)
+	left = int(cols / diagonal_ratio)
+	right = int(cols - left)
+	
+	poly = np.array([[
+		(left, 50), (right, 50), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
+	
+	cv2.fillConvexPoly(mask, poly, 255)
+	return mask
 
 
 '''
@@ -38,26 +40,66 @@ Higher portion
   ----------
 
 '''
-def vertical(img, top_portion=0.667):
-    rows, cols, channels = img.shape
-    mask = np.zeros((rows, cols), dtype=np.uint8)
-    top = int(rows * top_portion)
 
-    poly = np.array([[
-        (0, top), (cols - 1, top), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
 
-    cv2.fillConvexPoly(mask, poly, 255)
-    return mask
+def vertical(img, top_portion = 0.667):
+	rows, cols, channels = img.shape
+	mask = np.zeros((rows, cols), dtype = np.uint8)
+	top = int(rows * top_portion)
+	
+	poly = np.array([[
+		(0, top), (cols - 1, top), (cols - 1, rows - 1), (0, rows - 1)]], np.int32)
+	
+	cv2.fillConvexPoly(mask, poly, 255)
+	return mask
+
+
+# does the match, if it's good returns the homography transform
+def find(des, kp, img_des, img_kp,MIN_MATCH_COUNT = 50):
+	# create BFMatcher object
+	bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
+	
+	# Match descriptors.
+	matches = bf.match(des, img_des)
+	
+	# Sort them in the order of their distance.
+	matches = sorted(matches, key = lambda x: x.distance)
+	
+	print("matches are found - %d/%d" % (len(matches), MIN_MATCH_COUNT))
+	
+	if len(matches) > MIN_MATCH_COUNT:
+		src_pts = np.float32([kp[m.queryIdx].pt for m in matches[:MIN_MATCH_COUNT]]).reshape(-1, 1, 2)
+		dst_pts = np.float32([img_kp[m.trainIdx].pt for m in matches[:MIN_MATCH_COUNT]]).reshape(-1, 1, 2)
+		
+		# get the transformation between the flat fiducial and the found fiducial in the photo
+		M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+		matchesMask = mask.ravel().tolist()
+		# return the transform
+		return M, matchesMask
+	else:
+		print("Not enough matches are found - %d/%d" % (len(matches), MIN_MATCH_COUNT))
+		return None, None
+
+
+# draws a box round the fiducial
+def draw_outline(display, M, h, w):
+	# array containing co-ords of the fiducial
+	pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+	# transform the coords of the fiducial onto the picture
+	dst = cv2.perspectiveTransform(pts, M)
+	# draw a box around the fiducial
+	cv2.polylines(display, [np.int32(dst)], True, (255, 0, 0), 5, cv2.LINE_AA)
 
 
 def get_rotatedRect_angle(rr):
 	return np.radians(90.0 - rr[2]) if rr[1][0] < rr[1][1] else np.radians(-rr[2])
 
-def _draw_str(dst, target, s, scale):
-    x, y = target
-    cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (255,255,255), thickness=2, lineType=cv2.LINE_AA)
-    cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (64,64,64), lineType=cv2.LINE_AA)
 
+def _draw_str(dst, target, s, scale):
+	x, y = target
+	cv2.putText(dst, s, (x + 1, y + 1), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (255, 255, 255), thickness = 2,
+				lineType = cv2.LINE_AA)
+	cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, scale, (64, 64, 64), lineType = cv2.LINE_AA)
 
 
 class Time:
@@ -78,28 +120,28 @@ class Time:
 		return time_elapsed
 
 
+def processing_info(np_arr, name = None, elapsed = None):
+	"""
+	Display information (shape, type, max, min, etc) about a NumPy array.
+	Args:
+	  np_arr: The NumPy array.
+	  name: The (optional) name of the array.
+	  elapsed: The (optional) time elapsed to perform a filtering operation.
+	"""
+	
+	if name is None:
+		name = "NumPy Array"
+	if elapsed is None:
+		elapsed = "---"
+	
+	print("%-20s | Time: %-14s  Type: %-7s Shape: %s" % (name, str(elapsed), np_arr.dtype, np_arr.shape))
 
-def processing_info(np_arr, name=None, elapsed=None):
-  """
-  Display information (shape, type, max, min, etc) about a NumPy array.
-  Args:
-    np_arr: The NumPy array.
-    name: The (optional) name of the array.
-    elapsed: The (optional) time elapsed to perform a filtering operation.
-  """
-
-  if name is None:
-    name = "NumPy Array"
-  if elapsed is None:
-    elapsed = "---"
-
-  print("%-20s | Time: %-14s  Type: %-7s Shape: %s" % (name, str(elapsed), np_arr.dtype, np_arr.shape))
 
 def roiPts(pts):
-    s = np.sum(pts, axis = 1)
-    (x, y) = pts[np.argmin(s)]
-    (xb, yb) = pts[np.argmax(s)]
-    return [(x, y), (xb, yb)]
+	s = np.sum(pts, axis = 1)
+	(x, y) = pts[np.argmin(s)]
+	(xb, yb) = pts[np.argmax(s)]
+	return [(x, y), (xb, yb)]
 
 
 def point_2d_norm(point_0):
@@ -242,6 +284,8 @@ def circular_mean(weights, angles):
 '''
 Choices are lsd or hough. hough appeared to work better
 '''
+
+
 def compute_lines(image, expected_orientation, length_limit, vertical_horizon, dlogger, dsettings):
 	"""
 
@@ -447,4 +491,3 @@ def uniques(iterable):
 			if item not in seen_unhashable:
 				yield item
 				seen_unhashable.append(item)
-

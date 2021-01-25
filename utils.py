@@ -2,7 +2,13 @@ import cv2
 import numpy as np
 import itertools
 import math
+from os import listdir
+from pathlib import Path
 
+from os.path import isfile, join
+import itertools
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 '''
 Variety of sources including mine
@@ -10,11 +16,62 @@ Variety of sources including mine
 '''
 
 
+
+# function to display images
+def display(images, titles=['']):
+    ilen = len(images)
+    tlen = len(titles)
+    if ilen == 0 or ilen != tlen: return False
+
+    if isinstance(images[0], list):
+        c = len(images[0])
+        r = len(images)
+        images = list(itertools.chain(*images))
+    else:
+        c = len(images)
+        r = 1
+    plt.figure(figsize=(4 * c, 4 * r))
+    gs1 = gridspec.GridSpec(r, c, wspace=0, hspace=0)
+    # gs1.update(wspace=0.01, hspace=0.01) # set the spacing between axes.
+    # titles = itertools.cycle(titles)
+    for i in range(r * c):
+        im = images[i]
+        title = titles[i]
+        plt.subplot(gs1[i])
+        # Don't let imshow doe any interpolation
+        plt.imshow(im, cmap='gray', interpolation='none')
+        plt.axis('off')
+        if i < c:
+            plt.title(title)
+    plt.tight_layout()
+    plt.show()
+    return True
+
+
+def rms(x):
+    return np.sqrt(x.dot(x) / x.size)
+
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    angle = np.arccos(np.dot(v1_u, v2_u))
+    if np.isnan(angle):
+        if (v1_u == v2_u).all():
+            return 0.0
+        else:
+            return np.pi
+    return angle
+
+
 def bgrFromHue(degrees):
     hsv = np.zeros((1, 1, 3), np.uint8)
     hsv[0, 0, 0] = ((degrees % 360) * 256) / 360.0
-    hsv[0, 0, 1] = ((degrees % 90) * 256) / 90.0
-    hsv[0, 0, 2] = ((degrees % 45) * 256) / 45.0
+    hsv[0, 0, 1] = 255
+    hsv[0, 0, 2] = 255
     bgr = cv.cvtColor(hsv, cv.COLOR_HSV2RGB)
     tp = tuple([int(x) for x in bgr[0, 0, :]])
     return tp
@@ -55,7 +112,7 @@ def get_rotation(mat, axis=0):
     return a
 
 def drawString(img, text):
-    font_scale = 1.5
+    font_scale = 2.5
     font = cv2.FONT_HERSHEY_PLAIN
 
     # set the rectangle background to white
@@ -64,12 +121,13 @@ def drawString(img, text):
     # get the width and height of the text box
     (text_width, text_height) = cv2.getTextSize(text, font, fontScale=font_scale, thickness=1)[0]
     # set the text start position
-    text_offset_x = 10
-    text_offset_y = img.shape[0] - 25
+    text_offset_x = 100
+    text_offset_y = img.shape[0] - 250
     # make the coords of the box with a small padding of two pixels
     box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width - 2, text_offset_y - text_height - 2))
     cv2.rectangle(img, box_coords[0], box_coords[1], rectangle_bgr, cv2.FILLED)
     cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=(0, 0, 0), thickness=1)
+
 def circleContainsPoint(center, radius_2, point):
     dx = center[0] - point[0]
     dy = center[1] - point[1]

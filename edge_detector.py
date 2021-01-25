@@ -193,8 +193,7 @@ if __name__ == '__main__':
     plt.figure(figsize = (10, 10))
     plt.imshow(I, cmap = plt.cm.gray)
     #plt.plot(xx, yy, 'or', ms = 1, mew = 1)
-    for chain in chains:
-        plot(chain[:, 0], chain[:, 1], '-')
+ 
  #   plt.xlim(15, 65)
  #   plt.ylim(15, 65)
     plt.show()

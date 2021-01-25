@@ -38,33 +38,6 @@ bins = [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
 def axis(x): return int((x + 16) // 32) % 8
 
 
-def gradient_abs_value_mask( img, sobel_kernel=3, axis='x', threshold=(0, 255)):
-    """
-    Masks the image based on gradient absolute value.
-
-    Parameters
-    ----------
-    image           : Image to mask.
-    sobel_kernel    : Kernel of the Sobel gradient operation.
-    axis            : Axis of the gradient, 'x' or 'y'.
-    threshold       : Value threshold for it to make it to appear in the mask.
-
-    Returns
-    -------
-    Image mask with 1s in activations and 0 in other pixels.
-    """
-    # Take the absolute value of derivative in x or y given orient = 'x' or 'y'
-    if axis == 'x':
-        sobel = np.absolute(cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=sobel_kernel))
-    if axis == 'y':
-        sobel = np.absolute(cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=sobel_kernel))
-    # Scale to 8-bit (0 - 255) then convert to type = np.uint8
-    sobel = np.uint8(255 * sobel / np.max(sobel))
-    # Create a mask of 1's where the scaled gradient magnitude is > thresh_min and < thresh_max
-    mask = np.zeros_like(sobel)
-    # Return this mask as your binary_output image
-    mask[(sobel >= threshold[0]) & (sobel <= threshold[1])] = 1
-    return mask
 
 
 def gradient_magnitude_mask(img, sobel_kernel=3, threshold=(0, 255)):
@@ -95,30 +68,6 @@ def gradient_magnitude_mask(img, sobel_kernel=3, threshold=(0, 255)):
     return mask
 
 
-def gradient_direction_mask( img, sobel_kernel=3, threshold=(0, np.pi / 2)):
-    """
-    Masks the image based on gradient direction.
-
-    Parameters
-    ----------
-    image           : Image to mask.
-    sobel_kernel    : Kernel of the Sobel gradient operation.
-    threshold       : Direction threshold for it to make it to appear in the mask.
-
-    Returns
-    -------
-    Image mask with 1s in activations and 0 in other pixels.
-    """
-    # Take the gradient in x and y separately
-    sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
-    sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
-    # Take the absolute value of the x and y gradients and calculate the direction of the gradient
-    direction = np.arctan2(np.absolute(sobel_y), np.absolute(sobel_x))
-    # Create a binary mask where direction thresholds are met
-    mask = np.zeros_like(direction)
-    # Return this mask as your binary_output image
-    mask[(direction >= threshold[0]) & (direction <= threshold[1])] = 1
-    return mask
 
 
 def truePeaks(magnitudes, phases_ubyte, phases, threshold):
@@ -193,9 +142,11 @@ def sobel_detect(img, half_size=1):
 
     sobelx = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=block_size)
     sobely = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=block_size)
-    phases = cv2.phase(sobelx, sobely)  # angleInDegrees=False)
-    phases_ubyte = np.divide(phases, np.pi + np.pi)
-    phases_ubyte = img_as_ubyte(phases_ubyte)
+    phases = cv2.phase(sobelx, sobely, False)
+    #    phases = np.unwrap(phases, np.pi + np.pi) / (2 * np.pi)
+    phases = np.divide(phases, np.pi + np.pi)
+    phases_ubyte = img_as_ubyte(phases)
+  
     magnitudes = np.sqrt(sobelx ** 2 + sobely ** 2)
     return (magnitudes, phases_ubyte, phases)
 
@@ -239,13 +190,14 @@ if __name__ == '__main__':
     else:
         if not Path(sys.argv[1]).is_file() or not Path(sys.argv[1]).exists():
             print(sys.argv[1] + '  Does not exist ')
-        lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 2)
+        lab_tuple = opencv_utils.load_reduce_convert(sys.argv[1], 3)
         display = opencv_utils.convert_lab2rgb(lab_tuple)
-        img = cv2.GaussianBlur(lab_tuple[0], (11, 11), sigmaX=3.0)
+        img = cv2.GaussianBlur(lab_tuple[0], (7,7), sigmaX=3.0)
         result = sobel_detect(img, 1)
         gdm = gradient_magnitude_mask(img, 3, (10, 255))
         gdm = cv2.bitwise_and(result[1], result[1], mask=gdm)
         cv2.imwrite("/Users/arman/tmp/directionMask.png", gdm)
+        cv2.imwrite("/Users/arman/tmp/blur.png", img)
 
 
     dims = display.shape
@@ -277,9 +229,10 @@ if __name__ == '__main__':
     ax2.imshow(gdm, cmap='gray')
     ax2.set_title('Masked Gradient Angle')
 
+    skip = (slice(None, None, 3), slice(None, None, 3))
     ax2 = plt.subplot2grid((3, 3), (1, 0))
     ax2.imshow(display, cmap='gray')
-    ax2.quiver(x, y, u, v, units='dots', angles = 'xy', scale=1, pivot='mid', color='r')
+    ax2.quiver(u[::,3],v[::,3], units='x', scale=1, pivot='mid', color='r')
     ax2.set_title('Image + TP ')
     ax2.xaxis.set_ticks([])
     ax2.yaxis.set_ticks([])

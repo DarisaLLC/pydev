@@ -4,6 +4,11 @@ import sys
 from pathlib import Path
 
 import cv2
+import numpy as np
+
+pp = Path(os.getcwd() + '/../pairopy')
+sys.path.append(str(pp))
+
 
 class icompare:
     def func(self, image_a, image_b, options): pass
@@ -16,6 +21,13 @@ class incv(icompare):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         return max_val
 
+
+class ichcmp(icompare):
+    def func(self, image_a, image_b, options):
+        res = cv2.matchTemplate(image_a, image_b, cv2.TM_CCOEFF_NORMED)
+        # @todo just fetch[0,0]
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        return max_val
 
 
 class pwimage:
@@ -36,8 +48,9 @@ class pwimage:
 
         return pwiser.UnityPairWiseArray(data)
 
-    def setPairWiseArrayPair(row, col, p):
-        """Set both P(i,j) and P(j,i) to p """
+    def setPairWiseArrayPair(data, row, col, p):
+        """Set both P(i,j) to p and P(j,i) to 1 - p """
+        assert (data.info == 'leo-pairwise')
         assert (p >= 0.0 and p <= 1.0)
         data[row, col] = p
-        data[col, row] = p
+        data[col, row] = 1.0 - p

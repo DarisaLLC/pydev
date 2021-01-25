@@ -13,7 +13,8 @@ from skimage import exposure
 from skimage import img_as_float
 from skimage import io
 from skimage.io import imsave
-from coloralgo import get_dominant_color, omf
+from copy import copy
+#from coloralgo import get_dominant_color
 
 
 # @memorize.Memorize
@@ -157,7 +158,6 @@ def main_lab_collection(images):
 
 def main_hue(img):
     rotred = coloralgo.rotate_hue(img, -10)
-    imsave('/Users/arman/Desktop/240_32_10.jpg', rotred)
     f, axs = plt.subplots(3, 2, figsize=(20, 10), frameon=False,
                           subplot_kw={'xticks': [], 'yticks': []})
     axs[0, 0].imshow(img)
@@ -172,6 +172,45 @@ def main_hue(img):
     plt.autoscale
     plt.show()
 
+def black_content(image):
+    height, width = rgb.shape[:2]
+    Red = image[:, :, 0]
+    Green = image[:, :, 1]
+    Blue = image[:, :, 2]
+    minw = np.minimum(Red, Green, Blue)
+    maxw = np.maximum(Red, Green, Blue)
+    maxw = 255 - maxw
+
+    dst = image.copy()
+
+    bw = np.add(minw,maxw)
+    cw = 255 - bw
+    dst[:, :, 0] = np.subtract(Red, bw)
+    dst[:, :, 1] = np.subtract(Green, bw)
+    dst[:, :, 2] = np.subtract(Blue, bw)
+
+
+    return maxw, minw, cw, dst
+
+def main_content(img):
+    palette = copy(plt.cm.gray)
+    palette.set_over('r', 1.0)
+    palette.set_under('g', 1.0)
+    palette.set_bad('b', 1.0)
+
+    bc,wc,cw, dst = black_content(img)
+    f, axs = plt.subplots(4, 3, figsize=(20, 10), frameon=False,
+                          subplot_kw={'xticks': [], 'yticks': []})
+    axs[0, 0].imshow(img,cmap=palette)
+    axs[0, 1].imshow(bc, cmap=plt.cm.gray)
+    axs[0, 2].imshow(wc,cmap=plt.cm.gray)
+    axs[1, 0].imshow(cw, cmap=plt.cm.gray)
+    axs[1, 1].imshow(dst, cmap=palette)
+    imsave('/Users/arman/tmp/cw.png', cw)
+    imsave('/Users/arman/tmp/dst.png', dst)
+
+
+    plt.show()
 
 def main_speed_cv_lab(img):
     import time
@@ -192,7 +231,6 @@ def main_speed_cv_lab(img):
     print('skimage:', t_sk)
     print('factor:', t_sk / t_cv)
 
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         exit(1)
@@ -207,13 +245,11 @@ if __name__ == "__main__":
             print('Not a color image')
             exit(1)
 
-        dc = get_dominant_color(img)
-        print(dc)
-
-        main_lab(rgb)
+        main_content(rgb)
+        #main_lab(rgb)
         # main_speed_cv_lab(rgb)
 
-    elif Path(sys.argv[1]).is_dir():
+  elif Path(sys.argv[1]).is_dir():
         coll = io.ImageCollection(sys.argv[1] + '/*.jpg')
         print(len(coll))
         main_lab_collection(coll)

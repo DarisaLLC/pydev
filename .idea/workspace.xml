@@ -1,778 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_candidate.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_candidate_maker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_center_estimator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_detector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_estimator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/ellipse_merger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/segment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/segment_detector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ellipse_detection/segment_pair.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/find_structure.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/dense_optical_flow_script.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/lucas_kanade_class0.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/lucas_kanade_inherit.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/lucas_kanade_script.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/video_capture_Robin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/video_capture_Robin2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/oflow/video_capture_Robin_with_LK.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/IMG_3103_warped.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last--/polar_rad_var.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/MED_lastest.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/last/polar_rad_var.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/m118_105/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100.tif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mval100/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval.tif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/mvalval/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/signal.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_0_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_10_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_1_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_2_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_3_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_4_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_5_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_6_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_7_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_8_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_9_9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/pupil/images/test/polar_rad_var.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/images/mask.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/images/pad2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/package0.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/pickels/pad0.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/pickels/rgb_pad.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Straight/2019-10-31 17-45-42_rec.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/winelattice.JPG" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/winelattice.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projects/winelattice_warped.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pygrabber" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/segments.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/vps.py" afterDir="false" />
+    <list default="true" id="08de5692-cd89-466d-9746-ffd44964abb1" name="Default Changelist" comment="adjusted farnback motion parameters">
+      <change afterPath="$PROJECT_DIR$/journals/Untitled.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pydev.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pydev.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coloralgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/coloralgo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/content.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/alignment_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/alignment_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/color_plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/color_plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/color_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/color_segmentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/edge_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eval_homography.py" beforeDir="false" afterPath="$PROJECT_DIR$/eval_homography.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exifer.py" beforeDir="false" afterPath="$PROJECT_DIR$/exifer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fiducial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_fiducial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_fiducial_wii.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/find_lines_lsd.py" beforeDir="false" afterPath="$PROJECT_DIR$/find_lines_lsd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fps_demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/fps_demo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lucas_kanade_class0.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lucas_kanade_inherit.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lucas_kanade_script.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/movement_direction.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/opencv_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/opencv_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/perspectivecorrection.py" beforeDir="false" afterPath="$PROJECT_DIR$/perspectivecorrection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projections.py" beforeDir="false" afterPath="$PROJECT_DIR$/projections.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/IMG_3103_warped.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/images/test.png" beforeDir="false" afterPath="$PROJECT_DIR$/projects/wiic/images/test.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/calibration/-0M028.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/calibration/0M511.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/calibration/1M593.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/calibration/4M032.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/curved approaches/2019-10-30 13-56-18.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/curved approaches/2019-10-30 13-56-59.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/curved approaches/2019-10-30 13-57-40.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/leaves on GA/2019-10-30 13-41-07.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/leaves on GA/2019-10-30 13-41-54.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/leaves on GA/2019-10-30 13-42-47.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/leaves on GA/2019-10-30 13-43-15.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/straight approaches/2019-10-30 13-36-24.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/straight approaches/2019-10-30 13-37-22.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/straight approaches/2019-10-30 13-37-54.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/straight approaches/2019-10-30 13-38-28.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/front_camera/straight approaches/2019-10-30 13-38-57.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/calibration/-0M042.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/calibration/0M528.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/calibration/1M281.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/calibration/2M633.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/calibration/4M04.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/curved approaches/2019-10-30 08-45-35.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/curved approaches/2019-10-30 08-46-27.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/curved approaches/2019-10-30 08-47-05.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/curved approaches/2019-10-30 08-47-39.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/curved approaches/2019-10-30 08-49-36.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/leaves on GA/2019-10-30 08-51-58.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/leaves on GA/2019-10-30 08-52-26.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/leaves on GA/2019-10-30 08-52-53.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/straight approaches/2019-10-30 08-35-23.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/straight approaches/2019-10-30 08-36-41.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/straight approaches/2019-10-30 08-37-28.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/straight approaches/2019-10-30 08-38-02.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_30/rear_camera/straight approaches/2019-10-30 08-42-38.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Curved/2019-10-31 17-46-31.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Curved/2019-10-31 17-47-44.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Curved/2019-10-31 17-51-04.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Straight/2019-10-31 17-44-24.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Straight/2019-10-31 17-45-05.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Straight/2019-10-31 17-45-42.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Front/Straight/2019-10-31 17-45-42_rec.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Curved/2019-10-31 17-58-22.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Curved/2019-10-31 17-58-57.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Curved/2019-10-31 17-59-28.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Straight/2019-10-31 17-57-09.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Straight/2019-10-31 17-57-36.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Night/Rear/Straight/2019-10-31 17-57-58.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-08-54.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-09-27.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-09-56.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-10-24.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-10-53.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Front Camera/2019-10-31 09-11-27.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Rear Camera/2019-10-31 09-00-18.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Rear Camera/2019-10-31 09-00-41.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Rear Camera/2019-10-31 09-01-13.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Rear Camera/2019-10-31 09-01-41.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_10_31-3/Parking Spot 2/Rear Camera/2019-10-31 09-02-05.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_11_11/fiducial_curved_approach_1.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_11_11/fiducial_curved_approach_2.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_11_11/fiducial_straight_1.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/2019_11_11/fiducial_straight_2.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/24fps_264_encoder_250kbitrate_0keyframe_1.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/24fps_264_encoder_250kbitrate_0keyframe_2.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/60fps_264_encoder_2.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/60fps_264_encoder_250kbitrate_1.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/60fps_264_encoder_250kbitrate_2.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/Video Quality Comparison/60fps_264encoder_1.mov" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/cropped-GA-night2.tif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/wiic/video/cropped-GA-pm1.tif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ridge_json.json" beforeDir="false" afterPath="$PROJECT_DIR$/ridge_json.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sandbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/sandbox.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/segments.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sobelplus.py" beforeDir="false" afterPath="$PROJECT_DIR$/sobelplus.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/squares.py" beforeDir="false" afterPath="$PROJECT_DIR$/squares.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssimage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vp_detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/vp_detect.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wiirunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/wiirunner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wiitricity_settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/wiitricity_settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wiitricity_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/wiitricity_utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -809,6 +145,91 @@
     <expand />
     <select />
   </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wiirunner.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="580">
+              <caret line="39" selection-start-line="39" selection-end-line="39" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wiirunner_threaded.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tf_box/np_box_list.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tf_box/np_box_list_ops.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tf_box/np_box_ops.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wiitricity_settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-95">
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wiitricity_utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-700">
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/numpy_transformer.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/find_lines_lsd.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/find_structure.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+    </leaf>
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -816,18 +237,78 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>zeros</find>
+    </findStrings>
+  </component>
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
+        <option value="gmnamra &lt;gmnamra@gmail.com&gt;" />
         <option value="Arman Garakani &lt;arman.garakani@darisa.net&gt;" />
       </list>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/journals/Untitled.ipynb" />
+        <option value="$PROJECT_DIR$/sobelplus.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="186" />
+    <option name="y" value="108" />
+    <option name="width" value="1930" />
+    <option name="height" value="1294" />
+  </component>
   <component name="ProjectId" id="1STmeUPlHLWdNE9pwgx8rKw3Hc0" />
+  <component name="ProjectView">
+    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane" />
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="pydev" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="pydev" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="imagemp" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="pydev" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="imagemp" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="simple_display.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="pydev" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="journals" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="pydev" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="simple_logger" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$USER_HOME$/snippets/plant-image-analysis-6b93ed69b481574e6eeca26b28763b4b9b58aaff" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -836,14 +317,29 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="python.debugger.dataview.autoresize" value="false" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
     <property name="vcs.patch.to.clipboard" value="true" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="pydev" sdk-home="$USER_HOME$/anaconda3/bin/python">
+        <option name="mySdkHome" value="$USER_HOME$/anaconda3/bin/python" />
+        <option name="myModuleName" value="pydev" />
+      </console-settings>
+    </option>
+    <option name="myShowDebugConsoleByDefault" value="true" />
+    <option name="myUseExistingConsole" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/projects/wiic" />
       <recent name="$PROJECT_DIR$/projects/AGM" />
       <recent name="$PROJECT_DIR$/projects/pupil/images" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projects/AGM" />
+      <recent name="$PROJECT_DIR$/../../../../../GoogleDrive/My Drive/Colab Notebooks" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -858,74 +354,49 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.lucas_kanade_script">
-    <configuration name="dense_optical_flow_script" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.canny_edge">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/oflow" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oflow/dense_optical_flow_script.py" />
-      <option name="PARAMETERS" value="&quot;$USER_HOME$/Downloads/2019_10_31-2/Night/Front/Curved/2019-10-31 17-46-31.mp4&quot;" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="find_lines_lsd" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="canny_edge" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
+      <option name="SDK_HOME" value="/Users/arman/miniconda3/envs/py3k/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/find_lines_lsd.py" />
-      <option name="PARAMETERS" value="$USER_HOME$/Pictures/ceye/slices/slice_2.png" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/canny_edge.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="lucas_kanade_script" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pydev" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="/usr/local/bin/python3.7" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/oflow" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oflow/lucas_kanade_script.py" />
-      <option name="PARAMETERS" value="&quot;$PROJECT_DIR$/projects/wiic/video/2019_11_11/fiducial_straight_1.mp4&quot; &quot;$USER_HOME$/Downloads/2019_10_31-2/Night/Front/Curved/2019-10-31 17-46-31.mp4&quot;" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="video_capture_Robin2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="color_plots" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -933,36 +404,80 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/oflow" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oflow/video_capture_Robin2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/color_plots.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="video_capture_Robin_with_LK" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="edge_detector" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pydev" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/oflow" />
+      <option name="SDK_HOME" value="/Users/arman/miniconda3/envs/py3k/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oflow/video_capture_Robin_with_LK.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/edge_detector.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="sobelplus" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/Users/arman/miniconda3/envs/py3k/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sobelplus.py" />
+      <option name="PARAMETERS" value="&quot;$USER_HOME$/Pictures/Polybiomics_ROI-1_TB1_WHITE_000010.tif&quot;" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tkinter_opencv" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pydev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/Users/arman/miniconda3/envs/py3k/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tkinter_opencv.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -970,19 +485,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.find_lines_lsd" />
-      <item itemvalue="Python.dense_optical_flow_script" />
-      <item itemvalue="Python.video_capture_Robin_with_LK" />
-      <item itemvalue="Python.video_capture_Robin2" />
-      <item itemvalue="Python.lucas_kanade_script" />
+      <item itemvalue="Python.sobelplus" />
+      <item itemvalue="Python.color_plots" />
+      <item itemvalue="Python.tkinter_opencv" />
+      <item itemvalue="Python.edge_detector" />
+      <item itemvalue="Python.canny_edge" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.lucas_kanade_script" />
-        <item itemvalue="Python.dense_optical_flow_script" />
-        <item itemvalue="Python.video_capture_Robin2" />
-        <item itemvalue="Python.video_capture_Robin_with_LK" />
-        <item itemvalue="Python.find_lines_lsd" />
+        <item itemvalue="Python.canny_edge" />
+        <item itemvalue="Python.sobelplus" />
+        <item itemvalue="Python.edge_detector" />
+        <item itemvalue="Python.tkinter_opencv" />
+        <item itemvalue="Python.color_plots" />
       </list>
     </recent_temporary>
   </component>
@@ -1026,105 +541,91 @@
       <workItem from="1577150160694" duration="2492000" />
       <workItem from="1577744829019" duration="1160000" />
       <workItem from="1577827329215" duration="9058000" />
-      <workItem from="1578331266879" duration="26035000" />
-    </task>
-    <task id="LOCAL-00001" summary="WiTricity Project adds">
-      <created>1568412949264</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1568412949264</updated>
-    </task>
-    <task id="LOCAL-00002" summary="WiTricity Project adds">
-      <created>1569451323798</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1569451323798</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Added Pupil script to run all through pupil stages">
-      <created>1571567472391</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1571567472391</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Adding test images and project directory">
-      <created>1571594830411</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1571594830411</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Adding test images and project directory">
-      <created>1571595422147</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1571595422147</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Adding test images and project directory">
-      <created>1571595843726</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1571595843726</updated>
-    </task>
-    <task id="LOCAL-00007" summary="added name of my LLC to README">
-      <created>1571596193097</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1571596193097</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fixed display of sub-pixel edgepoints&#10;added motion center calculation to truepeak&#10;started adaptive segmentation in pupil">
-      <created>1571619142693</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1571619142693</updated>
-    </task>
-    <task id="LOCAL-00009" summary="moved iris location code to the new python higlevel code: pupil.py">
-      <created>1571692994208</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1571692994208</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Added an additional way of calculatig the pupil">
-      <created>1571779926517</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1571779926517</updated>
-    </task>
-    <task id="LOCAL-00011" summary="Added meanshifting pupil roi">
-      <created>1571784757276</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1571784757276</updated>
-    </task>
-    <task id="LOCAL-00012" summary="Added moments for determination of axis of inertia &#10;Added adaptive pupil tracking ( initial approach )">
-      <created>1571795208285</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1571795208285</updated>
-    </task>
-    <task id="LOCAL-00013" summary="Added moments for determination of axis of inertia &#10;Added adaptive pupil tracking ( initial approach )">
-      <created>1572301554592</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1572301554592</updated>
-    </task>
-    <task id="LOCAL-00014" summary="Adding unit test data">
-      <created>1572306801922</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1572306801922</updated>
+      <workItem from="1578331266879" duration="46292000" />
+      <workItem from="1578714385484" duration="50937000" />
+      <workItem from="1579028362674" duration="12902000" />
+      <workItem from="1579046389685" duration="10456000" />
+      <workItem from="1579150342881" duration="6950000" />
+      <workItem from="1579205480474" duration="59050000" />
+      <workItem from="1579469518524" duration="12036000" />
+      <workItem from="1579498307398" duration="68482000" />
+      <workItem from="1579808580275" duration="9910000" />
+      <workItem from="1579838623045" duration="14764000" />
+      <workItem from="1579897662669" duration="32215000" />
+      <workItem from="1579992322555" duration="45915000" />
+      <workItem from="1580139967492" duration="45564000" />
+      <workItem from="1580202473889" duration="36211000" />
+      <workItem from="1580415768739" duration="9308000" />
+      <workItem from="1580427972795" duration="8567000" />
+      <workItem from="1580447171969" duration="10000" />
+      <workItem from="1580518708569" duration="15551000" />
+      <workItem from="1580756912779" duration="11000" />
+      <workItem from="1580760071143" duration="2121000" />
+      <workItem from="1580837386878" duration="1304000" />
+      <workItem from="1580949283415" duration="522000" />
+      <workItem from="1580953101523" duration="121000" />
+      <workItem from="1581010093419" duration="18590000" />
+      <workItem from="1581135034191" duration="5774000" />
+      <workItem from="1581274346478" duration="25668000" />
+      <workItem from="1581356870297" duration="137000" />
+      <workItem from="1581357033412" duration="908000" />
+      <workItem from="1581386666554" duration="32000" />
+      <workItem from="1581386703754" duration="59305000" />
+      <workItem from="1581492138464" duration="2996000" />
+      <workItem from="1581533098585" duration="4423000" />
+      <workItem from="1581543248906" duration="7796000" />
+      <workItem from="1581615926256" duration="33544000" />
+      <workItem from="1581704227315" duration="10818000" />
+      <workItem from="1582052235885" duration="5022000" />
+      <workItem from="1582142382392" duration="29478000" />
+      <workItem from="1582573534563" duration="2429000" />
+      <workItem from="1582608589981" duration="9000" />
+      <workItem from="1582654832742" duration="145000" />
+      <workItem from="1582682130417" duration="4880000" />
+      <workItem from="1583620040080" duration="638000" />
+      <workItem from="1584036269749" duration="3043000" />
+      <workItem from="1584407554102" duration="5782000" />
+      <workItem from="1584489764335" duration="874000" />
+      <workItem from="1584559651624" duration="1206000" />
+      <workItem from="1593113499520" duration="1058000" />
+      <workItem from="1593118143407" duration="11000" />
+      <workItem from="1593122931487" duration="695000" />
+      <workItem from="1593193698508" duration="19000" />
+      <workItem from="1593298035506" duration="740000" />
+      <workItem from="1593298853926" duration="3989000" />
+      <workItem from="1593560667967" duration="668000" />
+      <workItem from="1593639711110" duration="1435000" />
+      <workItem from="1593727278988" duration="1161000" />
+      <workItem from="1595019868848" duration="230000" />
+      <workItem from="1595331108455" duration="360000" />
+      <workItem from="1595365243649" duration="1397000" />
+      <workItem from="1595453049769" duration="573000" />
+      <workItem from="1595622630077" duration="9000" />
+      <workItem from="1595800715630" duration="97000" />
+      <workItem from="1597199945403" duration="30000" />
+      <workItem from="1597200001752" duration="31000" />
+      <workItem from="1597204576388" duration="1572000" />
+      <workItem from="1597611630361" duration="896000" />
+      <workItem from="1597967380200" duration="640000" />
+      <workItem from="1597970340079" duration="16000" />
+      <workItem from="1598179853345" duration="949000" />
+      <workItem from="1599436996271" duration="154000" />
+      <workItem from="1600558321202" duration="16000" />
+      <workItem from="1600558352652" duration="102000" />
+      <workItem from="1601337371558" duration="1403000" />
+      <workItem from="1601424677894" duration="618000" />
+      <workItem from="1601568292895" duration="30000" />
+      <workItem from="1604949175876" duration="243000" />
+      <workItem from="1605200524392" duration="2728000" />
+      <workItem from="1606870454445" duration="71000" />
+      <workItem from="1606895543868" duration="147000" />
+      <workItem from="1607319755324" duration="1185000" />
+      <workItem from="1607476136113" duration="1632000" />
+      <workItem from="1607631837474" duration="144000" />
+      <workItem from="1608342025023" duration="42000" />
+      <workItem from="1608419997743" duration="22000" />
+      <workItem from="1609198538510" duration="1484000" />
+      <workItem from="1610998714932" duration="439000" />
     </task>
     <task id="LOCAL-00015" summary="typical fiducial file">
       <created>1572985656186</created>
@@ -1238,8 +739,272 @@
       <option name="project" value="LOCAL" />
       <updated>1578416949052</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="added oflow for wiitricity">
+      <created>1578460749869</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1578460749869</updated>
+    </task>
+    <task id="LOCAL-00032" summary="added distance to vp">
+      <created>1578614130843</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1578614130843</updated>
+    </task>
+    <task id="LOCAL-00033" summary="added exifer for reading image exif data">
+      <created>1578946902819</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1578946902819</updated>
+    </task>
+    <task id="LOCAL-00034" summary="adjusted farnback motion parameters">
+      <created>1578951306686</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1578951306686</updated>
+    </task>
+    <task id="LOCAL-00035" summary="track video with camera itrinsic etc">
+      <created>1578967665840</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1578967665840</updated>
+    </task>
+    <task id="LOCAL-00036" summary="need to fix bug in frame processing in movement direction">
+      <created>1579023093046</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1579023093046</updated>
+    </task>
+    <task id="LOCAL-00037" summary="fixed bug. Working version">
+      <created>1579030772410</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1579030772410</updated>
+    </task>
+    <task id="LOCAL-00038" summary="adjusted farnback motion parameters">
+      <created>1579035716874</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1579035716874</updated>
+    </task>
+    <task id="LOCAL-00039" summary="direction mean correction and graphical output is conditional based on type">
+      <created>1579042582206</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1579042582206</updated>
+    </task>
+    <task id="LOCAL-00040" summary="removed unnecessary imports">
+      <created>1579068274160</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1579068274161</updated>
+    </task>
+    <task id="LOCAL-00041" summary="fixed camera mode">
+      <created>1579069861807</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1579069861807</updated>
+    </task>
+    <task id="LOCAL-00042" summary="cleaned up output. Added reduction parameter.">
+      <created>1579197085905</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1579197085905</updated>
+    </task>
+    <task id="LOCAL-00043" summary="added &quot; It is based on Python implementation of Vanishing point ... &quot;&quot;">
+      <created>1579197171406</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1579197171406</updated>
+    </task>
+    <task id="LOCAL-00044" summary="update direction detection">
+      <created>1579297236101</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1579297236101</updated>
+    </task>
+    <task id="LOCAL-00045" summary="version 2.">
+      <created>1579400076192</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1579400076192</updated>
+    </task>
+    <task id="LOCAL-00046" summary="added FOV from camera intrinsic">
+      <created>1579560707958</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1579560707958</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Add in mask creation and use. Mask covers two sides of the path. Added directory processing and output file generation.">
+      <created>1579584176628</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1579584176628</updated>
+    </task>
+    <task id="LOCAL-00048" summary="new version: &#10;angles are now weighted before averaged &#10;Using state machine. &#10;No hardwired regions for left and right angles&#10;single angle differene for detecting instant left, right or same">
+      <created>1579634734111</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1579634734111</updated>
+    </task>
+    <task id="LOCAL-00049" summary="removed unneeded import">
+      <created>1579635000787</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1579635000787</updated>
+    </task>
+    <task id="LOCAL-00050" summary="switched to more robust tracking with lk tracker. &#10;applied mask. Left and right are apparent from avg angle&#10;could add a &quot; it is stationary &quot; method">
+      <created>1579685076759</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1579685076760</updated>
+    </task>
+    <task id="LOCAL-00051" summary="added distance measurement &amp; update of instant angle and distance">
+      <created>1579713848045</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1579713848045</updated>
+    </task>
+    <task id="LOCAL-00052" summary="consolidated and removed duplicates and no longer used&#10;add current angle and current distance">
+      <created>1579714663285</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1579714663285</updated>
+    </task>
+    <task id="LOCAL-00053" summary="adjusted farnback motion parameters">
+      <created>1580091820016</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1580091820017</updated>
+    </task>
+    <task id="LOCAL-00054" summary="separated rendering display from the call in order for python clients use their own image as base&#10;made lines and clusters properties. Lines is all lines, clusters is lines + vp they contributed to">
+      <created>1580232698880</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1580232698880</updated>
+    </task>
+    <task id="LOCAL-00055" summary="image transformer generator">
+      <created>1580252761965</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1580252761966</updated>
+    </task>
+    <task id="LOCAL-00056" summary="added parallel pair line detection">
+      <created>1581026296612</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1581026296613</updated>
+    </task>
+    <task id="LOCAL-00057" summary="added prunning over expected_orinetation &amp; length">
+      <created>1581039342363</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1581039342363</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Added roated rectangle processing. Still too slow.">
+      <created>1581403481494</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1581403481494</updated>
+    </task>
+    <task id="LOCAL-00059" summary="added merge&#10;added very simple synthetic test">
+      <created>1581473626034</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1581473626034</updated>
+    </task>
+    <task id="LOCAL-00060" summary="removed unused variable in merge_segments.">
+      <created>1581474628662</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1581474628662</updated>
+    </task>
+    <task id="LOCAL-00061" summary="test tag for package 2.0">
+      <created>1581658437186</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1581658437186</updated>
+    </task>
+    <task id="LOCAL-00062" summary="default json file for ridge detection">
+      <created>1582424859073</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1582424859073</updated>
+    </task>
+    <task id="LOCAL-00063" summary="adjusted farnback motion parameters">
+      <created>1582741100166</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1582741100166</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="10306000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="186" y="108" width="1930" height="1294" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.31726694" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.24936387" />
+      <window_info anchor="right" id="R Graphics" />
+      <window_info anchor="right" id="R Packages" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" visible="true" weight="0.01588983" />
+      <window_info anchor="right" x="0" y="0" width="473" height="1128" id="Documentation" order="4" side_tool="true" visible="true" weight="0.32976133" />
+      <window_info anchor="right" id="Database" order="5" />
+    </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -1260,7 +1025,12 @@
         <entry key="1">
           <value>
             <State>
-              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
               <option name="FILTERS">
                 <map>
                   <entry key="branch">
@@ -1279,12 +1049,26 @@
                   </entry>
                 </map>
               </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
             </State>
           </value>
         </entry>
         <entry key="MAIN">
           <value>
             <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
               <option name="COLUMN_ORDER" />
             </State>
           </value>
@@ -1296,152 +1080,476 @@
         <option value="1" />
       </set>
     </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <MESSAGE value="WiTricity Project adds" />
-    <MESSAGE value="Added Pupil script to run all through pupil stages" />
-    <MESSAGE value="Adding test images and project directory" />
-    <MESSAGE value="added name of my LLC to README" />
-    <MESSAGE value="fixed display of sub-pixel edgepoints&#10;added motion center calculation to truepeak&#10;started adaptive segmentation in pupil" />
-    <MESSAGE value="moved iris location code to the new python higlevel code: pupil.py" />
-    <MESSAGE value="Added an additional way of calculatig the pupil" />
-    <MESSAGE value="Added meanshifting pupil roi" />
-    <MESSAGE value="Added moments for determination of axis of inertia &#10;Added adaptive pupil tracking ( initial approach )" />
-    <MESSAGE value="Adding unit test data" />
-    <MESSAGE value="typical fiducial file" />
-    <MESSAGE value="grab frame using filter graph from frame grabber" />
-    <MESSAGE value="adding toolbox and ransac" />
-    <MESSAGE value="added combined backprojection and line segments results" />
-    <MESSAGE value="added hue only back projection&#10;added histogram smoothing&#10;added valid area clipping" />
-    <MESSAGE value="switched from drawing circle to drawing contours" />
-    <MESSAGE value="modularized a bit.&#10;process_frame and initialization" />
-    <MESSAGE value="moved all utils to utils" />
-    <MESSAGE value="add live camera support" />
-    <MESSAGE value="implementation of" />
-    <MESSAGE value="addng color sort / segmentation" />
-    <MESSAGE value="adding ransac for vanishng point detection" />
-    <MESSAGE value="lsd line detector wrapper" />
-    <MESSAGE value="switched to HSV&#10;added slice selection" />
-    <MESSAGE value="added corner detection demo" />
-    <option name="LAST_COMMIT_MESSAGE" value="added corner detection demo" />
+    <MESSAGE value="fixed bug. Working version" />
+    <MESSAGE value="direction mean correction and graphical output is conditional based on type" />
+    <MESSAGE value="removed unnecessary imports" />
+    <MESSAGE value="fixed camera mode" />
+    <MESSAGE value="cleaned up output. Added reduction parameter." />
+    <MESSAGE value="added &quot; It is based on Python implementation of Vanishing point ... &quot;&quot;" />
+    <MESSAGE value="update direction detection" />
+    <MESSAGE value="version 2." />
+    <MESSAGE value="added FOV from camera intrinsic" />
+    <MESSAGE value="Add in mask creation and use. Mask covers two sides of the path. Added directory processing and output file generation." />
+    <MESSAGE value="new version: &#10;angles are now weighted before averaged &#10;Using state machine. &#10;No hardwired regions for left and right angles&#10;single angle differene for detecting instant left, right or same" />
+    <MESSAGE value="removed unneeded import" />
+    <MESSAGE value="switched to more robust tracking with lk tracker. &#10;applied mask. Left and right are apparent from avg angle&#10;could add a &quot; it is stationary &quot; method" />
+    <MESSAGE value="added distance measurement &amp; update of instant angle and distance" />
+    <MESSAGE value="consolidated and removed duplicates and no longer used&#10;add current angle and current distance" />
+    <MESSAGE value="separated rendering display from the call in order for python clients use their own image as base&#10;made lines and clusters properties. Lines is all lines, clusters is lines + vp they contributed to" />
+    <MESSAGE value="image transformer generator" />
+    <MESSAGE value="added parallel pair line detection" />
+    <MESSAGE value="added prunning over expected_orinetation &amp; length" />
+    <MESSAGE value="Added roated rectangle processing. Still too slow." />
+    <MESSAGE value="added merge&#10;added very simple synthetic test" />
+    <MESSAGE value="removed unused variable in merge_segments." />
+    <MESSAGE value="test tag for package 2.0" />
+    <MESSAGE value="default json file for ridge detection" />
+    <MESSAGE value="adjusted farnback motion parameters" />
+    <option name="LAST_COMMIT_MESSAGE" value="adjusted farnback motion parameters" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/zscore_1d.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="43" />
+          <url>file://$PROJECT_DIR$/eval_homography.py</url>
+          <line>99</line>
+          <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/zscore_1d.py</url>
-          <line>110</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/videomotion.py</url>
-          <line>17</line>
+          <url>file://$USER_HOME$/Library/Python/3.7/lib/python/site-packages/ridge_detection/helper.py</url>
+          <line>99</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sobelplus.py</url>
-          <line>184</line>
-          <option name="timeStamp" value="54" />
+          <url>file://$PROJECT_DIR$/lpolar.py</url>
+          <line>35</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/padChecker.py</url>
-          <line>266</line>
-          <option name="timeStamp" value="62" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/padChecker.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="65" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/imagemp/process_runners/examples/simple_display.py</url>
-          <line>21</line>
-          <option name="timeStamp" value="73" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ellipse_detection/ellipse_center_estimator.py</url>
-          <line>85</line>
-          <option name="timeStamp" value="75" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ellipse_detection/ellipse_detector.py</url>
-          <line>36</line>
-          <option name="timeStamp" value="76" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/find_fiducial.py</url>
-          <line>96</line>
-          <option name="timeStamp" value="87" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/coloralgo.py</url>
-          <line>120</line>
-          <option name="timeStamp" value="90" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/coloralgo.py</url>
-          <line>332</line>
-          <option name="timeStamp" value="91" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/oflow/lucas_kanade_script.py</url>
-          <line>121</line>
-          <option name="timeStamp" value="94" />
+          <url>file://$PROJECT_DIR$/wiirunner.py</url>
+          <line>668</line>
+          <option name="timeStamp" value="47" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/pydev$fps_demo.coverage" NAME="fps_demo Coverage Results" MODIFIED="1573075878799" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$vp_finder.coverage" NAME="vp_finder Coverage Results" MODIFIED="1574186200546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/vp" />
-    <SUITE FILE_PATH="coverage/pydev$color_plots.coverage" NAME="color_plots Coverage Results" MODIFIED="1574200158308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$rectseg_app.coverage" NAME="rectseg_app Coverage Results" MODIFIED="1580415824163" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/rectseg" />
+    <SUITE FILE_PATH="coverage/pydev$fps_demo.coverage" NAME="fps_demo Coverage Results" MODIFIED="1579671294170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$ocvgrabber.coverage" NAME="ocvgrabber Coverage Results" MODIFIED="1574454341591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$circles.coverage" NAME="circles Coverage Results" MODIFIED="1576846884585" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$find_lines_lsd.coverage" NAME="find_lines_lsd Coverage Results" MODIFIED="1578422553085" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_script.coverage" NAME="lucas_kanade_script Coverage Results" MODIFIED="1578460169441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/oflow" />
-    <SUITE FILE_PATH="coverage/pydev$vp_detect.coverage" NAME="vp_detect Coverage Results" MODIFIED="1577213731886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_script.coverage" NAME="lucas_kanade_script Coverage Results" MODIFIED="1578948866225" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$color_plots.coverage" NAME="color_plots Coverage Results" MODIFIED="1579566433880" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$vp_detect.coverage" NAME="vp_detect Coverage Results" MODIFIED="1580238972284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$numpy_transformer.coverage" NAME="numpy_transformer Coverage Results" MODIFIED="1580252236171" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$Hough.coverage" NAME="Hough Coverage Results" MODIFIED="1582501602295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$movement_direction.coverage" NAME="movement_direction Coverage Results" MODIFIED="1579112211856" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$tracker_pad.coverage" NAME="tracker_pad Coverage Results" MODIFIED="1574364478689" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$projections.coverage" NAME="projections Coverage Results" MODIFIED="1579216049098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$glcamera.coverage" NAME="glcamera Coverage Results" MODIFIED="1578948002963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$edge_detector.coverage" NAME="edge_detector Coverage Results" MODIFIED="1593301729935" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$video_capture_Robin__1_.coverage" NAME="video_capture_Robin (1) Coverage Results" MODIFIED="1578508227517" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$simple_display.coverage" NAME="simple_display Coverage Results" MODIFIED="1574364483825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$aligned_difference.coverage" NAME="aligned_difference Coverage Results" MODIFIED="1579717403643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$padChecker.coverage" NAME="padChecker Coverage Results" MODIFIED="1581524452380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$utils.coverage" NAME="utils Coverage Results" MODIFIED="1572214476328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$sandbox.coverage" NAME="sandbox Coverage Results" MODIFIED="1580520267377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1572996104367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$run_script1__1_.coverage" NAME="run_script1 (1) Coverage Results" MODIFIED="1574356447827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$ellipses.coverage" NAME="segments Coverage Results" MODIFIED="1577042414823" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1593302212622" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$wiirunner.coverage" NAME="wiirunner Coverage Results" MODIFIED="1584036619004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$grabcut.coverage" NAME="grabcut Coverage Results" MODIFIED="1579801442224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/usr/local/opencv-3.4.3/samples/python" />
+    <SUITE FILE_PATH="coverage/pydev$findTemplate.coverage" NAME="findTemplate Coverage Results" MODIFIED="1579846224894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$coloralgo.coverage" NAME="coloralgo Coverage Results" MODIFIED="1579562104229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$simple_kdtree.coverage" NAME="simple_kdtree Coverage Results" MODIFIED="1580076448726" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$vp_finder.coverage" NAME="vp_finder Coverage Results" MODIFIED="1574186200546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/vp" />
+    <SUITE FILE_PATH="coverage/pydev$find_lines_lsd.coverage" NAME="find_lines_lsd Coverage Results" MODIFIED="1579482027855" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$eval_homography.coverage" NAME="eval_homography Coverage Results" MODIFIED="1579902218729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$wiitricity_utils.coverage" NAME="wiitricity_utils Coverage Results" MODIFIED="1581619937845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$cone.coverage" NAME="cone Coverage Results" MODIFIED="1571609655939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$pupil.coverage" NAME="pupil Coverage Results" MODIFIED="1572546147012" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$videoio.coverage" NAME="videoio Coverage Results" MODIFIED="1572558449796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$run_script1.coverage" NAME="run_script1 Coverage Results" MODIFIED="1574363236294" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
     <SUITE FILE_PATH="coverage/pydev$skeletonization.coverage" NAME="skeletonization Coverage Results" MODIFIED="1573688235519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$color_segmentation.coverage" NAME="color_segmentation Coverage Results" MODIFIED="1578359015019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$color_segmentation.coverage" NAME="color_segmentation Coverage Results" MODIFIED="1579204535951" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$zscore_1d.coverage" NAME="zscore_1d Coverage Results" MODIFIED="1572290392062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$test.coverage" NAME="test Coverage Results" MODIFIED="1574734525155" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$vps.coverage" NAME="vps Coverage Results" MODIFIED="1577082589513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$lpolar.coverage" NAME="lpolar Coverage Results" MODIFIED="1571708154733" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$auxcameragrabber.coverage" NAME="auxcameragrabber Coverage Results" MODIFIED="1578611572672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$lpolar.coverage" NAME="lpolar Coverage Results" MODIFIED="1582683198486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$recorder.coverage" NAME="recorder Coverage Results" MODIFIED="1574360374581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
     <SUITE FILE_PATH="coverage/pydev$test_horizon_finder.coverage" NAME="test_horizon_finder Coverage Results" MODIFIED="1574184870590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/vp" />
-    <SUITE FILE_PATH="coverage/pydev$squares.coverage" NAME="squares Coverage Results" MODIFIED="1571686601642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$blur_polar.coverage" NAME="blur_polar Coverage Results" MODIFIED="1572545953722" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$squares.coverage" NAME="squares Coverage Results" MODIFIED="1579475597259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$exifer.coverage" NAME="exifer Coverage Results" MODIFIED="1579481336232" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$temporal_filter.coverage" NAME="temporal_filter Coverage Results" MODIFIED="1574061540265" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$perspectivecorrection.coverage" NAME="perspectivecorrection Coverage Results" MODIFIED="1578346100321" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$find_fiducial.coverage" NAME="find_fiducial Coverage Results" MODIFIED="1577140791600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$perspectivecorrection.coverage" NAME="perspectivecorrection Coverage Results" MODIFIED="1579282696273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$find_structure.coverage" NAME="find_structure Coverage Results" MODIFIED="1577150333501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$moments.coverage" NAME="moments Coverage Results" MODIFIED="1571791864713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$tracker_pad.coverage" NAME="tracker_pad Coverage Results" MODIFIED="1574364478689" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
+    <SUITE FILE_PATH="coverage/pydev$find_fiducial.coverage" NAME="find_fiducial Coverage Results" MODIFIED="1579222107131" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$opencv_utils.coverage" NAME="opencv_utils Coverage Results" MODIFIED="1579808755897" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$moments.coverage" NAME="moments Coverage Results" MODIFIED="1578956136832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$warp_from_vp.coverage" NAME="warp_from_vp Coverage Results" MODIFIED="1578801464533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$math_utils.coverage" NAME="math_utils Coverage Results" MODIFIED="1579212401976" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$video_capture_Robin_with_LK.coverage" NAME="video_capture_Robin_with_LK Coverage Results" MODIFIED="1578434370341" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/oflow" />
-    <SUITE FILE_PATH="coverage/pydev$dense_optical_flow_script.coverage" NAME="dense_optical_flow_script Coverage Results" MODIFIED="1578450467650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/oflow" />
-    <SUITE FILE_PATH="coverage/pydev$simple_display.coverage" NAME="simple_display Coverage Results" MODIFIED="1574364483825" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
-    <SUITE FILE_PATH="coverage/pydev$utils.coverage" NAME="utils Coverage Results" MODIFIED="1572214476328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$dense_optical_flow_script.coverage" NAME="dense_optical_flow_script Coverage Results" MODIFIED="1579679726607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/video_and_trackers" />
     <SUITE FILE_PATH="coverage/pydev$various_segmentation.coverage" NAME="various_segmentation Coverage Results" MODIFIED="1574202528726" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1572996104367" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$video_capture_Robin2.coverage" NAME="video_capture_Robin2 Coverage Results" MODIFIED="1578434412744" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/oflow" />
-    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_class0.coverage" NAME="lucas_kanade_class0 Coverage Results" MODIFIED="1574030703047" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../naumannlab_tutorials19-master/video_and_trackers" />
-    <SUITE FILE_PATH="coverage/pydev$track_color.coverage" NAME="track_color Coverage Results" MODIFIED="1574296382460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$run_script1__1_.coverage" NAME="run_script1 (1) Coverage Results" MODIFIED="1574356447827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/imagemp" />
-    <SUITE FILE_PATH="coverage/pydev$ellipses.coverage" NAME="segments Coverage Results" MODIFIED="1577042414823" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$sobelplus.coverage" NAME="sobelplus Coverage Results" MODIFIED="1578329564952" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$match.coverage" NAME="match Coverage Results" MODIFIED="1579242624170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$video_capture_Robin.coverage" NAME="video_capture_Robin Coverage Results" MODIFIED="1578507404217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/oflow" />
+    <SUITE FILE_PATH="coverage/pydev$lucas_kanade_class0.coverage" NAME="lucas_kanade_class0 Coverage Results" MODIFIED="1579682246757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/video_and_trackers" />
+    <SUITE FILE_PATH="coverage/pydev$track_color.coverage" NAME="track_color Coverage Results" MODIFIED="1579029666228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$gaussian_mix.coverage" NAME="gaussian_mix Coverage Results" MODIFIED="1579801088018" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/usr/local/opencv-3.4.3/samples/python" />
     <SUITE FILE_PATH="coverage/pydev$register.coverage" NAME="register Coverage Results" MODIFIED="1574189964674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$color_pixels.coverage" NAME="color_pixels Coverage Results" MODIFIED="1572904119948" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pydev$coloralgo.coverage" NAME="coloralgo Coverage Results" MODIFIED="1578345027086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pydev$videomotion.coverage" NAME="videomotion Coverage Results" MODIFIED="1572912141848" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$stats.coverage" NAME="stats Coverage Results" MODIFIED="1579395738836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pydev$plot_shape_index.coverage" NAME="plot_shape_index Coverage Results" MODIFIED="1593300116007" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/tkinter_opencv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38">
+          <caret line="2" column="9" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/zscore_1d.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-55">
+          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
+          <folding>
+            <element signature="e#101#119#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/skeletonization.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3518">
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stats.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/moments.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/geometry.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3295" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frame_monitor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1371">
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pupil.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="45" column="23" lean-forward="true" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/blur_polar.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-690">
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/squares.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/segment_cluster.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/register.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1827" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/read_frames_slow.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyvisible.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2373" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/projections.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-906">
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/padChecker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3841">
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bbox_player.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2530">
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cone.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cv_io.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1006" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ellipse_detection.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/opencv_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4503">
+          <caret line="242" column="39" selection-start-line="242" selection-start-column="39" selection-end-line="242" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gen_models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/helper.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hist_utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lpolar.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/math_utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/imagemp/simple_display.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/color_segmentation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/color_pixels.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#152#167#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/edge_detector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2774">
+          <caret line="151" column="24" selection-start-line="151" selection-start-column="24" selection-end-line="151" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sobelplus.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3287">
+          <caret line="187" selection-start-line="187" selection-end-line="187" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/alignment_utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coloralgo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="5" column="12" selection-start-line="5" selection-end-line="5" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/findTemplate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1140">
+          <caret line="66" column="48" selection-start-line="66" selection-start-column="6" selection-end-line="66" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/color_histogram_utils.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/color_plots.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logs/wiirunner-06-02-2020_02-16-35_PM.log" />
+    <entry file="file://$PROJECT_DIR$/rectangle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2869">
+          <caret line="151" column="17" selection-start-line="151" selection-end-line="151" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simple_logger/simple_logger.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1805">
+          <caret line="96" column="6" selection-start-line="96" selection-end-line="96" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tf_box/np_box_list.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tf_box/np_box_list_ops.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/numpy_transformer.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/find_lines_lsd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/find_structure.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tf_box/np_box_ops.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiirunner.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="580">
+          <caret line="39" selection-start-line="39" selection-end-line="39" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiirunner_threaded.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiitricity_settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-95">
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiitricity_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-700">
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>

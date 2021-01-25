@@ -6,8 +6,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-#pp = Path(os.getcwd() + '/../pairopy')
-#sys.path.append(str(pp))
+
+# pp = Path(os.getcwd() + '/../pairopy')
+# sys.path.append(str(pp))
 
 
 def mouse_handler(event, x, y, flags, data):
@@ -34,35 +35,36 @@ def get_four_points(im):
 
     return points
 
+
 def skiimage_display(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 def fetch_reduce_image_from_file(filename, reduce):
     ## Note image read by skimage and therefore RGB
-    bgr = cv2.imread ( filename )
+    bgr = cv2.imread(filename)
     h, w, channels = bgr.shape
 
     if reduce == 1:
         return bgr
-    frame = (int ( w / reduce ), int ( h / reduce ))
-    bgr_clone = cv2.resize ( bgr, frame )
+    frame = (int(w / reduce), int(h / reduce))
+    bgr_clone = cv2.resize(bgr, frame)
     return bgr_clone
 
 
 def load_reduce_convert(image_file, reduce):
-    bgr_image = fetch_reduce_image_from_file ( image_file, reduce )
+    bgr_image = fetch_reduce_image_from_file(image_file, reduce)
     h, w, channels = bgr_image.shape
     if channels == 3:
-        lab_image = cv2.cvtColor ( bgr_image, cv2.COLOR_BGR2LAB )
+        lab_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2LAB)
         # Split LAB channels
         L, a, b = cv2.split(lab_image)
         return (L, a, b)
     if channels == 4:
-        bgr_image = cv2.cvtColor ( bgr_image, cv2.COLOR_BGRA2BGR )
-        lab_image = cv2.cvtColor ( bgr_image, cv2.COLOR_BGR2LAB )
+        bgr_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGRA2BGR)
+        lab_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2LAB)
         # Split LAB channels
-        L, a, b = cv2.split ( lab_image )
+        L, a, b = cv2.split(lab_image)
         return (L, a, b)
     if channels == 1:
         return bgr_image
@@ -72,6 +74,8 @@ def load_reduce_convert(image_file, reduce):
 Parameters: image file path and reduction factor
 Returns a dictionary reduced and full_shape
 '''
+
+
 def import_reduce_from_file(filename, reduce):
     ## Note image read by skimage and therefore RGB
     bgr = cv2.imread(filename)
@@ -89,6 +93,8 @@ Parameters: image file and reduction factor
 Returns a dictionary of full_shape, reduced and LAB for reduced
 @todo: Add choice to which one to convert and cache
 '''
+
+
 def import_reduce_convertLAB(image_file, reduce):
     im = import_reduce_from_file(image_file, reduce)
     bgr_image = im['reduced']
@@ -215,9 +221,7 @@ def color_transfer(source, target):
     # space, being sure to utilize the 8-bit unsigned integer data
     # type
     transfer = cv2.merge([l, a, b])
-    transfer = cv2.cvtColor(transfer.astype("uint8"), cv2.COLOR_LAB2BGR)
-
-    # return the color transferred image
+    transfer = cv2.cvtColor(transfer.astype("uint8"), cv2.COLOR_LAB2BGR)  # return the color transferred image
     return transfer
 
 
@@ -240,3 +244,25 @@ def lab_image_stats(image):
 
     # return the color statistics
     return (lMean, lStd, aMean, aStd, bMean, bStd)
+
+
+def invertLABluminance(bgr_image):
+    in_lab = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2LAB)
+    (l, a, b) = cv2.split(in_lab)
+    l = 255 - l
+    outlab = cv2.merge([l, a, b])
+    outbgr = cv2.cvtColor(outlab, cv2.COLOR_LAB2BGR)
+    return outbgr
+
+
+if __name__ == '__main__':
+    name = sys.argv[1]
+    img_color = cv2.imread(name)
+
+    outbgr = invertLABluminance(img_color)
+
+    cv2.namedWindow('Display', cv2.WINDOW_NORMAL)
+    cv2.imshow('Display', outbgr)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

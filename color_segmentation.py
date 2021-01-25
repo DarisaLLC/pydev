@@ -17,7 +17,6 @@ from scipy import ndimage
 import numpy as np
 import argparse
 import cv2
-from utils import centroid_histogram, plot_colors
 from matplotlib import pyplot as plt
 
 '''
