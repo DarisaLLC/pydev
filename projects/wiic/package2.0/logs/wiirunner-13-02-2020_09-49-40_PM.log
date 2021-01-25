@@ -1,0 +1,122 @@
+2020-02-13 21:49:40,474 - wiirunner - INFO - Source is /Users/arman/PycharmProjects/pydev/projects/wiic/video/2020_01_21/front/straight1.mp4
+2020-02-13 21:49:40,474 - wiirunner - INFO - {'row_low': 0, 'row_high': 519, 'column_low': 0, 'column_high': 1279}
+2020-02-13 21:49:51,406 - wiirunner - INFO - GA Detection: 1.0118590672209393
+2020-02-13 21:49:51,406 - wiirunner - INFO -  Candidate Rejected because of orientation169.41836547851562,(39.8814811706543, 178.52688598632812)
+2020-02-13 21:49:51,665 - wiirunner - INFO - GA Detection: 1.122003932207008
+2020-02-13 21:49:51,665 - wiirunner - INFO -  Candidate Rejected because of orientation164.4384918212891,(45.03323745727539, 181.82794189453125)
+2020-02-13 21:49:51,919 - wiirunner - INFO - GA Detection: 1.6923514634254389
+2020-02-13 21:49:51,919 - wiirunner - INFO -  Candidate Rejected because of orientation157.92686462402344,(68.04349517822266, 291.3210144042969)
+2020-02-13 21:49:52,059 - wiirunner - INFO - GA Detection: 1.4596150294237304
+2020-02-13 21:49:52,059 - wiirunner - INFO -  Candidate Rejected because of orientation170.62293243408203,(46.471527099609375, 229.8231658935547)
+2020-02-13 21:49:52,185 - wiirunner - INFO - GA Detection: 1.5798695011326345
+2020-02-13 21:49:52,185 - wiirunner - INFO -  Candidate Rejected because of orientation168.8112030029297,(48.35972213745117, 152.36656188964844)
+2020-02-13 21:49:52,310 - wiirunner - INFO - GA Detection: 1.5142116715433076
+2020-02-13 21:49:52,310 - wiirunner - INFO -  Candidate Rejected because of orientation162.29956817626953,(44.49121856689453, 124.83891296386719)
+2020-02-13 21:49:52,436 - wiirunner - INFO - GA Detection: 1.8319536490598693
+2020-02-13 21:49:52,436 - wiirunner - INFO -  Candidate Rejected because of orientation150.68999481201175,(52.57909393310547, 214.52333068847656)
+2020-02-13 21:49:52,560 - wiirunner - INFO - GA Detection: 1.780668822946609
+2020-02-13 21:49:52,560 - wiirunner - INFO -  Candidate Rejected because of orientation164.83554077148438,(48.92645263671875, 195.84112548828125)
+2020-02-13 21:49:52,819 - wiirunner - INFO - GA Detection: 1.3742916600895114
+2020-02-13 21:49:52,819 - wiirunner - INFO -  Candidate Rejected because of orientation8.530765533447266,(76.64257049560547, 71.7473373413086)
+2020-02-13 21:49:52,943 - wiirunner - INFO - GA Detection: 1.8445514853665372
+2020-02-13 21:49:52,943 - wiirunner - INFO -  Candidate Rejected because of orientation172.23483276367188,(42.87592315673828, 130.29417419433594)
+2020-02-13 21:49:53,063 - wiirunner - INFO - GA Detection: 1.5128725322138052
+2020-02-13 21:49:53,063 - wiirunner - INFO -  Candidate Rejected because of orientation166.16514587402344,(51.85371398925781, 233.1460418701172)
+2020-02-13 21:49:53,183 - wiirunner - INFO - GA Detection: 1.1663380038371542
+2020-02-13 21:49:53,184 - wiirunner - INFO -  Candidate Rejected because of orientation166.13897705078125,(49.08616256713867, 144.5980224609375)
+2020-02-13 21:49:53,319 - wiirunner - INFO - GA Detection: 1.7342653238156345
+2020-02-13 21:49:53,319 - wiirunner - INFO -  Candidate Rejected because of orientation158.96248626708984,(69.42655181884766, 298.0244140625)
+2020-02-13 21:49:53,564 - wiirunner - INFO - GA Detection: 1.4816042545862729
+2020-02-13 21:49:53,564 - wiirunner - INFO -  Candidate Rejected because of orientation163.98455810546875,(57.13725662231445, 236.66571044921875)
+2020-02-13 21:49:53,687 - wiirunner - INFO - GA Detection: 1.5800977492617676
+2020-02-13 21:49:53,687 - wiirunner - INFO -  Candidate Rejected because of orientation167.70473480224612,(54.352272033691406, 253.33494567871094)
+2020-02-13 21:49:53,810 - wiirunner - INFO - GA Detection: 1.5463985316164326
+2020-02-13 21:49:53,810 - wiirunner - INFO -  Candidate Rejected because of orientation166.18497467041016,(50.67083740234375, 250.93447875976562)
+2020-02-13 21:49:53,947 - wiirunner - INFO - GA Detection: 1.5966859444306465
+2020-02-13 21:49:53,947 - wiirunner - INFO -  Candidate Rejected because of orientation177.22978973388672,(50.779296875, 176.64816284179688)
+2020-02-13 21:49:54,071 - wiirunner - INFO - GA Detection: 1.5567527030798374
+2020-02-13 21:49:54,071 - wiirunner - INFO -  Candidate Rejected because of orientation162.1811065673828,(57.733734130859375, 270.172119140625)
+2020-02-13 21:49:54,191 - wiirunner - INFO - GA Detection: 1.4803627047367627
+2020-02-13 21:49:54,191 - wiirunner - INFO -  Candidate Rejected because of orientation166.13897705078125,(57.622337341308594, 159.8799285888672)
+2020-02-13 21:49:54,312 - wiirunner - INFO - GA Detection: 1.623895103664836
+2020-02-13 21:49:54,312 - wiirunner - INFO -  Candidate Rejected because of orientation165.80144500732422,(56.27490997314453, 218.93252563476562)
+2020-02-13 21:49:54,433 - wiirunner - INFO - GA Detection: 1.6999177865945967
+2020-02-13 21:49:54,433 - wiirunner - INFO -  Candidate Rejected because of orientation166.62555694580078,(58.82176971435547, 270.71893310546875)
+2020-02-13 21:49:54,568 - wiirunner - INFO - GA Detection: 1.5454175743216183
+2020-02-13 21:49:54,568 - wiirunner - INFO -  Candidate Rejected because of orientation167.7638854980469,(58.872432708740234, 325.7294006347656)
+2020-02-13 21:49:54,809 - wiirunner - INFO - GA Detection: 1.5003937179862987
+2020-02-13 21:49:54,809 - wiirunner - INFO -  Candidate Rejected because of orientation166.96134185791016,(58.33002853393555, 231.13580322265625)
+2020-02-13 21:49:54,930 - wiirunner - INFO - GA Detection: 1.159604938220582
+2020-02-13 21:49:54,930 - wiirunner - INFO -  Candidate Rejected because of orientation161.56504821777344,(49.96398162841797, 105.30384063720703)
+2020-02-13 21:49:55,051 - wiirunner - INFO - GA Detection: 1.788467755453894
+2020-02-13 21:49:55,051 - wiirunner - INFO -  Candidate Rejected because of orientation162.07208251953125,(71.07850646972656, 307.90423583984375)
+2020-02-13 21:49:55,186 - wiirunner - INFO - GA Detection: 1.6102258002647432
+2020-02-13 21:49:55,186 - wiirunner - INFO -  Candidate Rejected because of orientation162.34988403320312,(61.723594665527344, 328.49951171875)
+2020-02-13 21:49:55,308 - wiirunner - INFO - GA Detection: 1.5978270776686259
+2020-02-13 21:49:55,309 - wiirunner - INFO -  Candidate Rejected because of orientation165.02317047119143,(66.87760162353516, 302.47210693359375)
+2020-02-13 21:49:55,432 - wiirunner - INFO - GA Detection: 1.3591821781446924
+2020-02-13 21:49:55,432 - wiirunner - INFO -  Candidate Rejected because of orientation169.5625228881836,(46.714027404785156, 147.64739990234375)
+2020-02-13 21:49:55,555 - wiirunner - INFO - GA Detection: 1.4260878349887207
+2020-02-13 21:49:55,555 - wiirunner - INFO -  Candidate Rejected because of orientation168.69007110595703,(51.186309814453125, 154.5395050048828)
+2020-02-13 21:49:55,680 - wiirunner - INFO - GA Detection: 1.7511951824999414
+2020-02-13 21:49:55,680 - wiirunner - INFO -  Candidate Rejected because of orientation161.56504821777344,(61.66440963745117, 245.39271545410156)
+2020-02-13 21:49:55,818 - wiirunner - INFO - GA Detection: 1.6465572102169972
+2020-02-13 21:49:55,818 - wiirunner - INFO -  Candidate Rejected because of orientation160.0168914794922,(62.7098503112793, 248.2763214111328)
+2020-02-13 21:49:55,946 - wiirunner - INFO - GA Detection: 1.626311683561653
+2020-02-13 21:49:55,946 - wiirunner - INFO -  Candidate Rejected because of orientation166.54131317138672,(62.51673889160156, 211.40647888183594)
+2020-02-13 21:49:56,070 - wiirunner - INFO - GA Detection: 1.6593822794384323
+2020-02-13 21:49:56,070 - wiirunner - INFO -  Candidate Rejected because of orientation163.6350860595703,(69.28864288330078, 255.2462921142578)
+2020-02-13 21:49:56,193 - wiirunner - INFO - GA Detection: 1.4720498602400767
+2020-02-13 21:49:56,193 - wiirunner - INFO -  Candidate Rejected because of orientation150.94539642333984,(58.85992431640625, 103.44194030761719)
+2020-02-13 21:49:56,450 - wiirunner - INFO - GA Detection: 1.5576568038086407
+2020-02-13 21:49:56,450 - wiirunner - INFO -  Candidate Rejected because of orientation158.0782241821289,(69.22636413574219, 197.57627868652344)
+2020-02-13 21:49:56,694 - wiirunner - INFO - GA Detection: 1.6896397551026894
+2020-02-13 21:49:56,694 - wiirunner - INFO -  Candidate Rejected because of orientation157.16634368896484,(68.97713470458984, 211.39404296875)
+2020-02-13 21:49:57,067 - wiirunner - INFO - GA Detection: 1.0427436806785408
+2020-02-13 21:49:57,067 - wiirunner - INFO -  Candidate Rejected because of orientation168.11134338378906,(52.27516174316406, 141.8382110595703)
+2020-02-13 21:49:57,436 - wiirunner - INFO - GA Detection: 1.181076662556734
+2020-02-13 21:49:57,436 - wiirunner - INFO -  Candidate Rejected because of orientation165.96376037597656,(60.876441955566406, 124.90584564208984)
+2020-02-13 21:49:57,937 - wiirunner - INFO - GA Detection: 1.4094716633553617
+2020-02-13 21:49:57,937 - wiirunner - INFO -  Candidate Rejected because of orientation169.91940307617188,(57.08274841308594, 137.4011688232422)
+2020-02-13 21:49:58,062 - wiirunner - INFO - GA Detection: 1.3130042476550443
+2020-02-13 21:49:58,062 - wiirunner - INFO -  Candidate Rejected because of orientation162.47443389892578,(61.28022766113281, 110.61558532714844)
+2020-02-13 21:49:58,189 - wiirunner - INFO - GA Detection: 1.8763111051230226
+2020-02-13 21:49:58,189 - wiirunner - INFO -  Candidate Rejected because of orientation154.9213333129883,(91.93793487548828, 301.5801696777344)
+2020-02-13 21:49:59,442 - wiirunner - INFO - GA Detection: 1.6235496322333347
+2020-02-13 21:49:59,443 - wiirunner - INFO -  Candidate Rejected because of orientation156.25050354003906,(91.45828247070312, 108.62958526611328)
+2020-02-13 21:49:59,581 - wiirunner - INFO - GA Detection: 1.1683164970745565
+2020-02-13 21:49:59,581 - wiirunner - INFO -  Candidate Rejected because of orientation153.94650650024414,(89.69869995117188, 95.24870300292969)
+2020-02-13 21:49:59,835 - wiirunner - INFO - GA Detection: 1.4212551927485038
+2020-02-13 21:49:59,835 - wiirunner - INFO -  Candidate Rejected because of orientation151.11341857910156,(83.78372192382812, 116.54241943359375)
+2020-02-13 21:50:00,336 - wiirunner - INFO - GA Detection: 1.0069035629421705
+2020-02-13 21:50:00,337 - wiirunner - INFO -  Candidate Rejected because of orientation178.36341857910156,(70.54264068603516, 157.935546875)
+2020-02-13 21:50:18,176 - wiirunner - INFO - GA Detection: 1.00597753454349
+2020-02-13 21:50:18,176 - wiirunner - INFO -  Candidate Rejected because of orientation5.332159519195557,(111.9401626586914, 53.646846771240234)
+2020-02-13 21:50:18,295 - wiirunner - INFO - GA Detection: 0.871972646767972
+2020-02-13 21:50:18,295 - wiirunner - INFO -  Candidate Rejected because of orientation11.309932708740234,(141.98805236816406, 64.32608795166016)
+2020-02-13 21:50:18,428 - wiirunner - INFO - GA Detection: 0.9823528746783268
+2020-02-13 21:50:18,429 - wiirunner - INFO -  Candidate Rejected because of orientation9.462321281433105,(144.34230041503906, 59.67683029174805)
+2020-02-13 21:50:18,550 - wiirunner - INFO - GA Detection: 1.1301564890163718
+2020-02-13 21:50:18,550 - wiirunner - INFO -  Candidate Rejected because of orientation9.833563804626465,(130.2183074951172, 48.20126724243164)
+2020-02-13 21:50:18,788 - wiirunner - INFO - GA Detection: 1.0338214467192302
+2020-02-13 21:50:18,788 - wiirunner - INFO -  Candidate Rejected because of orientation8.32564926147461,(137.07655334472656, 63.61510467529297)
+2020-02-13 21:50:18,909 - wiirunner - INFO - GA Detection: 1.0433759830048075
+2020-02-13 21:50:18,909 - wiirunner - INFO -  Candidate Rejected because of orientation12.288322448730469,(144.9187469482422, 66.55814361572266)
+2020-02-13 21:50:19,042 - wiirunner - INFO - GA Detection: 1.0779217601084383
+2020-02-13 21:50:19,042 - wiirunner - INFO -  Candidate Rejected because of orientation12.692665100097656,(136.6578826904297, 65.81971740722656)
+2020-02-13 21:50:19,163 - wiirunner - INFO - GA Detection: 1.1481646841129987
+2020-02-13 21:50:19,163 - wiirunner - INFO -  Candidate Rejected because of orientation9.10733413696289,(155.69915771484375, 61.76108932495117)
+2020-02-13 21:50:19,282 - wiirunner - INFO - GA Detection: 1.5157728269550717
+2020-02-13 21:50:19,282 - wiirunner - INFO -  Candidate Rejected because of orientation10.007979393005373,(155.53785705566406, 69.05070495605469)
+2020-02-13 21:50:19,668 - wiirunner - INFO - GA Detection: 1.2599914556922158
+2020-02-13 21:50:19,668 - wiirunner - INFO -  Candidate Rejected because of orientation10.109299659729006,(158.3172607421875, 74.08744812011719)
+2020-02-13 21:50:19,790 - wiirunner - INFO - GA Detection: 0.8226067469076952
+2020-02-13 21:50:19,791 - wiirunner - INFO -  Candidate Rejected because of orientation158.19859313964847,(45.86674880981445, 122.55891418457031)
+2020-02-13 21:50:19,910 - wiirunner - INFO - GA Detection: 0.8395743358123582
+2020-02-13 21:50:19,910 - wiirunner - INFO -  Candidate Rejected because of orientation157.30620574951172,(45.35737991333008, 192.1985626220703)
+2020-02-13 21:50:20,150 - wiirunner - INFO - GA Detection: 0.9403631934110308
+2020-02-13 21:50:20,150 - wiirunner - INFO -  Candidate Rejected because of orientation157.78240966796875,(48.63471603393555, 133.0348358154297)
+2020-02-13 21:50:21,007 - wiirunner - INFO - GA Detection: 0.9901342918310547
+2020-02-13 21:50:21,007 - wiirunner - INFO -  Candidate Rejected because of orientation153.43495178222656,(63.05711364746094, 169.941162109375)
+2020-02-13 21:50:21,249 - wiirunner - INFO - GA Detection: 1.0296800430805888
+2020-02-13 21:50:21,250 - wiirunner - INFO -  Candidate Rejected because of orientation152.56689834594727,(64.27619171142578, 175.57215881347656)
